@@ -1,10 +1,15 @@
 #Handles getting all of the images from an album linked to on imgur
 
-import urllib
+import urllib, urllib2
 from lxml import etree
 
 def get_imgur_album(url):
-    resp = urllib.urlopen(url)
+    try:
+        resp = urllib.urlopen(url)
+    except urllib2.HTTPError, e:
+        print 'Error contacting imgur (%s):' % url
+        print e
+        return []
     tree = etree.HTML(resp.read())
     urls = []
     for script in tree.findall('body/script'):
