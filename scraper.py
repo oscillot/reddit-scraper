@@ -1,8 +1,33 @@
-import urllib, urllib2, json, cookielib, gzip
+import urllib, urllib2, json, gzip
 from StringIO import StringIO
-import os
+import os, sys
 import sqlite3
+import imp
 from lxml import etree
+
+if 'linux' in sys.platform.lower():
+    APP_ROOT = os.path.expanduser('~')
+elif sys.platform.startswith('win') or sys.platform == 'cli':
+    APP_ROOT = 'C:\\'
+
+plugins_folder = os.path.join(APP_ROOT, 'reddit-scraper', 'plugins')
+plugin_list = []
+for r, d, f in os.walk(plugins_folder):
+    for p in f:
+        if p.endswith('.py'):
+           plugin_list.append(p.rstrip('.py'))
+
+sys.path.insert(0, plugins_folder)
+loaded_plugins = []
+failed_plugins = []
+for plugin in plugin_list:
+    try:
+        loaded = __import__(plugin)
+        loaded_plugins.append(loaded)
+    except ImportError, e:
+        print '%s failed to load: %s' % (plugin, e)
+        failed_plugins.append(plugin)
+sys.path.remove(plugins_folder)
 
 def pretty_print(data, delimiter):
     if type(data) not in [str, unicode]:
@@ -75,68 +100,29 @@ class RedditConnect():
         print 'Likes retrieved!'
         return total_liked_data
 
-    #TODO break out things like deviant art and imgur albums into plugins using __import__
-    def get_imgur_album(self, document):
-        resp = urllib.urlopen(document)
-        tree = etree.HTML(resp.read())
-        urls = []
-        for script in tree.findall('body/script'):
-            if script.text is not None:
-                if script.text.replace('\n','').lstrip().rstrip().startswith('var album'):
-                    album = eval(script.text.split('[', 1)[1].split(']',1)[0])
-                    if type(album) == list:
-                        for image in eval(album):
-                            url = 'http://i.imgur.com/%s%s' % (image['hash'], image['ext'])
-                            urls.append(url)
-                    elif type(album) == dict:
-                        url = 'http://i.imgur.com/%s%s' % (album['hash'], album['ext'])
-                        urls.append(url)
-                    else:
-                        print type(album), album
-                        print 'Unhandled album type!'
-                        raise ValueError
-
-        return urls
-
-    def get_deviant_art_image(self, document):
-        resp = urllib.urlopen(document)
-        tree = etree.HTML(resp.read())
-        for dl in tree.findall('.//*[@id="download-button"]'):
-            if '/download/' in dl.attrib['href']:
-                return dl.attrib['href']
-
-
     def get_upvoted_wallpapers(self, subs, liked_data):
         print 'Getting candidates...'
         candidates = []
         for i, sub in enumerate(subs):
             subs[i] = sub.lower()
+
+        children = []
+        candidates = []
         for child in liked_data:
             if child['data']['subreddit'].lower() in subs:
+                children.append(child)
 
-                if child['data']['url'].lower().startswith('http://imgur.com/a/'):
-                    album_imgs = self.get_imgur_album(child['data']['url'])
-                    for album_img in album_imgs:
-                        candidates.append({'url' : album_img,
-                                           'subreddit' : child['data']['subreddit'],
-                                           'title' : child['data']['title']})
-                    continue
+        for plugin in loaded_plugins:
+            handled, candidates = plugin.execute(children, candidates)
+            for h in handled:
+                children.remove(h)
 
-                for img_type in ['.jpg', '.jpeg', '.gif', '.bmp', '.png']:
-                    if child['data']['url'].lower().endswith(img_type):
-                            candidates.append({'url' : child['data']['url'],
-                                               'subreddit' : child['data']['subreddit'],
-                                               'title' : child['data']['title']})
-                    break
-
-                if 'deviantart.com' in child['data']['url'].lower():
-                    deviant_art_img = self.get_deviant_art_image(child['data']['url'])
-                    if deviant_art_img != None:
-                        candidates.append({'url' : deviant_art_img,
-                                           'subreddit' : child['data']['subreddit'],
-                                           'title' : child['data']['title']})
-                    continue
         print 'Candidates retrieved!'
+
+        if len(children) > 0:
+            for c in children:
+                print 'Unhandled link: %s' % c['data']['url']
+
         return candidates
 
     def acquire(self, candidates, output):
