@@ -1,10 +1,15 @@
 #Handles getting the image url from the download button of a single image on deviant art
 
-import urllib
+import urllib, urllib2
 from lxml import etree
 
 def get_deviant_art_image(url):
-    resp = urllib.urlopen(url)
+    try:
+        resp = urllib.urlopen(url)
+    except urllib2.HTTPError, e:
+        print 'Error reaching deviantart (%s):' % url
+        print e
+        return
     tree = etree.HTML(resp.read())
     for dl in tree.findall('.//*[@id="download-button"]'):
         if '/download/' in dl.attrib['href']:
