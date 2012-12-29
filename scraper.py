@@ -102,7 +102,6 @@ class RedditConnect():
 
     def get_upvoted_wallpapers(self, subs, liked_data):
         print 'Getting candidates...'
-        candidates = []
         for i, sub in enumerate(subs):
             subs[i] = sub.lower()
 
@@ -112,6 +111,10 @@ class RedditConnect():
             if child['data']['subreddit'].lower() in subs:
                 children.append(child)
 
+        #Call each plugin module and hand the list of unhandled links off to it.
+        #plugin *must* return a list of the links that were successfully handled AND
+        # a list of candidates where each member of that list is a dictionry with the following keys:
+        #'url', 'subreddit', 'title'
         for plugin in loaded_plugins:
             handled, candidates = plugin.execute(children, candidates)
             for h in handled:
@@ -121,6 +124,8 @@ class RedditConnect():
 
         if len(children) > 0:
             for c in children:
+                #inform of any unhandled cases
+                #TODO write these to the database
                 print 'Unhandled link: %s' % c['data']['url']
 
         return candidates
