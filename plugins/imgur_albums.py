@@ -1,6 +1,7 @@
 #Handles getting all of the images from an album linked to on imgur
 
-import urllib, urllib2
+import urllib
+import urllib2
 from lxml import etree
 
 def get_imgur_album(url):

@@ -1,6 +1,7 @@
 #Handles getting the image url from the download button of a single image on deviant art
 
-import urllib, urllib2
+import urllib
+import urllib2
 from lxml import etree
 
 def get_deviant_art_image(url):
