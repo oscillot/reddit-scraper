@@ -21,7 +21,7 @@ def execute(children, candidates):
     for child in children:
         if 'deviantart.com' in child['data']['url'].lower():
             deviant_art_img = get_deviant_art_image(child['data']['url'])
-            if deviant_art_img != None:
+            if deviant_art_img is not None:
                 candidates.append({'url' : deviant_art_img,
                                    'subreddit' : child['data']['subreddit'],
                                    'title' : child['data']['title']})

@@ -119,7 +119,7 @@ class RedditConnect():
         """
         the_page = self.basic_request('http://www.reddit.com/r/%s.json' %
                                       sub_name)
-        if the_page == None:
+        if the_page is None:
             print 'Nothing returned trying to request \"%s\"!' % sub_name
             raise ValueError
         return the_page
@@ -163,7 +163,7 @@ class RedditConnect():
         total_liked_data = []
         liked_json = self.basic_request('http://www.reddit.com/user/%s/liked'
                                         '.json' % self.username)
-        if liked_json == None:
+        if liked_json is None:
             print 'Nothing returned trying to request your likes (%s/liked' \
                   '.json)!' % self.username
             raise ValueError
@@ -297,7 +297,7 @@ class RedditConnect():
             f.write(new_img)
             f.close()
             try:
-                test_image = Image.open(img_path)
+                Image.open(img_path)
             except IOError, e:
                 self.handle_exception(sql_cursor, e, candidate)
             sql_cursor.execute('''INSERT INTO wallpapers VALUES (?, ?, ?, ?)''',
