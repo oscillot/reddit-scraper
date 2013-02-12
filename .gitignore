@@ -4,3 +4,5 @@ paul_walls.py
 /.idea
 local_walls.py
 *.pyc
+/dist
+*.egg-info/
