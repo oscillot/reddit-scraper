@@ -13,7 +13,7 @@ from PIL import Image
 # of your user folder
 if 'linux' in sys.platform.lower():
     APP_ROOT = os.path.expanduser('~')
-elif sys.platform.startswith('win') or sys.platform == 'cli':
+elif sys.platform.startswith('win'):
     APP_ROOT = 'C:\\'
 
 #Load an arbitrary umber of arbitrarily named plugins from the plugins folder
