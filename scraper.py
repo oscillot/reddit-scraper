@@ -27,14 +27,18 @@ for r, d, f in os.walk(plugins_folder):
 sys.path.insert(0, plugins_folder)
 loaded_plugins = []
 failed_plugins = []
+succeeded = []
 for plugin in plugin_list:
     try:
         loaded = __import__(plugin)
         loaded_plugins.append(loaded)
+        succeeded.append(plugin)
     except ImportError, e:
-        print '%s failed to load: %s' % (plugin, e)
+        print '%s failed to load: %s\n' % (plugin, e)
         failed_plugins.append(plugin)
 sys.path.remove(plugins_folder)
+print 'Loaded the following plugin modules successfully: %s\n' % ', '.join(
+    succeeded)
 
 class RedditConnect():
     """
@@ -67,7 +71,7 @@ class RedditConnect():
         reddit's API throttling rules! You can't upvote fast enough that you
         would have to break them anyway!
         """
-        print 'Logging in...'
+        print 'Logging in...\n'
         data = urllib.urlencode(
             {'user' : self.username,
              'passwd' : self.password,
@@ -90,7 +94,7 @@ class RedditConnect():
         self.cookie = resp.headers.get('set-cookie')
         opener.addheaders.append(('Cookie', self.cookie))
         urllib2.install_opener(opener)
-        print 'Logged in %s' % self.username
+        print 'Logged in as %s\n' % self.username
         return json_resp
 
     def basic_request(self, url):
@@ -105,8 +109,7 @@ class RedditConnect():
         try:
             resp = urllib2.urlopen(url)
         except urllib2.HTTPError, e:
-            print 'Error in basic request (%s):' % url
-            print e
+            print 'Error in basic request (%s): %s\n' % (url, e)
             return
         return resp.read()
 
@@ -120,7 +123,7 @@ class RedditConnect():
         the_page = self.basic_request('http://www.reddit.com/r/%s.json' %
                                       sub_name)
         if the_page is None:
-            print 'Nothing returned trying to request \"%s\"!' % sub_name
+            print 'Nothing returned trying to request \"%s\"!\n' % sub_name
             raise ValueError
         return the_page
 
@@ -133,7 +136,7 @@ class RedditConnect():
         """
         the_page = self.basic_request('http://www.reddit.com/reddits/mine.json')
         if the_page is None:
-            print 'Nothing returned trying to request your subs (mine.json)!'
+            print 'Nothing returned trying to request your subs (mine.json)!\n'
             raise ValueError
         return the_page
 
@@ -146,7 +149,7 @@ class RedditConnect():
         """
         the_page = self.basic_request('http://www.reddit.com/api/me.json')
         if the_page is None:
-            print 'Nothing returned trying to request your info (me.json)!'
+            print 'Nothing returned trying to request your info (me.json)!\n'
             raise ValueError
         return the_page
 
@@ -159,13 +162,13 @@ class RedditConnect():
          25 posts.
         :returns list: A list of dictionaries converted from the json response
         """
-        print 'Retrieving likes...'
+        print 'Retrieving likes...\n'
         total_liked_data = []
         liked_json = self.basic_request('http://www.reddit.com/user/%s/liked'
                                         '.json' % self.username)
         if liked_json is None:
             print 'Nothing returned trying to request your likes (%s/liked' \
-                  '.json)!' % self.username
+                  '.json)!\n' % self.username
             raise ValueError
         json_data = json.loads(liked_json)
         total_liked_data += json_data['data']['children']
@@ -195,7 +198,7 @@ class RedditConnect():
         :returns list: A list of dictionaries where each key 'url' is a
         direct link to an image
         """
-        print 'Getting candidates...'
+        print 'Getting candidates...\n'
         for i, sub in enumerate(subs):
             subs[i] = sub.lower()
 
@@ -210,19 +213,22 @@ class RedditConnect():
         # handled AND a list of candidates where each member of that list is
         # a dictionary with the following keys: 'url', 'subreddit', 'title'
         for plugin in loaded_plugins:
+            print 'Loading plugin: %s.\n' % plugin
             handled, candidates = plugin.execute(children, candidates)
+            print 'Plugin handled the following links: %s\n' % ', '.join(
+                [h['data']['url'] for h in handled])
             #remove handled links here so each plugin doesn't have to do this
             # itself
             for h in handled:
                 children.remove(h)
 
-        print 'Candidates retrieved!'
+        print 'Candidates retrieved!\n'
 
         if len(children) > 0:
             for c in children:
                 #inform of any unhandled cases
                 #TODO write these to the database
-                print 'Unhandled link: %s' % c['data']['url']
+                print 'WARNING: Unhandled link: %s\n' % c['data']['url']
 
         return candidates
 
@@ -235,6 +241,7 @@ class RedditConnect():
 
         """
         print error
+        print '\n'
         cursor.execute('''INSERT INTO wallpapers VALUES (?, ?, ?, ?)''',
                        (candidate['subreddit'], candidate['title'],
                        '%s: %s' % (str(e), candidate['url']),
@@ -256,16 +263,22 @@ class RedditConnect():
         :param str output: The location to save the downloaded images to as a
          string
         """
-        print 'Getting wallpapers...'
+        new = 0
+        print 'Found %d candidates.\n' % len(candidates)
+        print 'Getting wallpapers...\n'
         db_connection = sqlite3.connect(self.db)
         sql_cursor = db_connection.cursor()
         sql_cursor.execute('''SELECT filename FROM wallpapers''')
         self.existing = [f[0] for f in sql_cursor.fetchall()]
-        for candidate in candidates:
+        for i, candidate in enumerate(candidates):
             candidate['filename'] = candidate['url'].split('/')[-1].replace(
                 ' ', '_')
             if candidate['filename'] in self.existing:
+                print 'Skipping #%d: %s already in database\n' % (i,
+                                                                candidate[
+                                                                    'filename'])
                 continue
+            print 'Aquiring #%d: %s \n' % (i, candidate['filename'])
             for key in ['subreddit', 'url', 'title']:
                 print candidate[key].encode('ascii','replace')
             print '\n'
@@ -300,10 +313,12 @@ class RedditConnect():
                 Image.open(img_path)
             except IOError, e:
                 self.handle_exception(sql_cursor, e, candidate)
+                os.remove(img_path)
             sql_cursor.execute('''INSERT INTO wallpapers VALUES (?, ?, ?, ?)''',
                                (candidate['subreddit'], candidate['title'],
                                candidate['url'], candidate['filename']))
             self.existing.append(candidate['filename'])
             db_connection.commit()
+            new += 1
         db_connection.close()
-        print 'Complete.'
+        print 'Complete. %d new images were acquired this run.' % new
