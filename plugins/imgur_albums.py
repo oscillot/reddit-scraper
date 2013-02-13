@@ -19,7 +19,7 @@ def get_imgur_album(url):
                 album = eval(script.text.split('[', 1)[1].split(']',1)[0])
                 #this check in case the album has one image, which returns dict instead of list
                 if type(album) == list or type(album) == tuple:
-                    for image in eval(album):
+                    for image in album:
                         url = 'http://i.imgur.com/%s%s' % (image['hash'], image['ext'])
                         urls.append(url)
                 elif type(album) == dict:
