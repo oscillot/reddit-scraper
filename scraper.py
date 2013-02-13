@@ -71,7 +71,7 @@ class RedditConnect():
         reddit's API throttling rules! You can't upvote fast enough that you
         would have to break them anyway!
         """
-        print 'Logging in...\n'
+        print 'Logging in...'
         data = urllib.urlencode(
             {'user' : self.username,
              'passwd' : self.password,
@@ -162,7 +162,7 @@ class RedditConnect():
          25 posts.
         :returns list: A list of dictionaries converted from the json response
         """
-        print 'Retrieving likes...\n'
+        print 'Retrieving likes...'
         total_liked_data = []
         liked_json = self.basic_request('http://www.reddit.com/user/%s/liked'
                                         '.json' % self.username)
@@ -182,7 +182,7 @@ class RedditConnect():
 
                 json_data = json.loads(liked_json)
                 total_liked_data += json_data['data']['children']
-        print 'Likes retrieved!'
+        print 'Likes retrieved!\n'
         return total_liked_data
 
     def get_upvoted_wallpapers(self, subs, liked_data):
@@ -215,8 +215,10 @@ class RedditConnect():
         for plugin in loaded_plugins:
             print 'Loading plugin: %s.\n' % plugin
             handled, candidates = plugin.execute(children, candidates)
-            print 'Plugin handled the following links: %s\n' % ', '.join(
-                [h['data']['url'] for h in handled])
+            print 'Plugin handled the following links:'
+            for h in handled:
+                print h['data']['url']
+            print '\n'
             #remove handled links here so each plugin doesn't have to do this
             # itself
             for h in handled:
