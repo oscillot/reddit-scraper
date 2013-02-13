@@ -30,11 +30,9 @@ def get_wallbase_collection(url):
         end += 32
     urls = []
     for p in pages:
-        print p
         tree = etree.HTML(wget(p).read())
         for script in tree.findall('.//*[@class="thumb"]/a'):
             img_link = script.get('href')
-            print img_link
             thumb_links.append(img_link)
         for link in thumb_links:
             try:
@@ -65,7 +63,3 @@ def execute(children, candidates):
                                    'title' : child['data']['title']})
             handled.append(child)
     return handled, candidates
-
-# url = 'http://wallbase.cc/user/collection/80324/'
-# urls = get_wallbase_collection(url)
-# print len(urls), urls
