@@ -6,6 +6,6 @@ def execute(children, candidates):
                 candidates.append({'url' : child['data']['url'],
                                    'subreddit' : child['data']['subreddit'],
                                    'title' : child['data']['title']})
-            handled.append(child)
-            break
+                handled.append(child)
+                break
     return handled, candidates
