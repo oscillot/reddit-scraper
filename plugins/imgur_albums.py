@@ -27,10 +27,6 @@ def get_imgur_album(url):
                     print type(album), album
                     print 'Unhandled album type!'
                     raise ValueError
-                #This handles the links that come down with extensions like
-                # `jpg?1` that have been showing up lately. Regular links
-                # should be unaffected by this.
-                url = url.split('?')[0]
                 urls.append(url)
 
     return urls
@@ -41,7 +37,11 @@ def execute(children, candidates):
         if child['data']['url'].lower().startswith('http://imgur.com/a/'):
             album_imgs = get_imgur_album(child['data']['url'])
             for album_img in album_imgs:
-                candidates.append({'url' : album_img,
+                #This handles the links that come down with extensions like
+                # `jpg?1` that have been showing up lately. Regular links
+                # should be unaffected by this. This is done here so that the
+                #  list of handled links is still accurate.
+                candidates.append({'url' : album_img.split('?')[0],
                                    'subreddit' : child['data']['subreddit'],
                                    'title' : child['data']['title']})
             handled.append(child)
