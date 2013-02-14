@@ -21,14 +21,17 @@ def get_imgur_album(url):
                 if type(album) == list or type(album) == tuple:
                     for image in album:
                         url = 'http://i.imgur.com/%s%s' % (image['hash'], image['ext'])
-                        urls.append(url)
                 elif type(album) == dict:
                     url = 'http://i.imgur.com/%s%s' % (album['hash'], album['ext'])
-                    urls.append(url)
                 else:
                     print type(album), album
                     print 'Unhandled album type!'
                     raise ValueError
+                #This handles the links that come down with extensions like
+                # `jpg?1` that have been showing up lately. Regular links
+                # should be unaffected by this.
+                url = url.split('?')[0]
+                urls.append(url)
 
     return urls
 
