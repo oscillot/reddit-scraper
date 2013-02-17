@@ -15,6 +15,8 @@ def get_deviant_art_image(url):
     for dl in tree.findall('.//*[@id="download-button"]'):
         if '/download/' in dl.attrib['href']:
             return dl.attrib['href']
+    dl = tree.find('.//*[@id="gmi-ResViewSizer_img"]')
+    return dl.attrib['src']
 
 def execute(children, candidates):
     handled = []
