@@ -63,24 +63,24 @@ class RedditConnect():
         self.username = username
         self.password = password
         self.db = os.path.join(os.getcwd(),'%s_downloaded.db' % database)
+        self.engine = create_engine('sqlite:///%s' % self.db)
+        metadata = MetaData(self.engine)
+        self.wallpapers = Table('wallpapers', metadata,
+                                Column('subreddit', String),
+                                Column('title', String),
+                                Column('url', String),
+                                Column('filename', String),
+                                Column('md5', String, primary_key=True)
+        )
+        self.retrieved = Table('retrieved', metadata,
+                               Column('image_url', String,
+                                      primary_key=True))
+        self.errors = Table('errors', metadata,
+                            Column('image_url', String,
+                                   primary_key=True),
+                            Column('attempts', Integer))
         #Create the DB if it's not there
         if not os.path.exists(self.db):
-            self.engine = create_engine('sqlite:///%s' % self.db)
-            metadata = MetaData(self.engine)
-            self.wallpapers = Table('wallpapers', metadata,
-                                    Column('subreddit', String),
-                                    Column('title', String),
-                                    Column('url', String),
-                                    Column('filename', String),
-                                    Column('md5', String, primary_key=True)
-            )
-            self.retrieved = Table('retrieved', metadata,
-                                   Column('image_url', String,
-                                   primary_key=True))
-            self.errors = Table('errors', metadata,
-                                Column('image_url', String,
-                                primary_key=True),
-                                Column('attempts', Integer))
             metadata.create_all()
         self.unhandled = []
 
