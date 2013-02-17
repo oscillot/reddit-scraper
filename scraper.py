@@ -71,7 +71,7 @@ class RedditConnect():
                                 Column('url', String),
                                 Column('filename', String),
                                 Column('md5', String, primary_key=True)
-        )
+            )
         self.retrieved = Table('retrieved', metadata,
                                Column('image_url', String,
                                       primary_key=True))
@@ -79,9 +79,8 @@ class RedditConnect():
                             Column('image_url', String,
                                    primary_key=True),
                             Column('attempts', Integer))
-        #Create the DB if it's not there
-        if not os.path.exists(self.db):
-            metadata.create_all()
+        #Create the DB tables if not there
+        metadata.create_all()
         self.unhandled = []
 
     def login(self):
