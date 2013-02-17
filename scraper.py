@@ -293,10 +293,11 @@ class RedditConnect():
             return False
         att_sel = sql.select([self.errors]).where(self.errors.c
                                                       .image_url == url)
-        attempts = conn.execute(att_sel)[1]
+        attempts = conn.execute(att_sel).fetchone()[1]
         if attempts < 5:
             return False
-        return True
+        else:
+            return True
 
     def get_previous_md5s(self):
         conn = self.engine.connect()
