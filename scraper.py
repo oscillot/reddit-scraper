@@ -360,13 +360,13 @@ class RedditConnect():
             already_dled = self.list_handled_image_links()
             if candidate['url'] in already_dled:
                 print 'Skipping #%d/%d: %s has already been downloaded\n' % (
-                    i, candidate['filename'], total)
+                    i, total, candidate['filename'])
                 continue
             if self.too_many_error_attempts(candidate):
                 print 'Skipping #%d/%d: %s has failed 5 or more times\n' % (
-                    i, candidate['filename'], total)
+                    i, total, candidate['filename'])
                 continue
-            print 'Aquiring #%d/%d: %s \n' % (i, candidate['filename'], total)
+            print 'Aquiring #%d/%d: %s \n' % (i, total, candidate['filename'])
             for key in ['subreddit', 'url', 'title']:
                 print candidate[key].encode('ascii', 'replace')
             print '\n'
