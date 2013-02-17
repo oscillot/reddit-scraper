@@ -352,19 +352,20 @@ class RedditConnect():
         print 'Found %d candidates.\n' % len(candidates)
         print 'Getting wallpapers...\n'
         unique_img_hashes = self.get_previous_md5s()
+        total = len(candidates)
         for i, candidate in enumerate(candidates):
             candidate['filename'] = candidate['url'].split('/')[-1].replace(
                 ' ', '_')
             already_dled = self.list_handled_image_links()
             if candidate['url'] in already_dled:
-                print 'Skipping #%d: %s has already been downloaded\n' % (
-                    i, candidate['filename'])
+                print 'Skipping #%d/%d: %s has already been downloaded\n' % (
+                    i, candidate['filename'], total)
                 continue
             if self.too_many_error_attempts(candidate):
-                print 'Skipping #%d: %s has failed 5 or more times\n' % (
-                    i, candidate['filename'])
+                print 'Skipping #%d/%d: %s has failed 5 or more times\n' % (
+                    i, candidate['filename'], total)
                 continue
-            print 'Aquiring #%d: %s \n' % (i, candidate['filename'])
+            print 'Aquiring #%d/%d: %s \n' % (i, candidate['filename'], total)
             for key in ['subreddit', 'url', 'title']:
                 print candidate[key].encode('ascii', 'replace')
             print '\n'
