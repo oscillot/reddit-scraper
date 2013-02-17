@@ -14,7 +14,7 @@ def get_500px_img(url):
         return []
     tree = etree.HTML(resp.read())
     a = tree.findall('.//*[@id="thephoto"]/a')
-    href = a.attrib['href']
+    href = a[0].attrib['href']
     return href
 
 def execute(children, candidates):
