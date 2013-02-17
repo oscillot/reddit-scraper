@@ -278,7 +278,7 @@ class RedditConnect():
         else:
             old_att_sel = sql.select([self.errors]).where(self.errors.c
                                                           .image_url == url)
-            old_attempts = conn.execute(old_att_sel)[1]
+            old_attempts = conn.execute(old_att_sel).fetchone()[1]
             err_upd = self.errors.update().where(self.errors.c.image_url ==
                                                  url).values({'attempts':
                                                              old_attempts + 1})
