@@ -263,9 +263,7 @@ class RedditConnect():
         """
         To be called when an exception is caught or raised that prevents the
         image from being acquired. Error is put into the database for use
-        later.
-
-
+        later. After 5 errors the link is no longer tried.
         """
         print '%s\n' % str(error)
         url = candidate['url']
@@ -285,6 +283,10 @@ class RedditConnect():
             conn.execute(err_upd)
 
     def too_many_error_attempts(self, candidate):
+        """
+        This checks the database for the number of times a link has errored
+        and returns True or False for is it has errored 5 or more times.
+        """
         conn = self.engine.connect()
         url = candidate['url']
         err_urls = sql.select([self.errors])
@@ -300,12 +302,19 @@ class RedditConnect():
             return True
 
     def get_previous_md5s(self):
+        """
+        Returns the list of md5s already in the database
+        """
         conn = self.engine.connect()
         md5_select = sql.select(from_obj=self.wallpapers, columns=['md5'])
         unique_img_hashes = [h[0] for h in conn.execute(md5_select).fetchall()]
         return unique_img_hashes
 
     def list_previous_handled_posts(self):
+        """
+        Returns the list of previous liked posts that successfully went all
+        the way through the scraper
+        """
         conn = self.engine.connect()
         retrieved_select = sql.select([self.retrieved])
         already_handled = [a[0] for a in conn.execute(retrieved_select)
@@ -313,6 +322,9 @@ class RedditConnect():
         return already_handled
 
     def list_handled_image_links(self):
+        """
+        Returns the ist of urls that has successfully been handled.
+        """
         conn = self.engine.connect()
         retrieved_select = sql.select([self.wallpapers])
         already_dled = [a[2] for a in conn.execute(retrieved_select)
@@ -320,6 +332,9 @@ class RedditConnect():
         return already_dled
 
     def add_to_previous_aquisitions(self, handled):
+        """
+        Adds to the list of previously handled links
+        """
         for h in handled:
             conn = self.engine.connect()
             retrieved_ins = sql.insert(table=self.retrieved,
@@ -327,6 +342,9 @@ class RedditConnect():
             conn.execute(retrieved_ins)
 
     def add_to_main_db_table(self, candidate, md5):
+        """
+        Inserts the full handled link info into the wallpaers table of the db
+        """
         conn = self.engine.connect()
         wall_data = (candidate['subreddit'], candidate['title'],
                      candidate['url'], candidate['filename'], md5)
