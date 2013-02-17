@@ -231,8 +231,7 @@ class RedditConnect():
                     children.append(child)
                 else:
                     print 'Skipping previously acquired post: %s' % child[
-                        'data']['title'].decode('utf-8').encode('ascii',
-                                                                'replace')
+                        'data']['url']
 
         #Call each plugin module and hand the list of unhandled links off to
         # it. Plugin *must* return a list of the links that were successfully
