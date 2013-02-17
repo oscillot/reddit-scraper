@@ -351,8 +351,8 @@ class RedditConnect():
         new = 0
         print 'Found %d candidates.\n' % len(candidates)
         print 'Getting wallpapers...\n'
+        unique_img_hashes = self.get_previous_md5s()
         for i, candidate in enumerate(candidates):
-            unique_img_hashes = self.get_previous_md5s()
             candidate['filename'] = candidate['url'].split('/')[-1].replace(
                 ' ', '_')
             already_dled = self.list_handled_image_links()
@@ -398,8 +398,8 @@ class RedditConnect():
                 except IOError, e:
                     self.handle_exception(e, candidate)
                     os.remove(img_path)
-
-            self.add_to_main_db_table(candidate, md5)
+                unique_img_hashes.append(md5)
+                self.add_to_main_db_table(candidate, md5)
             new += 1
         #only mark posts as handled if the whole run completes,
         # so that galleries can complete if interrupted
