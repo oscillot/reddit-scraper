@@ -323,7 +323,7 @@ class RedditConnect():
         for h in handled:
             conn = self.engine.connect()
             retrieved_ins = sql.insert(table=self.retrieved,
-                                       values=[h['url']])
+                                       values=[h['data']['url']])
             conn.execute(retrieved_ins)
 
     def add_to_main_db_table(self, candidate, md5):
