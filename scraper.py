@@ -224,10 +224,10 @@ class RedditConnect():
 
         children = []
         candidates = []
-        already_dled = self.list_previous_aquisitions()
+        already_handled = self.list_previous_handled_posts()
         for child in liked_data:
             if child['data']['subreddit'].lower() in subs:
-                if child['data']['url'] not in already_dled:
+                if child['data']['url'] not in already_handled:
                     children.append(child)
                 else:
                     print 'Skipping previously acquired post: %s' % child[
@@ -305,10 +305,18 @@ class RedditConnect():
         unique_img_hashes = [h[0] for h in conn.execute(md5_select).fetchall()]
         return unique_img_hashes
 
-    def list_previous_aquisitions(self):
+    def list_previous_handled_posts(self):
         conn = self.engine.connect()
         retrieved_select = sql.select([self.retrieved])
-        already_dled = [a[0] for a in conn.execute(retrieved_select).fetchall()]
+        already_handled = [a[0] for a in conn.execute(retrieved_select)
+        .fetchall()]
+        return already_handled
+
+    def list_handled_image_links(self):
+        conn = self.engine.connect()
+        retrieved_select = sql.select([self.wallpapers])
+        already_dled = [a[2] for a in conn.execute(retrieved_select)
+                        .fetchall()]
         return already_dled
 
     def add_to_previous_aquisitions(self, candidate):
@@ -344,10 +352,11 @@ class RedditConnect():
         new = 0
         print 'Found %d candidates.\n' % len(candidates)
         print 'Getting wallpapers...\n'
-        unique_img_hashes = self.get_previous_md5s()
         for i, candidate in enumerate(candidates):
+            unique_img_hashes = self.get_previous_md5s()
             candidate['filename'] = candidate['url'].split('/')[-1].replace(
                 ' ', '_')
+            already_dled = self.list_handled_image_links()
             if candidate['url'] in already_dled:
                 print 'Skipping #%d: %s has already been downloaded\n' % (
                     i, candidate['filename'])
