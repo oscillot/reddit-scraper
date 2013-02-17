@@ -426,4 +426,7 @@ class RedditConnect():
         # so that galleries can complete if interrupted
         self.add_to_previous_aquisitions(self.handled)
 
-        print 'Complete. %d new images were acquired this run.' % new
+        print 'The following posts had links that were unhandled:'
+        for uh in self.unhandled:
+            print uh
+        print '\nComplete. %d new images were acquired this run.' % new
