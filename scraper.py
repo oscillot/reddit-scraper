@@ -5,11 +5,17 @@ import gzip
 from StringIO import StringIO
 import os
 import sys
-from sqlalchemy import *
-import sqlalchemy.sql as sql
 import hashlib
 
+from sqlalchemy import *
+import sqlalchemy.sql as sql
 from PIL import Image
+
+IMAGE_HEADERS = ['image/bmp',
+                 'image/png',
+                 'image/jpg',
+                 'image/jpeg',
+                 'image/gif']
 
 #Platform agnostic handler for paths
 #*NOTE* This assumes that on *nix systems you will install this to the root
@@ -60,13 +66,13 @@ class RedditConnect():
         #Create the DB if it's not there
         if not os.path.exists(self.db):
             self.engine = create_engine('sqlite:///%s' % self.db)
-            metadata = MetaData(engine)
+            metadata = MetaData(self.engine)
             self.wallpapers = Table('wallpapers', metadata,
-                               Column('subreddit', String),
-                               Column('title', String),
-                               Column('url', String),
-                               Column('filename', String),
-                               Column('md5', String, primary_key=True)
+                                    Column('subreddit', String),
+                                    Column('title', String),
+                                    Column('url', String),
+                                    Column('filename', String),
+                                    Column('md5', String, primary_key=True)
             )
             self.retrieved = Table('retrieved', metadata,
                                    Column('image_url', String,
@@ -77,7 +83,6 @@ class RedditConnect():
                                 Column('attempts', Integer))
             metadata.create_all()
         self.unhandled = []
-            
 
     def login(self):
         """
@@ -88,11 +93,11 @@ class RedditConnect():
         """
         print 'Logging in...'
         data = urllib.urlencode(
-            {'user' : self.username,
-             'passwd' : self.password,
-             'rem' : 'True'})
+            {'user': self.username,
+             'passwd': self.password,
+             'rem': 'True'})
         opener = urllib2.build_opener()
-        opener.addheaders = [] #remove the default python user-agent
+        opener.addheaders = []  # remove the default python user-agent
         opener.addheaders.append(('User-agent', 'Downloader for /user/%s\'s '
                                                 'upvoted images in specified '
                                                 'subreddits by '
@@ -219,17 +224,24 @@ class RedditConnect():
 
         children = []
         candidates = []
+        already_dled = self.list_previous_aquisitions()
         for child in liked_data:
             if child['data']['subreddit'].lower() in subs:
-                children.append(child)
+                if child['data']['url'] not in already_dled:
+                    children.append(child)
+                else:
+                    print 'Skipping previously acquired post: %s' % child[
+                        'data']['title']
 
         #Call each plugin module and hand the list of unhandled links off to
         # it. Plugin *must* return a list of the links that were successfully
         # handled AND a list of candidates where each member of that list is
         # a dictionary with the following keys: 'url', 'subreddit', 'title'
+        self.handled = []
         for plugin in loaded_plugins:
             print 'Loading plugin: %s.\n' % plugin
             handled, candidates = plugin.execute(children, candidates)
+            self.handled.extend(handled)
             print 'Plugin handled the following links:'
             for h in handled:
                 print h['data']['url']
@@ -257,21 +269,60 @@ class RedditConnect():
 
         """
         print '%s\n' % str(error)
+        url = candidate['url']
         err_urls = sql.select([self.errors])
         conn = self.engine.connect()
         errs = [e['image_url'] for e in conn.execute(err_urls).fetchall()]
-        if candidate['url'] not in errs:
-            err_ins = self.errors.insert((candidate['url'], 1))
+        if url not in errs:
+            err_ins = self.errors.insert((url, 1))
             conn.execute(err_ins)
         else:
             old_att_sel = sql.select([self.errors]).where(self.errors.c
-                                                  .image_url == candidate[
-                'url'])
+                                                          .image_url == url)
             old_attempts = conn.execute(old_att_sel)[1]
             err_upd = self.errors.update().where(self.errors.c.image_url ==
-                                                 candidate['url'])\
-                .values({'attempts': old_attempts + 1})
+                                                 url).values({'attempts':
+                                                             old_attempts + 1})
             conn.execute(err_upd)
+
+    def too_many_error_attempts(self, candidate):
+        conn = self.engine.connect()
+        url = candidate['url']
+        err_urls = sql.select([self.errors])
+        errs = [e['image_url'] for e in conn.execute(err_urls).fetchall()]
+        if url not in errs:
+            return False
+        att_sel = sql.select([self.errors]).where(self.errors.c
+                                                      .image_url == url)
+        attempts = conn.execute(att_sel)[1]
+        if attempts < 5:
+            return False
+        return True
+
+    def get_previous_md5s(self):
+        conn = self.engine.connect()
+        md5_select = sql.select(from_obj=self.wallpapers, columns=['md5'])
+        unique_img_hashes = [h[0] for h in conn.execute(md5_select).fetchall()]
+        return unique_img_hashes
+
+    def list_previous_aquisitions(self):
+        conn = self.engine.connect()
+        retrieved_select = sql.select([self.retrieved])
+        already_dled = [a[0] for a in conn.execute(retrieved_select).fetchall()]
+        return already_dled
+
+    def add_to_previous_aquisitions(self, candidate):
+        conn = self.engine.connect()
+        retrieved_ins = sql.insert(table=self.retrieved,
+                                   values=[candidate['url']])
+        conn.execute(retrieved_ins)
+
+    def add_to_main_db_table(self, candidate, md5):
+        conn = self.engine.connect()
+        wall_data = (candidate['subreddit'], candidate['title'],
+                     candidate['url'], candidate['filename'], md5)
+        wall_ins = self.wallpapers.insert(wall_data)
+        conn.execute(wall_ins)
 
     def acquire(self, candidates, output):
         """
@@ -288,21 +339,22 @@ class RedditConnect():
         :param str output: The location to save the downloaded images to as a
          string
         """
+        if not os.path.exists(output):
+            os.makedirs(output)
         new = 0
         print 'Found %d candidates.\n' % len(candidates)
         print 'Getting wallpapers...\n'
-        md5_select = sql.select(from_obj=self.wallpapers, columns=['md5'])
-        retrieved_select = sql.select([self.retrieved])
-        conn = self.engine.connect()
-        already_dled = [a[0] for a in conn.execute(retrieved_select).fetchall()]
-        unique_img_hashes = [h[0] for h in conn.execute(md5_select).fetchall()]
+        unique_img_hashes = self.get_previous_md5s()
         for i, candidate in enumerate(candidates):
             candidate['filename'] = candidate['url'].split('/')[-1].replace(
                 ' ', '_')
             if candidate['url'] in already_dled:
-                print 'Skipping #%d: %s has already been downloaded\n' % (i,
-                                                                    candidate[
-                                                                    'filename'])
+                print 'Skipping #%d: %s has already been downloaded\n' % (
+                    i, candidate['filename'])
+                continue
+            if self.too_many_error_attempts(candidate):
+                print 'Skipping #%d: %s has failed 5 or more times\n' % (
+                    i, candidate['filename'])
                 continue
             print 'Aquiring #%d: %s \n' % (i, candidate['filename'])
             for key in ['subreddit', 'url', 'title']:
@@ -313,20 +365,13 @@ class RedditConnect():
             except urllib2.HTTPError, e:
                 self.handle_exception(e, candidate)
                 continue
-            retrieved_ins = sql.insert(table=self.retrieved,
-                                       values=[candidate['url']])
-            conn = self.engine.connect()
-            conn.execute(retrieved_ins)
 
-            if resp.headers.get('content-type') not in ['image/bmp',
-                                                        'image/png',
-                                                        'image/jpg',
-                                                        'image/jpeg',
-                                                        'image/gif']:
+            if resp.headers.get('content-type') not in IMAGE_HEADERS:
                 e = ValueError('Image header indicates a non-image was '
                                'found at the link: %s' % candidate['url'])
                 self.handle_exception(e, candidate)
                 continue
+
             if resp.headers.get('content-encoding') == 'gzip':
                 gzipped_img = resp.read()
                 img_data = gzip.GzipFile(fileobj=StringIO(gzipped_img))
@@ -346,15 +391,10 @@ class RedditConnect():
                     self.handle_exception(e, candidate)
                     os.remove(img_path)
 
-            wall_data = (candidate['subreddit'], candidate['title'],
-                         candidate['url'], candidate['filename'], md5)
-            wall_ins = self.wallpapers.insert(wall_data)
-            conn.execute(wall_ins)
-
-            retr_data = (candidate['filename'])
-            retr_ins = self.retrieved.insert(retr_data)
-            conn.execute(retr_ins)
-
+            self.add_to_main_db_table(candidate, md5)
             new += 1
+        #only mark posts as handled if the whole run completes,
+        # so that galleries can complete if interrupted
+        self.add_to_previous_aquisitions(self.handled)
 
         print 'Complete. %d new images were acquired this run.' % new
