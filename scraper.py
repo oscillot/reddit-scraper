@@ -227,6 +227,7 @@ class RedditConnect():
         for child in liked_data:
             if child['data']['subreddit'].lower() in subs:
                 if child['data']['url'] not in already_handled:
+                    already_handled.append(child['data']['url'])
                     children.append(child)
                 else:
                     print 'Skipping previously acquired post: %s' % child[
