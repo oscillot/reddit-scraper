@@ -16,7 +16,7 @@ def get_imgur_album(url):
     for script in tree.findall('body/script'):
         if script.text is not None:
             if script.text.replace('\n','').lstrip().rstrip().startswith('var album'):
-                album = eval(script.text.split('[', 1)[1].split(']',1)[0])
+                album = eval(script.text.lsplit('[', 1)[1].rsplit(']', 1)[0])
                 #this check in case the album has one image, which returns dict instead of list
                 if type(album) == list or type(album) == tuple:
                     for image in album:
