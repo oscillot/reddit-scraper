@@ -20,7 +20,7 @@ def get_500px_img(url):
 def execute(children, candidates):
     handled = []
     for child in children:
-        if child['data']['url'].lower().startswith('http://500px.com/'):
+        if child['data']['url'].lower().startswith('http://500px.com/photo/'):
             img = get_500px_img(child['data']['url'])
             candidates.append({'url': img,
                                'subreddit': child['data']['subreddit'],
