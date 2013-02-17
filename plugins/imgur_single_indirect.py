@@ -13,9 +13,11 @@ def get_imgur_single(url):
         print e
         return []
     tree = etree.HTML(resp.read())
-    a = tree.find('.//*[@id="content"]/div[1]/div[1]/div[1]/a')
-    url = a.attrib['href']
-    return url
+    al = tree.findall('.//head/link')
+    for a in al:
+        href = a.attrib['href']
+        if url.lstrip('http://') in href:
+            return href
 
 def execute(children, candidates):
     handled = []
