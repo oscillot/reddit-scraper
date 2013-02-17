@@ -22,11 +22,13 @@ def get_imgur_single(url):
 def execute(children, candidates):
     handled = []
     for child in children:
-        if child['data']['url'].lower().startswith('http://imgur.com/') and \
-                not child['data']['url'].lower().startswith('http://imgur'
-                                                            '.com/a/') and \
-                not child['data']['url'].lower()[-4:] in ['.jpg', '.bmp',
-                                                          '.png', '.gif']:
+        if (child['data']['url'].lower().startswith('http://imgur.com/') and
+            not child['data']['url'].lower().startswith(
+            'http://imgur.com/a/') and not child['data']['url'].lower()[-4:]
+            in ['.jpg', '.bmp', '.png', '.gif']) or \
+            (child['data']['url'].lower().startswith('http://i.imgur.com/')
+            and not child['data']['url'].lower()[-4:] in ['.jpg', '.bmp',
+                                                          '.png', '.gif']):
             img = get_imgur_single(child['data']['url'])
             #This handles the links that come down with extensions like
             # `jpg?1` that have been showing up lately. Regular links
