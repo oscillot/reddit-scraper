@@ -16,18 +16,21 @@ def get_imgur_album(url):
     for script in tree.findall('body/script'):
         if script.text is not None:
             if script.text.replace('\n','').lstrip().rstrip().startswith('var album'):
-                album = eval(script.text.split('[', 1)[1].split(']', -1)[0])
+                album = eval('[{%s}]' % script.text.split('[{')[1].split('}]')[
+                    0])
                 #this check in case the album has one image, which returns dict instead of list
                 if type(album) == list or type(album) == tuple:
                     for image in album:
                         url = 'http://i.imgur.com/%s%s' % (image['hash'], image['ext'])
+                        urls.append(url)
                 elif type(album) == dict:
                     url = 'http://i.imgur.com/%s%s' % (album['hash'], album['ext'])
+                    urls.append(url)
                 else:
                     print type(album), album
                     print 'Unhandled album type!'
                     raise ValueError
-                urls.append(url)
+
 
     return urls
 
