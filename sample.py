@@ -1,21 +1,33 @@
 import os
-from scraper import RedditConnect
+from reddit_connect import RedditConnect
+from image_getter import ImageGetter
 
-#pass in your username and pw. All connections are ssl, see scraper.py
-rc = RedditConnect('username', 'password', 'db_name')
+#run this manually, through jenkins or as a cron job
+
+#pass in your username and pw. All connections are ssl, see reddit_connect.py
+rc = RedditConnect('username', 'password')
 #perform the login
 rc.login()
 #retrieve X pages of likes
 liked_data = rc.get_liked(max_pages=5)
-#if you use jenkins with envinject, you can specify a multi-reddit or list there, otherwise pass a list in directly
-# and call on a schedule as a cron job
-my_subs = ['apocalypseporn','bigwallpapers','conceptart','creepywallpaper','creepywallpapers','cyberpunk','FUI',
-           'FuturePorn','glitchart','grim','imaginarylandscapes','imaginarytechnology','multiscreen',
-           'originalbackgrounds','postapocalyptic','sciencefiction','scifi','specart','steampunk']
+#if you use jenkins with envinject, you can specify a multi-reddit or list
+# there, otherwise pass a list in directly
+# e.g.
+# my_subs = \
+# os.environ.get('MY_SUBS').lstrip('http://www.reddit.com/r/').split('+')
+my_subs = ['apocalypseporn', 'bigwallpapers', 'conceptart',
+           'creepywallpaper', 'creepywallpapers', 'cyberpunk', 'FUI',
+           'FuturePorn', 'glitchart', 'grim', 'imaginarylandscapes',
+           'imaginarytechnology', 'multiscreen', 'originalbackgrounds',
+           'postapocalyptic', 'sciencefiction', 'scifi', 'specart',
+           'steampunk']
 #get the list of candidate images
 candidates = rc.get_upvoted_wallpapers(my_subs, liked_data)
-#set a location to save to.
-rc.acquire(candidates, os.path.join('X:\\', 'location_to_save_to'))
+#instaniate the image acquisition class with a daabase name,
+# list of candidates and set a location to save images to.
+ig = ImageGetter(database='db_name', candidates=candidates,
+                 output=os.path.join('X:\\', 'location_to_save_to'))
+ig.acquire()
 
 #If you use Jenkins with the EnvInject plugin, you can expose parameter input to the web interface and configure from
 # over your network instead of editing the module directly, e.g.:
