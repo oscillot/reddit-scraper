@@ -1,8 +1,11 @@
 #Handles getting all of the images from an album linked to on imgur
 
+#works as of 02-23-13
+
 import urllib
 import urllib2
 from lxml import etree
+
 
 def get_imgur_album(url):
     try:
@@ -34,9 +37,9 @@ def get_imgur_album(url):
 
     return urls
 
-def execute(children, candidates):
+def execute(candidates, to_acquire):
     handled = []
-    for child in children:
+    for child in candidates:
         if child['data']['url'].lower().startswith('http://imgur.com/a/'):
             album_imgs = get_imgur_album(child['data']['url'])
             for album_img in album_imgs:
@@ -44,8 +47,8 @@ def execute(children, candidates):
                 # `jpg?1` that have been showing up lately. Regular links
                 # should be unaffected by this. This is done here so that the
                 #  list of handled links is still accurate.
-                candidates.append({'url' : album_img.split('?')[0],
+                to_acquire.append({'url' : album_img.split('?')[0],
                                    'subreddit' : child['data']['subreddit'],
                                    'title' : child['data']['title']})
             handled.append(child)
-    return handled, candidates
+    return handled, to_acquire

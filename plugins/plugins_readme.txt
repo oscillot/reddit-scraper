@@ -6,9 +6,8 @@ http requests are made, HTTPErrors should be caught and reported to a print on
 
 The execute function may call other functions as needed.
 
-See the included:
-* direct_links.py
-* imgur_albums.py
-* deviant_art.py
+See the included plugins for examples.
 
-For examples.
+This is my first attempt a a plugin system that doesn't require you to
+explicitly register plugins. Do you have an opinion on this? Good or bad,
+it is welcome! Please get in touch!

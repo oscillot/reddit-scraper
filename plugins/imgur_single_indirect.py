@@ -1,6 +1,8 @@
 #Handles getting a single imgur image that isn't a direct link but rather a
 # link to its imgur page
 
+#works as of 02-23-13
+
 import urllib
 import urllib2
 from lxml import etree
@@ -19,9 +21,9 @@ def get_imgur_single(url):
         if url.lstrip('http://') in href:
             return href
 
-def execute(children, candidates):
+def execute(candidate, to_acquire):
     handled = []
-    for child in children:
+    for child in candidate:
         if (child['data']['url'].lower().startswith('http://imgur.com/') and
             not child['data']['url'].lower().startswith(
             'http://imgur.com/a/') and not child['data']['url'].lower()[-4:]
@@ -34,8 +36,8 @@ def execute(children, candidates):
             # `jpg?1` that have been showing up lately. Regular links
             # should be unaffected by this. This is done here so that the
             #  list of handled links is still accurate.
-            candidates.append({'url': img.split('?')[0],
+            to_acquire.append({'url': img.split('?')[0],
                                'subreddit': child['data']['subreddit'],
                                'title': child['data']['title']})
             handled.append(child)
-    return handled, candidates
+    return handled, to_acquire

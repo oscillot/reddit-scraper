@@ -1,5 +1,7 @@
 #Handles getting all of the images from a collection linked to on wallbase.cc
 
+#works as of 02-23-13
+
 import urllib
 import urllib2
 from lxml import etree
@@ -7,9 +9,11 @@ import re
 import base64
 import time
 
+
 def wget(url):
     resp = urllib.urlopen(url)
     return resp
+
 
 def get_wallbase_collection(url):
     try:
@@ -54,14 +58,15 @@ def get_wallbase_collection(url):
                 urls.append(img_url)
     return urls
 
-def execute(children, candidates):
+
+def execute(candidates, to_acquire):
     handled = []
-    for child in children:
+    for child in candidates:
         if child['data']['url'].lower().startswith('http://wallbase.cc/user/collection/'):
             collection_imgs = get_wallbase_collection(child['data']['url'])
             for img in collection_imgs:
-                candidates.append({'url' : img,
+                to_acquire.append({'url' : img,
                                    'subreddit' : child['data']['subreddit'],
                                    'title' : child['data']['title']})
             handled.append(child)
-    return handled, candidates
+    return handled, to_acquire

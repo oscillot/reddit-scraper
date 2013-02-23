@@ -1,8 +1,11 @@
 #Handles getting the image url from the download button of a single image on deviant art
 
+#works as of 02-23-13
+
 import urllib
 import urllib2
 from lxml import etree
+
 
 def get_deviant_art_image(url):
     try:
@@ -19,14 +22,15 @@ def get_deviant_art_image(url):
     if dl is not None:
         return dl.attrib['content']
 
-def execute(children, candidates):
+
+def execute(candidates, to_acquire):
     handled = []
-    for child in children:
+    for child in candidates:
         if 'deviantart.com' in child['data']['url'].lower():
             deviant_art_img = get_deviant_art_image(child['data']['url'])
             if deviant_art_img is not None:
-                candidates.append({'url' : deviant_art_img,
+                to_acquire.append({'url' : deviant_art_img,
                                    'subreddit' : child['data']['subreddit'],
                                    'title' : child['data']['title']})
                 handled.append(child)
-    return handled, candidates
+    return handled, to_acquire
