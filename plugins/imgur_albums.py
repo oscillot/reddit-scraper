@@ -8,6 +8,11 @@ from lxml import etree
 
 
 def get_imgur_album(url):
+    """Helper for the imgur album execute function
+
+    :param str url: a url to retrieve and execute the xpath on
+    :rtype list: a list of urls that is are direct links to images
+    """
     try:
         resp = urllib.urlopen(url)
     except urllib2.HTTPError, e:
@@ -38,17 +43,27 @@ def get_imgur_album(url):
     return urls
 
 def execute(candidates, to_acquire):
+    """Executor for this plugin. The entry function by which any plugin must
+    operate to handle links.
+
+    :param list candidates: a list of dictionaries converted from the json
+    response given back by reddit.
+    :rtype list, list: a list of the dictionary data that was successfully
+    parsed by this plugin, a list of dictionaries with the url,
+    subreddit and title of the direct link for later acquisition and database
+     entry
+    """
     handled = []
-    for child in candidates:
-        if child['data']['url'].lower().startswith('http://imgur.com/a/'):
-            album_imgs = get_imgur_album(child['data']['url'])
+    for cand in candidates:
+        if cand['data']['url'].lower().startswith('http://imgur.com/a/'):
+            album_imgs = get_imgur_album(cand['data']['url'])
             for album_img in album_imgs:
                 #This handles the links that come down with extensions like
                 # `jpg?1` that have been showing up lately. Regular links
                 # should be unaffected by this. This is done here so that the
                 #  list of handled links is still accurate.
                 to_acquire.append({'url' : album_img.split('?')[0],
-                                   'subreddit' : child['data']['subreddit'],
-                                   'title' : child['data']['title']})
-            handled.append(child)
+                                   'subreddit' : cand['data']['subreddit'],
+                                   'title' : cand['data']['title']})
+            handled.append(cand)
     return handled, to_acquire

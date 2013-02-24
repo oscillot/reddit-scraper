@@ -10,14 +10,16 @@ import base64
 import time
 
 
-def wget(url):
-    resp = urllib.urlopen(url)
-    return resp
-
-
 def get_wallbase_collection(url):
+    """Helper for the wallbase collection function. This will try to
+    retirieve all of the pages of a collection and then stitch together a
+    listing of all the different images from that collection.
+
+    :param str url: a url to retrieve and execute the xpath on
+    :rtype str: a url that is a direct link to an image
+    """
     try:
-        resp = wget(url)
+        resp = urllib.urlopen(url)
     except urllib2.HTTPError, e:
         print 'Error contacting wallbase (%s):' % url
         print e
@@ -36,7 +38,7 @@ def get_wallbase_collection(url):
     urls = []
     for i, p in enumerate(pages):
         thumb_links = []
-        tree = etree.HTML(wget(p).read())
+        tree = etree.HTML(urllib.urlopen(p).read())
         t1 = time.time()
         for script in tree.findall('.//*[@class="thumb"]/a'):
             img_link = script.get('href')
@@ -60,6 +62,16 @@ def get_wallbase_collection(url):
 
 
 def execute(candidates, to_acquire):
+    """Executor for this plugin. The entry function by which any plugin must
+    operate to handle links.
+
+    :param list candidates: a list of dictionaries converted from the json
+    response given back by reddit.
+    :rtype list, list: a list of the dictionary data that was successfully
+    parsed by this plugin, a list of dictionaries with the url,
+    subreddit and title of the direct link for later acquisition and database
+     entry
+    """
     handled = []
     for child in candidates:
         if child['data']['url'].lower().startswith('http://wallbase.cc/user/collection/'):

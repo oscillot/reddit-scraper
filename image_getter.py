@@ -50,6 +50,27 @@ print 'Loaded the following plugin modules successfully: %s\n' % ', '.join(
 
 class ImageGetter():
     def __init__(self, database, candidates, output):
+        """The ImageGetter class handles all of the logic necessary to
+        translate data from reddit (in this case, a filtered list of upvoted
+        posts is input) and enumerates any that it can into listings of
+        direct links. The goal at the end is to have every possible upvoted
+        image link parsed into a direct link or links for retrieval. Then
+        links can be retrieved and a slew of metadata is tokenized into a
+        database that tracks which posts have already been acquired,
+        which links have already been acquired, and at its most granular
+        level, the md5 of every image already acquired. It tries to retrieve
+        as little as possible using this progressive keyspace reduction,
+        the worst case scenario being that it might retrieve the same image
+        from two disparate sources, but then chuck it right at the end
+        because of the MD5 check.
+
+        :param str database: the prefix for the database filename.
+        :param list candidates: a list of dictionaries converted from the json
+        :param str output: the location on disk to store your images (note
+        that this can be changed and the database data will handle all
+        duplicate filtering
+        """
+
         self.output = output
         self.to_acquire = []
         self.handled = []
@@ -84,10 +105,12 @@ class ImageGetter():
         self.unhandled = []
 
     def hand_off_to_plugins(self):
-        #Call each plugin module and hand the list of unhandled links off to
-        # it. Plugin *must* return a list of the links that were successfully
-        # handled AND a list of to_acquire where each member of that list is
-        # a dictionary with the following keys: 'url', 'subreddit', 'title'
+        """Call each plugin module and hand the list of unhandled links off to
+        it. Plugin *must* return a list of the links that were successfully
+        handled AND a list of to_acquire where each member of that list is
+        a dictionary with the following keys: 'url', 'subreddit', 'title'
+
+        """
 
         for plugin in loaded_plugins:
             print 'Loading plugin: %s.\n' % plugin
@@ -114,6 +137,12 @@ class ImageGetter():
                 self.unhandled.append(c)
 
     def check_redirects(self):
+        """
+        A simple but effective check to see if an image link points to a
+        redirect. This is ot executed until after the first pass at retrieval
+        . Only remaining unhandled links are evaluated and if there are no
+        remaining unhandled links, the second pass is never performed.
+        """
         redirects_found = False
         for link in self.unhandled:
             resp = urllib.urlopen(link['data']['url'])

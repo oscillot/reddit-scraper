@@ -9,6 +9,11 @@ from lxml import etree
 
 
 def get_500px_img(url):
+    """Helper for the 500px execute function
+
+    :param str url: a url to retrieve and execute the xpath on
+    :rtype str: a url that is a direct link to an image
+    """
     try:
         resp = urllib.urlopen(url)
     except urllib2.HTTPError, e:
@@ -22,12 +27,22 @@ def get_500px_img(url):
 
 
 def execute(candidates, to_acquire):
+    """Executor for this plugin. The entry function by which any plugin must
+    operate to handle links.
+
+    :param list candidates: a list of dictionaries converted from the json
+    response given back by reddit.
+    :rtype list, list: a list of the dictionary data that was successfully
+    parsed by this plugin, a list of dictionaries with the url,
+    subreddit and title of the direct link for later acquisition and database
+     entry
+    """
     handled = []
-    for child in candidates:
-        if child['data']['url'].lower().startswith('http://500px.com/photo/'):
-            img = get_500px_img(child['data']['url'])
+    for cand in candidates:
+        if cand['data']['url'].lower().startswith('http://500px.com/photo/'):
+            img = get_500px_img(cand['data']['url'])
             to_acquire.append({'url': img,
-                               'subreddit': child['data']['subreddit'],
-                               'title': child['data']['title']})
-            handled.append(child)
+                               'subreddit': cand['data']['subreddit'],
+                               'title': cand['data']['title']})
+            handled.append(cand)
     return handled, to_acquire
