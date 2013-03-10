@@ -103,6 +103,7 @@ class ImageGetter():
                 print 'Skipping previously acquired post: %s' % cand['data'][
                     'url']
         self.unhandled = []
+        self.exceptions = []
 
     def hand_off_to_plugins(self):
         """Call each plugin module and hand the list of unhandled links off to
@@ -114,9 +115,12 @@ class ImageGetter():
 
         for plugin in loaded_plugins:
             print 'Loading plugin: %s.\n' % plugin
-            handled, self.to_acquire = plugin.execute(self.candidates,
-                                                      self.to_acquire)
+            handled, self.to_acquire, exceptions = plugin.execute(self
+                                                                  .candidates,
+                                                                  self
+                                                                  .to_acquire)
             self.handled.extend(handled)
+            self.exceptions.extend(exceptions)
             print 'Plugin handled the following links:'
             if len(handled) > 0:
                 for h in handled:
@@ -342,4 +346,12 @@ class ImageGetter():
                 print uh['data']['url']
         else:
             print 'None'
+
+        print 'The following links caused plugin exceptions:'
+        if len(self.exceptions) > 0:
+            for link, ex, plugin in self.exceptions:
+                print '%s: %s - %s' % (plugin, link['data']['url'], ex)
+        else:
+            print 'None'
+
         print '\nComplete. %d new images were acquired this run.' % new
