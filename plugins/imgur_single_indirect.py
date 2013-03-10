@@ -15,14 +15,21 @@ class ImgurSingleIndirect(BasePlugin):
         operate to handle links.
         :param dict candidate: data from a reddit post json
         """
+
         if (candidate['data']['url'].lower().startswith('http://imgur.com/')
-            and not candidate['data']['url'].lower().startswith(
-            'http://imgur.com/a/') and not candidate['data']['url'].lower()[
-                -4:] in ['.jpg', '.bmp', '.png', '.gif']) or \
+            and
+                #prevent this plugin from handling links such as the following:
+                #http://i.imgur.com/nbsQ4SF.jpg#.UTtRkqYGmy0.reddit
+                not candidate['data']['url'].split('#')[0].lower().startswith(
+                    'http://imgur.com/a/') and
+                not candidate['data']['url'].lower()[-4:] in
+                ['.jpg', '.bmp', '.png', '.gif']) or \
                 (candidate['data']['url'].lower().startswith('http://i.imgur'
-                                                             '.com/') and not
-                    candidate['data']['url'].lower()[-4:] in ['.jpg', '.bmp',
-                                                              '.png', '.gif']):
+                                                             '.com/') and
+                    not candidate['data']['url'].lower()[-4:] in ['.jpg',
+                                                                  '.bmp',
+                                                                  '.png',
+                                                                  '.gif']):
             img = self.get_imgur_single(candidate['data']['url'])
             #This handles the links that come down with extensions like
             # `jpg?1` that have been showing up lately. Regular links
