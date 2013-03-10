@@ -38,11 +38,15 @@ def execute(candidates, to_acquire):
      entry
     """
     handled = []
+    exceptions = []
     for cand in candidates:
-        if cand['data']['url'].lower().startswith('http://500px.com/photo/'):
-            img = get_500px_img(cand['data']['url'])
-            to_acquire.append({'url': img,
-                               'subreddit': cand['data']['subreddit'],
-                               'title': cand['data']['title']})
-            handled.append(cand)
-    return handled, to_acquire
+        try:
+            if cand['data']['url'].lower().startswith('http://500px.com/photo/'):
+                img = get_500px_img(cand['data']['url'])
+                to_acquire.append({'url': img,
+                                   'subreddit': cand['data']['subreddit'],
+                                   'title': cand['data']['title']})
+                handled.append(cand)
+        except Exception, e:
+            exceptions.append((cand, e, '500px_single'))
+    return handled, to_acquire, exceptions

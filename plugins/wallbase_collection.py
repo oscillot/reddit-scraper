@@ -73,12 +73,16 @@ def execute(candidates, to_acquire):
      entry
     """
     handled = []
-    for child in candidates:
-        if child['data']['url'].lower().startswith('http://wallbase.cc/user/collection/'):
-            collection_imgs = get_wallbase_collection(child['data']['url'])
-            for img in collection_imgs:
-                to_acquire.append({'url' : img,
-                                   'subreddit' : child['data']['subreddit'],
-                                   'title' : child['data']['title']})
-            handled.append(child)
-    return handled, to_acquire
+    exceptions = []
+    for cand in candidates:
+        try:
+            if cand['data']['url'].lower().startswith('http://wallbase.cc/user/collection/'):
+                collection_imgs = get_wallbase_collection(cand['data']['url'])
+                for img in collection_imgs:
+                    to_acquire.append({'url': img,
+                                       'subreddit': cand['data']['subreddit'],
+                                       'title': cand['data']['title']})
+                handled.append(cand)
+        except Exception, e:
+            exceptions.append((cand, e, 'wallbase_collection'))
+    return handled, to_acquire, exceptions

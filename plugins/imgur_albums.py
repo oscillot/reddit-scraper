@@ -54,16 +54,20 @@ def execute(candidates, to_acquire):
      entry
     """
     handled = []
+    exceptions = []
     for cand in candidates:
-        if cand['data']['url'].lower().startswith('http://imgur.com/a/'):
-            album_imgs = get_imgur_album(cand['data']['url'])
-            for album_img in album_imgs:
-                #This handles the links that come down with extensions like
-                # `jpg?1` that have been showing up lately. Regular links
-                # should be unaffected by this. This is done here so that the
-                #  list of handled links is still accurate.
-                to_acquire.append({'url' : album_img.split('?')[0],
-                                   'subreddit' : cand['data']['subreddit'],
-                                   'title' : cand['data']['title']})
-            handled.append(cand)
-    return handled, to_acquire
+        try:
+            if cand['data']['url'].lower().startswith('http://imgur.com/a/'):
+                album_imgs = get_imgur_album(cand['data']['url'])
+                for album_img in album_imgs:
+                    #This handles the links that come down with extensions like
+                    # `jpg?1` that have been showing up lately. Regular links
+                    # should be unaffected by this. This is done here so that the
+                    #  list of handled links is still accurate.
+                    to_acquire.append({'url' : album_img.split('?')[0],
+                                       'subreddit' : cand['data']['subreddit'],
+                                       'title' : cand['data']['title']})
+                handled.append(cand)
+        except Exception, e:
+            exceptions.append((cand, e, 'imgur_albums'))
+    return handled, to_acquire, exceptions

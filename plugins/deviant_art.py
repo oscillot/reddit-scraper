@@ -42,12 +42,16 @@ def execute(candidates, to_acquire):
      entry
     """
     handled = []
+    exceptions = []
     for cand in candidates:
-        if 'deviantart.com' in cand['data']['url'].lower():
-            deviant_art_img = get_deviant_art_image(cand['data']['url'])
-            if deviant_art_img is not None:
-                to_acquire.append({'url' : deviant_art_img,
-                                   'subreddit' : cand['data']['subreddit'],
-                                   'title' : cand['data']['title']})
-                handled.append(cand)
-    return handled, to_acquire
+        try:
+            if 'deviantart.com' in cand['data']['url'].lower():
+                deviant_art_img = get_deviant_art_image(cand['data']['url'])
+                if deviant_art_img is not None:
+                    to_acquire.append({'url' : deviant_art_img,
+                                       'subreddit' : cand['data']['subreddit'],
+                                       'title' : cand['data']['title']})
+                    handled.append(cand)
+        except Exception, e:
+            exceptions.append((cand, e, 'deviant_art'))
+    return handled, to_acquire, exceptions

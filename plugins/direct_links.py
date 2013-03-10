@@ -13,12 +13,16 @@ def execute(candidates, to_acquire):
      entry
     """
     handled = []
+    exceptions = []
     for cand in candidates:
-        for img_type in ['.jpg', '.jpeg', '.gif', '.bmp', '.png']:
-            if cand['data']['url'].lower().rsplit('?')[0].endswith(img_type):
-                to_acquire.append({'url': cand['data']['url'].rsplit('?')[0],
-                                   'subreddit': cand['data']['subreddit'],
-                                   'title': cand['data']['title']})
-                handled.append(cand)
-                break
-    return handled, to_acquire
+        try:
+            for img_type in ['.jpg', '.jpeg', '.gif', '.bmp', '.png']:
+                if cand['data']['url'].lower().rsplit('?')[0].endswith(img_type):
+                    to_acquire.append({'url': cand['data']['url'].rsplit('?')[0],
+                                       'subreddit': cand['data']['subreddit'],
+                                       'title': cand['data']['title']})
+                    handled.append(cand)
+                    break
+        except Exception, e:
+            exceptions.append((cand, e, 'direct_links'))
+    return handled, to_acquire, exceptions
