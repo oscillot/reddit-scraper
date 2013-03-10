@@ -352,7 +352,8 @@ class ImageGetter():
         self.add_to_previous_aquisitions()
 
         for ex in self.exceptions:
-            self.unhandled.remove(ex)
+            if ex in self.unhandled:
+                self.unhandled.remove(ex)
 
         print 'The following posts had links that were unhandled:'
         if len(self.unhandled) > 0:
