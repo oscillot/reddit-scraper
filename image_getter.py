@@ -347,6 +347,8 @@ class ImageGetter():
         else:
             print 'None'
 
+        print '\n'
+        
         print 'The following links caused plugin exceptions:'
         if len(self.exceptions) > 0:
             for link, ex, plugin in self.exceptions:
