@@ -137,6 +137,8 @@ class ImageGetter():
             # itself
             for h in handled:
                 self.candidates.remove(h)
+        for c in self.to_acquire:
+            print c
 
         print 'Candidates retrieved!\n'
 
@@ -344,6 +346,9 @@ class ImageGetter():
             #only mark posts as handled if the whole run completes,
         # so that galleries can complete if interrupted
         self.add_to_previous_aquisitions()
+
+        for ex in self.exceptions:
+            self.unhandled.remove(ex)
 
         print 'The following posts had links that were unhandled:'
         if len(self.unhandled) > 0:
