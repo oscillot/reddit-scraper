@@ -120,7 +120,7 @@ class ImageGetter():
         """
 
         for plugin in loaded_plugins:
-            print 'Loading plugin: %s.\n' % plugin.__name__
+            print 'Loading plugin: %s.' % plugin.__name__
             plug_inst = plugin(self.candidates)
             handled = plug_inst.handled
             self.handled.extend(handled)
@@ -130,20 +130,20 @@ class ImageGetter():
             if len(handled) > 0:
                 for h in handled:
                     print h['data']['url']
+                print '\n'
             else:
                 print 'None'
-            print '\n'
             #remove handled links here so each plugin doesn't have to do this
             # itself
             for h in handled:
                 self.candidates.remove(h)
-
-        print 'Candidates retrieved!\n'
-
-        if len(self.candidates) > 0:
-            for c in self.candidates:
-                #inform of any unhandled cases
-                self.unhandled.append(c)
+                if h in self.unhandled:
+                    self.unhandled.remove(h)
+            if len(self.candidates) > 0:
+                for c in self.candidates:
+                    #inform of any unhandled cases
+                    if c not in self.unhandled:
+                        self.unhandled.append(c)
 
     def check_redirects(self):
         """
@@ -159,6 +159,10 @@ class ImageGetter():
             if redirected != link['data']['url']:
                 redirects_found = True
                 print '%s redirects to: %s' % (link['data']['url'], redirected)
+                if link in self.candidates:
+                    self.candidates.remove(link)
+                if link in self.unhandled:
+                    self.unhandled.remove(link)
                 link['data']['url'] = redirected
                 self.candidates.append(link)
         return redirects_found
@@ -183,7 +187,8 @@ class ImageGetter():
             old_attempts = conn.execute(old_att_sel).fetchone()[1]
             err_upd = self.errors.update().where(self.errors.c.image_url ==
                                                  url).values({'attempts':
-                                                                  old_attempts + 1})
+                                                              old_attempts +
+                                                              1})
             conn.execute(err_upd)
 
     def too_many_error_attempts(self, candidate):
@@ -283,10 +288,11 @@ class ImageGetter():
         print "Checking remainder for redirects or shortened urls"
         if self.check_redirects():
             #hand the modified list off a 2nd time to try to get any stragglers
-            print '\nSecond pass for redirects'
+            print '\nSecond pass for redirects...'
             self.hand_off_to_plugins()
         else:
-            print 'No redirects detected.'
+            print 'No redirects detected.\n'
+        print 'Candidates retrieved!\n'
         new = 0
         print 'Found %d candidates.\n' % len(self.to_acquire)
         print 'Getting wallpapers...\n'
@@ -352,10 +358,9 @@ class ImageGetter():
         if len(self.unhandled) > 0:
             for uh in self.unhandled:
                 print uh['data']['url']
+                print '\n'
         else:
             print 'None'
-
-        print '\n'
 
         print 'The following links caused plugin exceptions:'
         if len(self.exceptions) > 0:
