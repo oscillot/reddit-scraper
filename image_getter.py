@@ -137,8 +137,6 @@ class ImageGetter():
             # itself
             for h in handled:
                 self.candidates.remove(h)
-        for c in self.to_acquire:
-            print c
 
         print 'Candidates retrieved!\n'
 
