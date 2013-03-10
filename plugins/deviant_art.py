@@ -18,11 +18,12 @@ class DeviantArt(BasePlugin):
         if 'deviantart.com' in candidate['data']['url'].lower():
             deviant_art_img = self.get_deviant_art_image(candidate['data'][
                 'url'])
-            self.to_acquire.append({'url': deviant_art_img,
-                                    'subreddit': candidate['data'][
-                                        'subreddit'],
-                                    'title': candidate['data']['title']})
-            self.handled.append(candidate)
+            if deviant_art_img is not None:
+                self.to_acquire.append({'url': deviant_art_img,
+                                        'subreddit': candidate['data'][
+                                            'subreddit'],
+                                        'title': candidate['data']['title']})
+                self.handled.append(candidate)
 
     def get_deviant_art_image(self, url):
         """Helper for the deviant art execute function
