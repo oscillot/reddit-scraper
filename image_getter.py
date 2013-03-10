@@ -8,6 +8,7 @@ import hashlib
 from sqlalchemy import *
 import sqlalchemy.sql as sql
 from PIL import Image
+from base_plugin import BasePlugin
 
 IMAGE_HEADERS = ['image/bmp',
                  'image/png',
@@ -38,14 +39,19 @@ succeeded = []
 for plugin in plugin_list:
     try:
         loaded = __import__(plugin)
-        loaded_plugins.append(loaded)
-        succeeded.append(plugin)
+        for attr in dir(loaded):
+            try:
+                cls = getattr(loaded, attr)
+                if issubclass(cls, BasePlugin) and cls.__name__ != 'BasePlugin':
+                    loaded_plugins.append(cls)
+                    succeeded.append(cls.__name__)
+            except TypeError:
+                pass
     except ImportError, e:
-        print '%s failed to load: %s\n' % (plugin, e)
-        failed_plugins.append(plugin)
+        print '%s:%s failed to load: %s\n' % (plugin, cls, e)
+        failed_plugins.append(cls.__name__)
 sys.path.remove(plugins_folder)
-print 'Loaded the following plugin modules successfully: %s\n' % ', '.join(
-    succeeded)
+print 'Loaded the following plugins successfully: %s\n' % ', '.join(succeeded)
 
 
 class ImageGetter():
@@ -114,13 +120,12 @@ class ImageGetter():
         """
 
         for plugin in loaded_plugins:
-            print 'Loading plugin: %s.\n' % plugin
-            handled, self.to_acquire, exceptions = plugin.execute(self
-                                                                  .candidates,
-                                                                  self
-                                                                  .to_acquire)
+            print 'Loading plugin: %s.\n' % plugin.__name__
+            plug_inst = plugin(self.candidates)
+            handled = plug_inst.handled
             self.handled.extend(handled)
-            self.exceptions.extend(exceptions)
+            self.to_acquire.extend(plug_inst.to_acquire)
+            self.exceptions.extend(plug_inst.exceptions)
             print 'Plugin handled the following links:'
             if len(handled) > 0:
                 for h in handled:
@@ -348,7 +353,7 @@ class ImageGetter():
             print 'None'
 
         print '\n'
-        
+
         print 'The following links caused plugin exceptions:'
         if len(self.exceptions) > 0:
             for link, ex, plugin in self.exceptions:
