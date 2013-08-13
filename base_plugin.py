@@ -1,3 +1,6 @@
+import traceback
+
+
 class BasePlugin():
     def __init__(self, candidates):
         """Constructs the plugin calls and executes them, saving successes,
@@ -27,6 +30,8 @@ class BasePlugin():
             try:
                 self.execute(candidate)
             except Exception, e:
+                #Trying this out for a bit
+                e = traceback.format_exc()
                 self.exceptions.append((candidate, e, self.__class__.__name__))
 
     def execute(self, candidate):
