@@ -33,28 +33,28 @@ class FlickrSingle(BasePlugin):
             print 'Error reaching Flickr (%s)' % url
             print e
             return
-        page = resp.read().replace('true', 'True').replace('false',
-                                                           'False').replace(
-                                                           'null', 'None')
+        page = resp.read()
         find_qualities = re.compile(r'Y.photo.init\((.+)\)', re.MULTILINE)
         match = re.search(find_qualities, page)
-        qualities = eval(match.group(1))
+        #some ugly de-jsification hackery here
+        qualities = eval(match.group(1).replace(
+            'true', 'True').replace('false', 'False').replace('null', 'None'))
         if type(qualities) != dict:
             raise ValueError('Did not resolve to a dict. That\'s really '
                              '*really* bad! You got a: %s' % type(qualities))
         sizes = qualities['sizes']
         sizemore = {}
         areas = []
-        for size in sizes:
+        for size in sizes.keys():
             #whatever has the largest area must be the biggest
-            area = int(size['width']) * int(size['height'])
+            area = int(sizes[size]['width']) * int(sizes[size]['height'])
             areas.append(area)
-            sizemore[area] = size
+            sizemore[area] = sizes[size]['url'].replace('\\', '')
 
         areas = sorted(areas, reverse=True)
         try:
             #ipso facto
             largest = areas[0]
-            return sizemore[largest]['url'].replace('\\', '')
+            return sizemore[largest]
         except IndexError:
             return None
