@@ -132,7 +132,7 @@ class ImageGetter():
                     print h['data']['url']
                 print '\n'
             else:
-                print 'None'
+                print 'None\n'
             #remove handled links here so each plugin doesn't have to do this
             # itself
             for h in handled:
@@ -321,8 +321,9 @@ class ImageGetter():
                 continue
 
             if resp.headers.get('content-type') not in IMAGE_HEADERS:
-                e = ValueError('Image header indicates a non-image was '
-                               'found at the link: %s' % candidate['url'])
+                e = ValueError('Non-image header \"%s\" was found at the '
+                               'link: %s' % (resp.headers.get('content-type'),
+                                             candidate['url']))
                 self.handle_exception(e, candidate)
                 continue
 
