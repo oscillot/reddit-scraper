@@ -39,7 +39,7 @@ class FlickrSingle(BasePlugin):
         find_qualities = re.compile(r'Y.photo.init\((.+)\)', re.MULTILINE)
         match = re.search(find_qualities, page)
         qualities = eval(match.group(1))
-        if type(qualities) != 'dict':
+        if type(qualities) != dict:
             raise ValueError('Did not resolve to a dict. That\'s really '
                              '*really* bad! You got a: %s' % type(qualities))
         sizes = qualities['sizes']
