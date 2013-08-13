@@ -35,10 +35,11 @@ class ImgurSingleIndirect(BasePlugin):
             # `jpg?1` that have been showing up lately. Regular links
             # should be unaffected by this. This is done here so that the
             #  list of handled links is still accurate.
-            self.to_acquire.append({'url': img.split('?')[0],
-                               'subreddit': candidate['data']['subreddit'],
-                               'title': candidate['data']['title']})
-            self.handled.append(candidate)
+            if img is not None:
+                self.to_acquire.append({'url': img.split('?')[0],
+                                   'subreddit': candidate['data']['subreddit'],
+                                   'title': candidate['data']['title']})
+                self.handled.append(candidate)
 
     def get_imgur_single(self, url):
         """Helper for the imgur single image page function

@@ -13,6 +13,11 @@ class FlickrSingle(BasePlugin):
         :param dict candidate: data from a reddit post json
         """
         if 'www.flickr.com/photos/' in candidate['data']['url']:
+            #This just throws us back in case the link we have is for a
+            # pre-selected size, so we can choose high quality like normal
+            if '/sizes/' in candidate['data']['url']:
+                candidate['data']['url'] = candidate['data']['url'].split(
+                    '/sizes/')[0]
             flickr_img = self.get_best_quality(candidate['data']['url'])
             if flickr_img is not None:
                 self.to_acquire.append({'url': flickr_img,
@@ -28,23 +33,27 @@ class FlickrSingle(BasePlugin):
             print 'Error reaching Flickr (%s)' % url
             print e
             return
-        page = resp.read().replace('true', 'True').replace('false', 'False')
+        page = resp.read().replace('true', 'True').replace('false',
+                                                           'False').replace(
+                                                           'null', 'None')
         find_qualities = re.compile(r'Y.photo.init\((.+)\)', re.MULTILINE)
         match = re.search(find_qualities, page)
         qualities = eval(match.group(1))
         if type(qualities) != 'dict':
             raise ValueError('Did not resolve to a dict. That\'s really '
-                             '*really* bad!')
+                             '*really* bad! You got a: %s' % type(qualities))
         sizes = qualities['sizes']
         sizemore = {}
         areas = []
         for size in sizes:
+            #whatever has the largest area must be the biggest
             area = int(size['width']) * int(size['height'])
             areas.append(area)
             sizemore[area] = size
 
         areas = sorted(areas, reverse=True)
         try:
+            #ipso facto
             largest = areas[0]
             return sizemore[largest]['url'].replace('\\', '')
         except IndexError:
