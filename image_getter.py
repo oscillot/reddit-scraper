@@ -174,7 +174,8 @@ class ImageGetter():
         later. After 5 errors the link is no longer tried.
         """
         print '%s\n' % str(error)
-        self.unhandled.append(candidate)
+        self.unhandled.append({'data': candidate}) #this is a compatibility
+        # hack bc i did something stupid somewhere
         url = candidate['url']
         err_urls = sql.select([self.errors])
         conn = self.engine.connect()
