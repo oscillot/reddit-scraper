@@ -24,9 +24,9 @@ class ImgurSingleIndirect(BasePlugin):
                     'http://imgur.com/a/') and
                 not candidate['data']['url'].lower()[-4:] in
                 ['.jpg', '.bmp', '.png', '.gif']) or \
-                (candidate['data']['url'].lower().startswith('http://i.imgur'
-                                                             '.com/') and
-                    not candidate['data']['url'].lower()[-4:] in ['.jpg',
+                (candidate['data']['url'].lower().startswith(
+                        'http://i.imgur.com/') and not \
+                        candidate['data']['url'].lower()[-4:] in ['.jpg',
                                                                   '.bmp',
                                                                   '.png',
                                                                   '.gif']):
@@ -58,4 +58,6 @@ class ImgurSingleIndirect(BasePlugin):
         for a in al:
             href = a.attrib['href']
             if url.lstrip('http://') in href:
-                return href
+                #Fix The single indirect links that look like this:
+                #<link rel="image_src" href="//i.imgur.com/IZZayKa.png" />
+                return href.lstrip('//')
