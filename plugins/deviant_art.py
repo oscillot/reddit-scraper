@@ -19,7 +19,7 @@ class DeviantArt(BasePlugin):
             deviant_art_img = self.get_deviant_art_image(candidate['data'][
                 'url'])
             if deviant_art_img is not None:
-                if deviant_art_img == 'UNAVAILABLE':
+                if deviant_art_img == 'deviantART: 404 Not Found':
                     self.unavailable.append(candidate)
                     return
                 self.to_acquire.append({'url': deviant_art_img,
@@ -46,8 +46,9 @@ class DeviantArt(BasePlugin):
         for title in tree.findall('.//head/title'):
             if title.text == 'deviantART: 404 Not Found':
                 print '%s: %s' % (url, title.text)
-                return 'UNAVAILABLE'
-        for dl in tree.findall('.//*[@id="output"]'):
+                return title.text
+        #//*[@id="output"]/div[1]/div[4]/div[1]/div/div[2]/a
+        for dl in tree.findall(".//*/a[@class='dev-page-button dev-page-button-with-text dev-page-download']"):
             if dl is not None and dl.get('href'):
                 if '/download/' in dl.attrib['href']:
                     return dl.attrib['href']
