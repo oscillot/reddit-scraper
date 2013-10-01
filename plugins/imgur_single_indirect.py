@@ -60,4 +60,7 @@ class ImgurSingleIndirect(BasePlugin):
             if url.lstrip('http://') in href:
                 #Fix The single indirect links that look like this:
                 #<link rel="image_src" href="//i.imgur.com/IZZayKa.png" />
-                return href.lstrip('//')
+                if not href.startswith('http://'):
+                    if href.startswith('//'):
+                        href = 'http:' + href
+                return href
