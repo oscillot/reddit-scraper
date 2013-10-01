@@ -39,12 +39,16 @@ class DeviantArt(BasePlugin):
             print e
             return
         tree = etree.HTML(resp.read())
+        #/html/head/title
+        for title in tree.findall('/html/head/title'):
+            if title.text == '':
+                return
         for dl in tree.findall('.//*[@id="output"]'):
-            if dl is not None:
+            if dl is not None and dl.get('href'):
                 if '/download/' in dl.attrib['href']:
                     return dl.attrib['href']
         for dl in tree.findall('.//*[@id="download-button"]'):
-            if dl is not None:
+            if dl is not None and dl.get('href'):
                 if '/download/' in dl.attrib['href']:
                     return dl.attrib['href']
         dl = tree.find('.//*/meta[@name="og:image"]')
