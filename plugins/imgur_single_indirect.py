@@ -1,7 +1,7 @@
 #Handles getting a single imgur image that isn't a direct link but rather a
 # link to its imgur page
 
-#works as of 02-23-13
+#works as of 09-30-13
 
 import urllib
 import urllib2

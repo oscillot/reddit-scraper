@@ -39,6 +39,9 @@ class DeviantArt(BasePlugin):
             print e
             return
         tree = etree.HTML(resp.read())
+        for dl in tree.findall('.//*[@id="output"]'):
+            if '/download/' in dl.attrib['href']:
+                return dl.attrib['href']
         for dl in tree.findall('.//*[@id="download-button"]'):
             if '/download/' in dl.attrib['href']:
                 return dl.attrib['href']
