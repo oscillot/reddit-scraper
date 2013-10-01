@@ -1,7 +1,7 @@
 #Handles getting the image url from the download button of a single image on
 # deviant art
 
-#works as of 02-23-13
+#works as of 09-30-13
 
 import urllib
 import urllib2
@@ -40,11 +40,13 @@ class DeviantArt(BasePlugin):
             return
         tree = etree.HTML(resp.read())
         for dl in tree.findall('.//*[@id="output"]'):
-            if '/download/' in dl.attrib['href']:
-                return dl.attrib['href']
+            if dl is not None:
+                if '/download/' in dl.attrib['href']:
+                    return dl.attrib['href']
         for dl in tree.findall('.//*[@id="download-button"]'):
-            if '/download/' in dl.attrib['href']:
-                return dl.attrib['href']
+            if dl is not None:
+                if '/download/' in dl.attrib['href']:
+                    return dl.attrib['href']
         dl = tree.find('.//*/meta[@name="og:image"]')
         if dl is not None:
             return dl.attrib['content']
