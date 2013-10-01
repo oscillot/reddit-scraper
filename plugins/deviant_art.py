@@ -19,6 +19,9 @@ class DeviantArt(BasePlugin):
             deviant_art_img = self.get_deviant_art_image(candidate['data'][
                 'url'])
             if deviant_art_img is not None:
+                if deviant_art_img == 'UNAVAILABLE':
+                    self.unavailable.append(candidate)
+                    return
                 self.to_acquire.append({'url': deviant_art_img,
                                         'subreddit': candidate['data'][
                                             'subreddit'],
@@ -41,8 +44,9 @@ class DeviantArt(BasePlugin):
         tree = etree.HTML(resp.read())
         #/html/head/title
         for title in tree.findall('/html/head/title'):
-            if title.text == '':
-                return
+            if title.text == 'deviantART: 404 Not Found':
+                print '%s: %s' % (url, title.text)
+                return 'UNAVAILABLE'
         for dl in tree.findall('.//*[@id="output"]'):
             if dl is not None and dl.get('href'):
                 if '/download/' in dl.attrib['href']:

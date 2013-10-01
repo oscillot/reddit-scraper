@@ -126,6 +126,7 @@ class ImageGetter():
             self.handled.extend(handled)
             self.to_acquire.extend(plug_inst.to_acquire)
             self.exceptions.extend(plug_inst.exceptions)
+            self.unhandled.extend(plug_inst.unavailable)
             print 'Plugin handled the following links:'
             if len(handled) > 0:
                 for h in handled:

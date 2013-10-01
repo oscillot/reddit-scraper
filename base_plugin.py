@@ -17,6 +17,7 @@ class BasePlugin():
         self.to_acquire = []
         self.handled = []
         self.exceptions = []
+        self.unavailable = []
         self.__execute()
 
     def __execute(self):
