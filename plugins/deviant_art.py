@@ -55,6 +55,7 @@ class DeviantArt(BasePlugin):
                     if '?token' in href:
                         href = href.split('?token')[0]
                     return href
+        #Possibly the above catches all images as of 9-30, not sure yet
         for dl in tree.findall('.//*[@id="download-button"]'):
             if dl is not None and dl.get('href'):
                 if '/download/' in dl.attrib['href']:
