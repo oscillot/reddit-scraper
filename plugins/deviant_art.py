@@ -51,7 +51,10 @@ class DeviantArt(BasePlugin):
         for dl in tree.findall(".//*/a[@class='dev-page-button dev-page-button-with-text dev-page-download']"):
             if dl is not None and dl.get('href'):
                 if '/download/' in dl.attrib['href']:
-                    return dl.attrib['href']
+                    href = dl.attrib['href']
+                    if '?token' in href:
+                        href = href.split('?token')[0]
+                    return href
         for dl in tree.findall('.//*[@id="download-button"]'):
             if dl is not None and dl.get('href'):
                 if '/download/' in dl.attrib['href']:
