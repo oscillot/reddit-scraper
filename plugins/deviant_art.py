@@ -43,7 +43,7 @@ class DeviantArt(BasePlugin):
             return
         tree = etree.HTML(resp.read())
         #/html/head/title
-        for title in tree.findall('/html/head/title'):
+        for title in tree.findall('.//head/title'):
             if title.text == 'deviantART: 404 Not Found':
                 print '%s: %s' % (url, title.text)
                 return 'UNAVAILABLE'
