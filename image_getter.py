@@ -1,8 +1,6 @@
 import sys
 import os
-import gzip
 import requests
-from StringIO import StringIO
 import hashlib
 from sqlalchemy import *
 import sqlalchemy.sql as sql
@@ -17,7 +15,8 @@ IMAGE_HEADERS = ['image/bmp',
 
 #Platform agnostic handler for paths
 #*NOTE* This assumes that on *nix systems you will install this to the root
-# of your user folder
+# of your user folder and python setup.py develop it (i guess i should readme
+# that)
 if 'linux' in sys.platform.lower():
     APP_ROOT = os.path.expanduser('~')
 elif sys.platform.startswith('win'):
@@ -330,12 +329,6 @@ class ImageGetter():
                                              candidate['url']))
                 self.handle_exception(e, candidate)
                 continue
-            #this is handled by requests now
-            #if resp.headers.get('content-encoding') == 'gzip':
-            #    gzipped_img = resp.text
-            #    img_data = gzip.GzipFile(fileobj=StringIO(gzipped_img))
-            #    new_img = img_data.read()
-            #    img_data.close()
             else:
                 new_img = resp.content
             md5 = hashlib.md5(new_img).hexdigest()
