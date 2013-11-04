@@ -52,7 +52,7 @@ class ImgurSingleIndirect(BasePlugin):
             print 'Error contacting imgur (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.read())
+        tree = etree.HTML(resp.text)
         al = tree.findall('.//head/link')
         for a in al:
             href = a.attrib['href']

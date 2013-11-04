@@ -25,7 +25,7 @@ class Tumblr(BasePlugin):
             print 'Error contacting tumblr (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.read())
+        tree = etree.HTML(resp.text)
         urls = []
         imgs = []
 
@@ -38,7 +38,7 @@ class Tumblr(BasePlugin):
                 print 'Error contacting tumblr (%s):' % url
                 print e
                 return []
-            tree = etree.HTML(resp.read())
+            tree = etree.HTML(resp.text)
 
             for img in tree.findall('.//*[@class="photoset_photo"]'):
                 imgs.append(img.attrib['href'])

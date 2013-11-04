@@ -332,12 +332,12 @@ class ImageGetter():
                 continue
 
             if resp.headers.get('content-encoding') == 'gzip':
-                gzipped_img = resp.read()
+                gzipped_img = resp.text
                 img_data = gzip.GzipFile(fileobj=StringIO(gzipped_img))
                 new_img = img_data.read()
                 img_data.close()
             else:
-                new_img = resp.read()
+                new_img = resp.text
             md5 = hashlib.md5(new_img).hexdigest()
             if md5 not in unique_img_hashes:
                 img_path = os.path.join(self.output, candidate['filename'])

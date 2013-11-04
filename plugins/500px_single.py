@@ -35,7 +35,7 @@ class Get500pxSingle(BasePlugin):
             print 'Error contacting imgur (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.read())
+        tree = etree.HTML(resp.text)
         a = tree.findall('.//*[@id="thephoto"]/a')
         href = a[0].attrib['href']
         return href

@@ -40,7 +40,7 @@ class DeviantArt(BasePlugin):
             print 'Error reaching deviantart (%s):' % url
             print e
             return
-        tree = etree.HTML(resp.read())
+        tree = etree.HTML(resp.text)
         #/html/head/title
         for title in tree.findall('.//head/title'):
             if title.text == 'deviantART: 404 Not Found':

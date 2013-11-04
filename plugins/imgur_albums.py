@@ -38,7 +38,7 @@ class ImgurAlbum(BasePlugin):
             print 'Error contacting imgur (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.read())
+        tree = etree.HTML(resp.text)
         urls = []
         for script in tree.findall('body/script'):
             if script.text is not None:

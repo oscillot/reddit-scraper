@@ -41,7 +41,7 @@ class WallbaseCollection(BasePlugin):
             print 'Error contacting wallbase (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.read())
+        tree = etree.HTML(resp.text)
         max_images = int(tree.find('.//*[@id="delwrap"]/div[1]/div[3]/span[1]').text)
         pages = []
         start = 1
@@ -55,7 +55,7 @@ class WallbaseCollection(BasePlugin):
         urls = []
         for i, p in enumerate(pages):
             thumb_links = []
-            tree = etree.HTML(requests.get(p).read())
+            tree = etree.HTML(requests.get(p).text)
             t1 = time.time()
             for script in tree.findall('.//*[@class="thumb"]/a'):
                 img_link = script.get('href')
@@ -67,7 +67,7 @@ class WallbaseCollection(BasePlugin):
                     print 'Error contacting wallbase (%s):' % url
                     print e
                     continue
-                tree = etree.HTML(resp.read())
+                tree = etree.HTML(resp.text)
                 js = tree.find('.//*[@id="bigwall"]/script').text
                 pat = re.compile(r'src="\'\+B\(\'[a-zA-Z0-9=\+\\]+\'\)\+\'"')
                 match = re.search(pat, js)

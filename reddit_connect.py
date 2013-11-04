@@ -38,7 +38,7 @@ class RedditConnect():
         except requests.HTTPError, e:
             print 'Error contacting reddit:'
             raise e
-        json_str = resp.read()
+        json_str = resp.text
         json_resp = json.loads(json_str)
         self.cookies = resp.cookies['set-cookie']
         print 'Logged in as %s\n' % self.username
@@ -59,7 +59,7 @@ class RedditConnect():
         except requests.HTTPError, e:
             print 'Error in basic request (%s): %s\n' % (url, e)
             return
-        return resp.read()
+        return resp.text
 
     def get_sub(self, sub_name):
         """

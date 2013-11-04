@@ -32,7 +32,7 @@ class FlickrSingle(BasePlugin):
             print 'Error reaching Flickr (%s)' % url
             print e
             return
-        page = resp.read()
+        page = resp.text
         find_qualities = re.compile(r'Y.photo.init\((.+)\)', re.MULTILINE)
         match = re.search(find_qualities, page)
         #some ugly de-jsification hackery here
