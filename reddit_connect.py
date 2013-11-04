@@ -40,7 +40,7 @@ class RedditConnect():
             raise e
         json_str = resp.text
         json_resp = json.loads(json_str)
-        self.cookies = resp.cookies['set-cookie']
+        self.cookies = dict(resp.cookies['set-cookie'])
         print 'Logged in as %s\n' % self.username
         return json_resp
 

@@ -346,8 +346,8 @@ class ImageGetter():
                 f.close()
                 try:
                     Image.open(img_path)
-                except IOError, e:
-                    self.handle_exception(e, candidate)
+                except IOError, err:
+                    self.handle_exception(err, candidate)
                     os.remove(img_path)
                 unique_img_hashes.append(md5)
                 self.add_to_main_db_table(candidate, md5)
