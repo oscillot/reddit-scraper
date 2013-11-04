@@ -1,5 +1,4 @@
-import urllib
-import urllib2
+import requests
 import json
 
 
@@ -16,6 +15,10 @@ class RedditConnect():
     def __init__(self, username, password):
         self.username = username
         self.password = password
+        self.headers = {'User-agent': 'Downloader for /user/%s\'s upvoted '
+                                      'images in specified subreddits by '
+                                      '/user/oscillot' % self.username}
+        self.cookies = None
 
     def login(self):
         """
@@ -25,28 +28,19 @@ class RedditConnect():
         would have to break them anyway!
         """
         print 'Logging in...'
-        data = urllib.urlencode(
-            {'user': self.username,
-             'passwd': self.password,
-             'rem': 'True'})
-        opener = urllib2.build_opener()
-        opener.addheaders = []  # remove the default python user-agent
-        opener.addheaders.append(('User-agent', 'Downloader for /user/%s\'s '
-                                                'upvoted images in specified '
-                                                'subreddits by '
-                                                '/user/oscillot' % self.username))
-        urllib2.install_opener(opener)
+        data = {'user': self.username,
+                'passwd': self.password,
+                'rem': 'True'}
+
         try:
-            resp = urllib2.urlopen('https://ssl.reddit.com/api/login/%s?' %
-                                   self.username, data)
-        except urllib2.HTTPError, e:
+            resp = requests.post('https://ssl.reddit.com/api/login/%s?' %
+                                 self.username, data, headers=self.headers)
+        except requests.HTTPError, e:
             print 'Error contacting reddit:'
             raise e
         json_str = resp.read()
         json_resp = json.loads(json_str)
-        self.cookie = resp.headers.get('set-cookie')
-        opener.addheaders.append(('Cookie', self.cookie))
-        urllib2.install_opener(opener)
+        self.cookies = resp.cookies['set-cookie']
         print 'Logged in as %s\n' % self.username
         return json_resp
 
@@ -60,8 +54,9 @@ class RedditConnect():
         :returns str: the read response
         """
         try:
-            resp = urllib2.urlopen(url)
-        except urllib2.HTTPError, e:
+            resp = requests.get(url, headers=self.headers,
+                                cookies=self.cookies)
+        except requests.HTTPError, e:
             print 'Error in basic request (%s): %s\n' % (url, e)
             return
         return resp.read()

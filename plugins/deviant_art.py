@@ -3,8 +3,7 @@
 
 #works as of 09-30-13
 
-import urllib
-import urllib2
+import requests
 from lxml import etree
 from base_plugin import BasePlugin
 
@@ -36,8 +35,8 @@ class DeviantArt(BasePlugin):
         """
 
         try:
-            resp = urllib.urlopen(url)
-        except urllib2.HTTPError, e:
+            resp = requests.get(url)
+        except requests.HTTPError, e:
             print 'Error reaching deviantart (%s):' % url
             print e
             return
@@ -63,3 +62,4 @@ class DeviantArt(BasePlugin):
         dl = tree.find('.//*/meta[@name="og:image"]')
         if dl is not None:
             return dl.attrib['content']
+

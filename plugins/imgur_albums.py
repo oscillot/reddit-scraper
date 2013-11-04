@@ -2,8 +2,7 @@
 
 #works as of 02-23-13
 
-import urllib
-import urllib2
+import requests
 from lxml import etree
 from base_plugin import BasePlugin
 
@@ -34,8 +33,8 @@ class ImgurAlbum(BasePlugin):
         :rtype list: a list of urls that is are direct links to images
         """
         try:
-            resp = urllib.urlopen(url)
-        except urllib2.HTTPError, e:
+            resp = requests.get(url)
+        except requests.HTTPError, e:
             print 'Error contacting imgur (%s):' % url
             print e
             return []

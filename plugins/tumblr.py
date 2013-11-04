@@ -1,8 +1,7 @@
 #worked for 1 link 3/10/13 - still experimental
 
 from base_plugin import BasePlugin
-import urllib
-import urllib2
+import requests
 from lxml import etree
 
 class Tumblr(BasePlugin):
@@ -21,8 +20,8 @@ class Tumblr(BasePlugin):
 
     def get_tumblr_imgs(self, url):
         try:
-            resp = urllib.urlopen(url)
-        except urllib2.HTTPError, e:
+            resp = requests.get(url)
+        except requests.HTTPError, e:
             print 'Error contacting tumblr (%s):' % url
             print e
             return []
@@ -34,8 +33,8 @@ class Tumblr(BasePlugin):
             src = iframe.attrib['src']
 
             try:
-                resp = urllib.urlopen(src)
-            except urllib2.HTTPError, e:
+                resp = requests.get(src)
+            except requests.HTTPError, e:
                 print 'Error contacting tumblr (%s):' % url
                 print e
                 return []

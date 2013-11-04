@@ -2,8 +2,7 @@
 
 #works as of 02-23-13
 
-import urllib
-import urllib2
+import requests
 from lxml import etree
 import re
 import base64
@@ -37,8 +36,8 @@ class WallbaseCollection(BasePlugin):
         :rtype str: a url that is a direct link to an image
         """
         try:
-            resp = urllib.urlopen(url)
-        except urllib2.HTTPError, e:
+            resp = requests.get(url)
+        except requests.HTTPError, e:
             print 'Error contacting wallbase (%s):' % url
             print e
             return []
@@ -56,15 +55,15 @@ class WallbaseCollection(BasePlugin):
         urls = []
         for i, p in enumerate(pages):
             thumb_links = []
-            tree = etree.HTML(urllib.urlopen(p).read())
+            tree = etree.HTML(requests.get(p).read())
             t1 = time.time()
             for script in tree.findall('.//*[@class="thumb"]/a'):
                 img_link = script.get('href')
                 thumb_links.append(img_link)
             for link in thumb_links:
                 try:
-                    resp = urllib.urlopen(link)
-                except urllib2.HTTPError, e:
+                    resp = requests.get(link)
+                except requests.HTTPError, e:
                     print 'Error contacting wallbase (%s):' % url
                     print e
                     continue

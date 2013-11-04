@@ -1,7 +1,6 @@
 #works as of 08-13-13
 import re
-import urllib
-import urllib2
+import requests
 
 from base_plugin import BasePlugin
 
@@ -28,8 +27,8 @@ class FlickrSingle(BasePlugin):
 
     def get_best_quality(self, url):
         try:
-            resp = urllib.urlopen(url)
-        except urllib2.HTTPError, e:
+            resp = requests.get(url)
+        except requests.HTTPError, e:
             print 'Error reaching Flickr (%s)' % url
             print e
             return

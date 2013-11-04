@@ -1,8 +1,6 @@
-import sys
 import os
 import gzip
-import urllib
-import urllib2
+import requests
 from StringIO import StringIO
 import hashlib
 from sqlalchemy import *
@@ -156,8 +154,9 @@ class ImageGetter():
         redirects_found = False
         for link in self.unhandled:
             print 'Checking: %s' % link['data']['url']
-            resp = urllib.urlopen(link['data']['url'])
-            redirected = resp.geturl()
+            #resp = urllib.urlopen(link['data']['url'])
+            resp = requests.get(link['data']['url'])
+            redirected = resp.url
             if redirected != link['data']['url']:
                 redirects_found = True
                 print '%s redirects to: %s' % (link['data']['url'], redirected)
@@ -319,9 +318,9 @@ class ImageGetter():
                 print candidate[key].encode('ascii', 'replace')
             print '\n'
             try:
-                resp = urllib.urlopen(candidate['url'])
-            except urllib2.HTTPError, e:
-                self.handle_exception(e, candidate)
+                resp = requests.get(candidate['url'])
+            except requests.HTTPError, err:
+                self.handle_exception(err, candidate)
                 continue
 
             if resp.headers.get('content-type') not in IMAGE_HEADERS:

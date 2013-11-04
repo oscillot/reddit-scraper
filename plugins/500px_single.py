@@ -3,8 +3,7 @@
 
 #works as of 02-23-13
 
-import urllib
-import urllib2
+import requests
 from lxml import etree
 from base_plugin import BasePlugin
 
@@ -31,8 +30,8 @@ class Get500pxSingle(BasePlugin):
         :rtype str: a url that is a direct link to an image
         """
         try:
-            resp = urllib.urlopen(url)
-        except urllib2.HTTPError, e:
+            resp = requests.get(url)
+        except requests.HTTPError, e:
             print 'Error contacting imgur (%s):' % url
             print e
             return []
