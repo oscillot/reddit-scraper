@@ -155,6 +155,7 @@ class ImageGetter():
         """
         redirects_found = False
         for link in self.unhandled:
+            print 'Checking: %s' % link['data']['url']
             resp = urllib.urlopen(link['data']['url'])
             redirected = resp.geturl()
             if redirected != link['data']['url']:
