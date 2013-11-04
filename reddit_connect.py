@@ -54,8 +54,7 @@ class RedditConnect():
         :returns str: the read response
         """
         try:
-            resp = requests.get(url, headers=self.headers,
-                                cookies=self.cookies)
+            resp = requests.get(url, headers=self.headers)
         except requests.HTTPError, e:
             print 'Error in basic request (%s): %s\n' % (url, e)
             return
