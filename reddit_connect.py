@@ -18,7 +18,7 @@ class RedditConnect():
         self.headers = {'User-agent': 'Downloader for /user/%s\'s upvoted '
                                       'images in specified subreddits by '
                                       '/user/oscillot' % self.username}
-        self.cookies = None
+        self.cookie = None
 
     def login(self):
         """
@@ -40,7 +40,8 @@ class RedditConnect():
             raise e
         json_str = resp.text
         json_resp = json.loads(json_str)
-        self.cookies = dict(resp.cookies['set-cookie'])
+        self.cookie = resp.cookies['set-cookie']
+        print self.cookie
         print 'Logged in as %s\n' % self.username
         return json_resp
 
@@ -54,7 +55,8 @@ class RedditConnect():
         :returns str: the read response
         """
         try:
-            resp = requests.get(url, headers=self.headers)
+            resp = requests.get(url, headers=self.headers,
+                                cookies=self.cookie)
         except requests.HTTPError, e:
             print 'Error in basic request (%s): %s\n' % (url, e)
             return
