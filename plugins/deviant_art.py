@@ -63,3 +63,4 @@ class DeviantArt(BasePlugin):
         if dl is not None:
             return dl.attrib['content']
 
+

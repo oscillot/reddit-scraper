@@ -7,8 +7,7 @@ setup(
     install_requires=['pillow>=1.7.8',
                       'lxml>=3.0.2',
                       'sqlalchemy>=0.8.0b2',
-                      'requests>=2.0.0',
-                      'spynner>=2.15'
+                      'requests>=2.0.0'
     ],
     url='https://github.com/oscillot/reddit-scraper',
     license='GPL2',
