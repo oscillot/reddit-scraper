@@ -13,5 +13,6 @@ setup(
     license='GPL2',
     author='Oscillot',
     author_email='oscillot@trioptimum.com',
-    description='Automatically download upvoted wallpapers using cron or jenkins'
+    description='Automatically download upvoted wallpapers using cron or '
+                'jenkins'
 )

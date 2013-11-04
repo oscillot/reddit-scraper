@@ -2,6 +2,9 @@
 # deviant art
 
 #works as of 09-30-13
+#11-4-13 There is a "bug" (more of a timing issue) when processing large jobs
+# where your token/ts pair will have expired before the ImageGetter can
+# handle them, refactor to address this scenario is imminent -oscillot
 
 import requests
 from lxml import etree
