@@ -5,6 +5,7 @@ from base_plugin import *
 #Load an arbitrary number of arbitrarily named plugins from the plugins folder
 
 plugin_list = []
+#what the fuck is good and loaded and why are they different??
 good_plugins = []
 loaded_plugins = []
 failed_plugins = []
@@ -25,12 +26,12 @@ for plugin in plugin_list:
                 cls = getattr(loaded, attr)
                 if issubclass(cls, BasePlugin) and cls.__name__ != 'BasePlugin':
                     good_plugins.append(cls.__name__)
-                    loaded_plugins.append(loaded)
+                    loaded_plugins.append(cls)
             except TypeError:
                 pass
     except ImportError, e:
-        print '%s failed to load: %s\n' % (plugin, e)
-        failed_plugins.append(plugin)
+        print '%s failed to load: %s\n' % (cls.__name__, e)
+        failed_plugins.append(cls)
 
 sys.path.remove(plugins_folder)
 

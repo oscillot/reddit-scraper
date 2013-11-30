@@ -8,18 +8,17 @@ class FlickrSingle(BasePlugin):
     def execute(self, candidate):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
-        :param dict candidate: data from a reddit post json
+        :param Download candidate: data from a reddit post json
         """
-        if 'www.flickr.com/photos/' in candidate['data']['url']:
+        if 'www.flickr.com/photos/' in candidate.url:
             #This just throws us back in case the link we have is for a
             # pre-selected size, so we can choose high quality like normal
-            if '/sizes/' in candidate['data']['url']:
-                candidate['data']['url'] = candidate['data']['url'].split(
-                    '/sizes/')[0]
-            flickr_img_url = self.get_best_quality(candidate['data']['url'])
+            if '/sizes/' in candidate.url:
+                candidate.url = candidate.url.split('/sizes/')[0]
+            flickr_img_url = self.get_best_quality(candidate.url)
             if flickr_img_url is not None:
-                self.current = Download(candidate['data']['title'],
-                                        candidate['data']['subreddit'],
+                self.current = Download(candidate.title,
+                                        candidate.subreddit,
                                         flickr_img_url)
 
     def get_best_quality(self, url):

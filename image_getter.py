@@ -1,6 +1,6 @@
 import os
 
-from plugins import *
+from plugins import loaded_plugins
 
 
 class ImageGetter():
@@ -30,7 +30,6 @@ class ImageGetter():
         self.output = output
         self.handled = []
         self.unhandled = []
-        self.exceptions = []
 
     def hand_off_to_plugins(self):
         """Call each plugin module and hand the list of unhandled links off to
@@ -39,22 +38,32 @@ class ImageGetter():
         a dictionary with the following keys: 'url', 'subreddit', 'title'
 
         """
-
+        self.candidates_backup = set()
         for plugin in loaded_plugins:
             print 'Loading plugin: %s.' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output)
-            handled = plug_inst.handled
-            self.handled.extend(handled)
-            self.exceptions.extend(plug_inst.exceptions)
-            self.unhandled.extend(plug_inst.unavailable)
+            self.handled.extend(plug_inst.handled)
             print 'Plugin handled the following links:'
-            if len(handled) > 0:
-                for h in handled:
-                    print h['data']['url']
+            if len(plug_inst.handled) > 0:
+                for h in plug_inst.handled:
+                    print h.url
                 print '\n'
             else:
                 print 'None\n'
+            #trim down the candidates from what got parsed
+            self.candidates = plug_inst.revised
+            #the last instance of these should be fine
+            self.already_handled = plug_inst.already_handled
+            self.already_dled = plug_inst.already_dled
+            self.candidates_backup.update(plug_inst.candidates_backup)
 
+    def check_unhandled_links(self):
+        for original in self.candidates_backup:
+            if original in self.handled or original in self.already_dled or \
+                    original in self.already_handled:
+                continue
+            else:
+                self.unhandled.append(original)
 
     def acquire(self):
         """
@@ -79,19 +88,13 @@ class ImageGetter():
         self.hand_off_to_plugins()
 
         print 'The following posts had links that were unhandled:'
+        self.check_unhandled_links()
         if len(self.unhandled) > 0:
             for uh in self.unhandled:
-                print uh['data']['url']
-                print '\n'
+                print uh.url
+            print '\n'
         else:
-            print 'None'
-
-        print 'The following links caused plugin exceptions:'
-        if len(self.exceptions) > 0:
-            for link, ex, plugin in self.exceptions:
-                print '%s: %s - %s' % (plugin, link['data']['url'], ex)
-        else:
-            print 'None'
+            print 'None\n'
 
         print '\nComplete. %d new images were acquired this run.' \
               % len(self.handled)

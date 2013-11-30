@@ -31,10 +31,6 @@ class BasePlugin():
         self.to_acquire = []
         self.handled = []
         self.unhandled = []
-        self.exceptions = []
-        self.unavailable = []
-        self.unique_img_hashes = self.get_previous_md5s()
-        self.__execute()
         self.db = os.path.join(os.getcwd(), '%s_downloaded.db' % database)
         self.engine = create_engine('sqlite:///%s' % self.db)
         metadata = MetaData(self.engine)
@@ -43,25 +39,29 @@ class BasePlugin():
                                 Column('title', String),
                                 Column('url', String),
                                 Column('filename', String),
-                                Column('md5', String, primary_key=True)
-        )
+                                Column('md5', String, primary_key=True))
         self.retrieved = Table('retrieved', metadata,
                                Column('image_url', String,
                                       primary_key=True))
-        self.errors = Table('errors', metadata,
-                            Column('image_url', String,
-                                   primary_key=True),
-                            Column('attempts', Integer))
         #Create the DB tables if not there
         metadata.create_all()
+        self.unique_img_hashes = self.get_previous_md5s()
+        self.enforcer()
 
-    def __execute(self):
+    def enforcer(self):
         """
         This hidden executor handles iterating through the list of links and
         catching any unexpected exceptions thrown by the plugin gracefully,
         reporting the plugin, link and exception for output at the end of the
          run
         """
+        self.convert_candidates()
+        ##WHY ARE THERE TWO OF THESE YOU MORON??
+        #create self.already_dled
+        self.check_db_for_already_dled()
+        #create self.already_handled
+        self.check_db_for_already_handled()
+        self.early_prune()
         total = len(self.candidates)
         for i, candidate in enumerate(self.candidates):
             #reset the Download object to None on each iteration of the loop
@@ -70,17 +70,17 @@ class BasePlugin():
                 #this creates a Download object at self.current (or loops
                 # around)
                 self.execute(candidate)
+                #iterate when the plugin returns None
+                if not self.current:
+                    print 'Skipping #%d/%d: ' \
+                          '%s was not handled by %s\n' % \
+                          (i + 1, total, candidate.url,
+                           self.__class__.__name__)
+                    continue
             except Exception, e:
-                #Log the Exceptions here
-                e = traceback.format_exc()
-                self.exceptions.append((candidate, e, self.__class__.__name__))
+                print traceback.print_exc()
+                self.unhandled.append(candidate)
             else:
-                ##WHY ARE THERE TWO OF THESE YOU MORON??
-                #create self.already_dled
-                self.check_db_for_already_dled()
-                #create self.already_handled
-                self.check_db_for_already_handled()
-
                 if self.current.url not in self.already_handled:
                     ##WHY DO I DO THIS?
                     ###WTF DOUBLE NEGATIVE???
@@ -98,22 +98,21 @@ class BasePlugin():
                     continue
                 else:
                     #print data about the current acquisition
-                    print 'Aquiring #%d/%d: ' \
+                    print 'Acquiring #%d/%d: ' \
                           '%s \n' % \
-                          (i, total, self.current.filename)
-                    for attr in ['title', 'subreddit', 'url']:
-                        print getattr(self.current, attr).encode('ascii',
-                                                                 'replace')
-                    print '\n'
+                          (i + 1, total, self.current.filename)
+                    print self.current.title.encode('ascii', 'replace'),
+                    self.current.subreddit.encode('ascii', 'replace'),
+                    self.current.url.encode('ascii', 'replace'), \
+                    '\n'
 
                     try:
                         #snag the image! woot! that's what it all leads up to
                         # in the end!
                         self.resp = requests.get(self.current.url)
-                    except requests.HTTPError, err:
+                    except requests.HTTPError:
                         #or abject failure, you know, whichever...
-                        self.exceptions.append((self.current.__dict__, err,
-                                                self.__class__.__name__))
+                        self.unhandled.append(candidate)
                         continue
 
                     if not self.valid_image_header():
@@ -126,22 +125,21 @@ class BasePlugin():
                         self.save_img(new_img)
                         self.unique_img_hashes.append(self.current.md5)
                         self.add_to_main_db_table()
+                        self.revised.remove(candidate)
+                        self.handled.append(candidate)
 
-            #remove handled links here so each plugin doesn't have to do this
-            # itself
-            for h in self.handled:
-                self.candidates.remove(h)
-                if h in self.unhandled:
-                    self.unhandled.remove(h)
-            if len(self.candidates) > 0:
-                for c in self.candidates:
-                    #inform of any unhandled cases
-                    if c not in self.unhandled:
-                        self.unhandled.append(c)
-
-        for ex in self.exceptions:
-            if ex in self.unhandled:
-                self.unhandled.remove(ex)
+    def convert_candidates(self):
+        new_cands = []
+        for c in self.candidates:
+            if c.__class__.__name__ == 'Download':
+                new_cands.append(c)
+            else:
+                new_cands.append(Download(c['data']['title'],
+                                          c['data']['subreddit'],
+                                          c['data']['url']))
+        self.candidates = new_cands
+        self.candidates_backup = self.candidates
+        self.revised = self.candidates
 
     def save_img(self, data):
         img_path = os.path.join(self.output_dir, self.current.filename)
@@ -149,9 +147,8 @@ class BasePlugin():
             f.write(data)
         try:
             Image.open(img_path)
-        except IOError, err:
-            self.exceptions.append((err, self.current.__dict__,
-                                    self.__class__.__name__))
+        except IOError:
+            print traceback.print_exc()
             os.remove(img_path)
 
     def valid_image_header(self):
@@ -161,8 +158,7 @@ class BasePlugin():
             err = ValueError('Non-image header \"%s\" was found at the link: '
                              '%s' % (self.resp.headers.get('content-type'),
                                      self.current.url))
-            self.exceptions.append((self.current.__dict__, err,
-                                    self.__class__.__name__))
+            print err
             return False
         else:
             return True
@@ -191,8 +187,8 @@ class BasePlugin():
         """
         conn = self.engine.connect()
         retrieved_select = sql.select([self.retrieved])
-        self.already_handled = [a[0] for a in conn.execute(retrieved_select)
-        .fetchall()]
+        self.already_handled = DownloadList([a[0] for a in conn.execute(
+                                            retrieved_select).fetchall()])
 
     def check_db_for_already_dled(self):
         """
@@ -200,8 +196,8 @@ class BasePlugin():
         """
         conn = self.engine.connect()
         handled_select = sql.select([self.wallpapers])
-        self.already_dled = [a[2] for a in conn.execute(handled_select)
-                             .fetchall()]
+        self.already_dled = DownloadList([a[2] for a in conn.execute(
+                                         handled_select).fetchall()])
 
     def add_to_previous_aquisitions(self):
         """
@@ -210,8 +206,8 @@ class BasePlugin():
         #prevent hash collision in the table
         uniques = set()
         for h in self.handled:
-            if h['data']['url'] not in self.already_handled:
-                uniques.add(h['data']['url'])
+            if h.url not in self.already_handled:
+                uniques.add(h.url)
         for u in uniques:
             conn = self.engine.connect()
             retrieved_ins = sql.insert(table=self.retrieved,
@@ -228,6 +224,16 @@ class BasePlugin():
         wall_ins = self.wallpapers.insert(wall_data)
         conn.execute(wall_ins)
 
+    def early_prune(self):
+        for already in self.already_dled.downloads:
+            if already in self.candidates:
+                self.candidates.remove(already)
+                continue
+        for handled in self.already_handled.downloads:
+            if handled in self.candidates:
+                self.candidates.remove(handled)
+                continue
+
 
 class Download(object):
     def __init__(self, title, subreddit, url):
@@ -236,6 +242,21 @@ class Download(object):
         self.url = url
         self.filename = self.name_from_url()
         self.md5 = None
-        
+
     def name_from_url(self):
         return self.url.split('/')[-1].replace(' ', '_')
+
+
+class DownloadList(object):
+    def __init__(self, downloads):
+        self.downloads = downloads
+
+    def __contains__(self, item):
+        for dl in self.downloads:
+            if dl.title == item.title and \
+                dl.subreddit == item.subreddit and \
+                    dl.url == item.url:
+                        return dl
+
+    def append(self, item):
+        self.downloads.append(item)

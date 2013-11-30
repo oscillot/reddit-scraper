@@ -12,29 +12,24 @@ class ImgurSingleIndirect(BasePlugin):
     def execute(self, candidate):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
-        :param dict candidate: data from a reddit post json
+        :param Download candidate: data from a reddit post json
         """
         #prevent this plugin from handling links such as the following:
         #http://i.imgur.com/nbsQ4SF.jpg#.UTtRkqYGmy0.reddit
-        if (candidate['data']['url'].lower().startswith(
-                'http://imgur.com/')
-            and not candidate['data']['url'].split(
-            '#')[0].lower().startswith(
-            'http://imgur.com/a/')
-            and not candidate['data']['url'].lower()[-4:] in
+        if (candidate.url.lower().startswith('http://imgur.com/')
+            and not candidate.url.split('#')[0].lower().startswith(
+            'http://imgur.com/a/') and not candidate.url.lower()[-4:] in
                 ['.jpg', '.bmp', '.png', '.gif']) or \
-                (candidate['data']['url'].lower().startswith(
-                'http://i.imgur.com/') and not
-                candidate['data']['url'].lower()[-4:] in
-                ['.jpg', '.bmp', '.png', '.gif']):
-            img_url = self.get_imgur_single(candidate['data']['url'])
+                (candidate.url.lower().startswith('http://i.imgur.com/') and not
+                candidate.url.lower()[-4:] in ['.jpg', '.bmp', '.png', '.gif']):
+            img_url = self.get_imgur_single(candidate.url)
             #This handles the links that come down with extensions like
             # `jpg?1` that have been showing up lately. Regular links
             # should be unaffected by this. This is done here so that the
             #  list of handled links is still accurate.
             if img_url is not None:
-                self.current = Download(candidate['data']['title'],
-                                        candidate['data']['subreddit'],
+                self.current = Download(candidate.title,
+                                        candidate.subreddit,
                                         img_url)
 
     def get_imgur_single(self, url):

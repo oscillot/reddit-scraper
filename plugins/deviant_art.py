@@ -9,17 +9,16 @@ class DeviantArt(BasePlugin):
     def execute(self, candidate):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
-        :param dict candidate: data from a reddit post json
+        :param Download candidate: data from a reddit post json
         """
-        if 'deviantart.com' in candidate['data']['url'].lower():
-            deviant_art_img_url = self.get_deviant_art_image(candidate['data'][
-                'url'])
+        if 'deviantart.com' in candidate.url.lower():
+            deviant_art_img_url = self.get_deviant_art_image(candidate.url)
             if deviant_art_img_url is not None:
                 if deviant_art_img_url == 'deviantART: 404 Not Found':
-                    self.unavailable.append(candidate)
+                    self.unhandled.append(candidate)
                     return
-                self.current = Download(candidate['data']['title'],
-                                        candidate['data']['subreddit'],
+                self.current = Download(candidate.title,
+                                        candidate.subreddit,
                                         deviant_art_img_url)
 
     def get_deviant_art_image(self, url):
