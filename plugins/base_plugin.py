@@ -137,7 +137,7 @@ class BasePlugin():
                 new_cands.append(Download(c['data']['title'],
                                           c['data']['subreddit'],
                                           c['data']['url']))
-        self.candidates = new_cands
+        self.candidates = CandidatesList(new_cands)
         self.candidates_backup = self.candidates
         self.revised = self.candidates
 
@@ -260,3 +260,26 @@ class DownloadList(object):
 
     def append(self, item):
         self.downloads.append(item)
+
+
+class CandidatesList(object):
+    def __init__(self, candidates):
+        self.candidates = candidates
+
+    def __contains__(self, item):
+        return item in self.candidates
+
+    def remove(self, item):
+        for c in self.candidates:
+            print '==='
+            print c.url
+            print item
+            if c.url == item:
+                return self.candidates.remove(c)
+
+    def __len__(self):
+        return len(self.candidates)
+
+    def __iter__(self):
+        for c in self.candidates:
+            yield c
