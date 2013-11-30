@@ -1,11 +1,8 @@
 #Handles getting a single imgur image that isn't a direct link but rather a
 # link to its imgur page
-
-#works as of 02-23-13
-
 import requests
 from lxml import etree
-from base_plugin import BasePlugin
+from plugins.base_plugin import *
 
 
 class Get500pxSingle(BasePlugin):
@@ -14,14 +11,12 @@ class Get500pxSingle(BasePlugin):
         operate to handle links.
         :param dict candidate: data from a reddit post json
         """
-        if candidate['data']['url'].lower().startswith('http://500px'
-                                                       '.com/photo/'):
-            img = self.get_500px_img(candidate['data']['url'])
-            self.to_acquire.append({'url': img,
-                                    'subreddit': candidate['data'][
-                                    'subreddit'],
-                                    'title': candidate['data']['title']})
-            self.handled.append(candidate)
+        if candidate['data']['url'].lower().startswith(
+                'http://500px.com/photo/'):
+            img_url = self.get_500px_img(candidate['data']['url'])
+            self.current = Download(candidate['data']['title'],
+                                    candidate['data']['subreddit'],
+                                    img_url)
 
     def get_500px_img(self, url):
         """Helper for the 500px execute function

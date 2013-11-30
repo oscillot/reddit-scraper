@@ -1,8 +1,7 @@
-#works as of 08-13-13
 import re
 import requests
 
-from base_plugin import BasePlugin
+from plugins.base_plugin import *
 
 
 class FlickrSingle(BasePlugin):
@@ -17,13 +16,11 @@ class FlickrSingle(BasePlugin):
             if '/sizes/' in candidate['data']['url']:
                 candidate['data']['url'] = candidate['data']['url'].split(
                     '/sizes/')[0]
-            flickr_img = self.get_best_quality(candidate['data']['url'])
-            if flickr_img is not None:
-                self.to_acquire.append({'url': flickr_img,
-                                        'subreddit': candidate['data'][
-                                            'subreddit'],
-                                        'title': candidate['data']['title']})
-                self.handled.append(candidate)
+            flickr_img_url = self.get_best_quality(candidate['data']['url'])
+            if flickr_img_url is not None:
+                self.current = Download(candidate['data']['title'],
+                                        candidate['data']['subreddit'],
+                                        flickr_img_url)
 
     def get_best_quality(self, url):
         try:

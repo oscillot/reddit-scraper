@@ -12,7 +12,7 @@ attributes for links to_acquire, links handled and exceptions. The to_acquire
 
 Finally, the constructor will call the __execute function which wraps the
 overriddable execute method in a generic exception handler that will catch
-any exception not explicitly caught y the plugin to keep plugins from
+any exception not explicitly caught by the plugin to keep plugins from
 stopping the job. Exceptions are logged as a 3-tuple in the with the plugin,
 data and exception and are displayed in the console at the end of the run.
 

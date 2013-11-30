@@ -2,12 +2,14 @@
 
 #works as of 02-23-13
 
-import requests
-from lxml import etree
 import re
 import base64
 import time
-from base_plugin import BasePlugin
+
+import requests
+from lxml import etree
+
+from plugins.base_plugin import *
 
 
 class WallbaseCollection(BasePlugin):
@@ -20,12 +22,10 @@ class WallbaseCollection(BasePlugin):
                                                        '.cc/user/collection/'):
             collection_imgs = self.get_wallbase_collection(candidate['data'][
                 'url'])
-            for img in collection_imgs:
-                self.to_acquire.append({'url': img,
-                                        'subreddit': candidate['data'][
-                                            'subreddit'],
-                                        'title': candidate['data']['title']})
-            self.handled.append(candidate)
+            for img_url in collection_imgs:
+                self.current = Download(candidate['data']['title'],
+                                        candidate['data']['subreddit'],
+                                        img_url)
 
     def get_wallbase_collection(self, url):
         """Helper for the wallbase collection function. This will try to

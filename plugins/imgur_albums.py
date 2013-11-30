@@ -1,10 +1,7 @@
 #Handles getting all of the images from an album linked to on imgur
-
-#works as of 02-23-13
-
 import requests
 from lxml import etree
-from base_plugin import BasePlugin
+from plugins.base_plugin import *
 
 
 class ImgurAlbum(BasePlugin):
@@ -20,11 +17,10 @@ class ImgurAlbum(BasePlugin):
                 # `jpg?1` that have been showing up lately. Regular links
                 # should be unaffected by this. This is done here so that the
                 #  list of handled links is still accurate.
-                self.to_acquire.append({'url': album_img.split('?')[0],
-                                       'subreddit': candidate['data'][
-                                           'subreddit'],
-                                       'title': candidate['data']['title']})
-            self.handled.append(candidate)
+                album_img_url = album_img.split('?')[0]
+                self.current = Download(candidate['data']['title'],
+                                        candidate['data']['subreddit'],
+                                        album_img_url)
 
     def get_imgur_album(self, url):
         """Helper for the imgur album execute function

@@ -1,8 +1,8 @@
-#worked for 1 link 3/10/13 - still experimental
-
-from base_plugin import BasePlugin
 import requests
 from lxml import etree
+
+from plugins.base_plugin import *
+
 
 class Tumblr(BasePlugin):
     def execute(self, candidate):
@@ -11,12 +11,11 @@ class Tumblr(BasePlugin):
         :param dict candidate: data from a reddit post json
         """
         if 'tumblr.com' in candidate['data']['url'].lower():
-            imgs = self.get_tumblr_imgs(candidate['data']['url'])
-            for img in imgs:
-                self.to_acquire.append({'url': img,
-                    'subreddit': candidate['data']['subreddit'],
-                    'title': candidate['data']['title']})
-            self.handled.append(candidate)
+            img_urls = self.get_tumblr_imgs(candidate['data']['url'])
+            for img_url in img_urls:
+                self.current = Download(candidate['data']['title'],
+                                        candidate['data']['subreddit'],
+                                        img_url)
 
     def get_tumblr_imgs(self, url):
         try:

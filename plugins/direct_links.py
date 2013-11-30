@@ -1,5 +1,4 @@
-#works as of 03-10-13
-from base_plugin import BasePlugin
+from plugins.base_plugin import *
 
 
 class DirectLinks(BasePlugin):
@@ -17,9 +16,7 @@ class DirectLinks(BasePlugin):
         for img_type in ['.jpg', '.jpeg', '.gif', '.bmp', '.png']:
             if candidate['data']['url'].lower().rsplit('?')[0].endswith(
                     img_type):
-                self.to_acquire.append({'url': candidate['data']['url']
-                    .rsplit('?')[0],
-                    'subreddit': candidate['data']['subreddit'],
-                    'title': candidate['data']['title']})
-                self.handled.append(candidate)
+                self.current = Download(candidate['data']['title'],
+                                        candidate['data']['subreddit'],
+                                        candidate['data']['url'].rsplit('?')[0])
                 break

@@ -1,14 +1,8 @@
 #Handles getting the image url from the download button of a single image on
 # deviant art
-
-#works as of 09-30-13
-#11-4-13 There is a "bug" (more of a timing issue) when processing large jobs
-# where your token/ts pair will have expired before the ImageGetter can
-# handle them, refactor to address this scenario is imminent -oscillot
-
 import requests
 from lxml import etree
-from base_plugin import BasePlugin
+from plugins.base_plugin import *
 
 
 class DeviantArt(BasePlugin):
@@ -18,17 +12,15 @@ class DeviantArt(BasePlugin):
         :param dict candidate: data from a reddit post json
         """
         if 'deviantart.com' in candidate['data']['url'].lower():
-            deviant_art_img = self.get_deviant_art_image(candidate['data'][
+            deviant_art_img_url = self.get_deviant_art_image(candidate['data'][
                 'url'])
-            if deviant_art_img is not None:
-                if deviant_art_img == 'deviantART: 404 Not Found':
+            if deviant_art_img_url is not None:
+                if deviant_art_img_url == 'deviantART: 404 Not Found':
                     self.unavailable.append(candidate)
                     return
-                self.to_acquire.append({'url': deviant_art_img,
-                                        'subreddit': candidate['data'][
-                                            'subreddit'],
-                                        'title': candidate['data']['title']})
-                self.handled.append(candidate)
+                self.current = Download(candidate['data']['title'],
+                                        candidate['data']['subreddit'],
+                                        deviant_art_img_url)
 
     def get_deviant_art_image(self, url):
         """Helper for the deviant art execute function
