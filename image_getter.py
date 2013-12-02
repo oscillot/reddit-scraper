@@ -7,29 +7,30 @@ from plugins import loaded_plugins
 def extract_domain(url):
     dom_pat = re.compile(r'^.*://(?:[wW]{3}\.)?([^:/]*).*$')
     domain = re.findall(dom_pat, url)[0]
+    #truncate username subdomains like for e.g. deviant art and useless ones
+    # like www
     if domain.count('.') > 1:
-        domain = '.'.join(domain.split('.')[-2:])
+        #but don't be overzealous and do this on sites that end in like .co.uk
+        if len(domain.split('.')[-2]) > 2:
+            domain = '.'.join(domain.split('.')[-2:])
+        else:
+            if domain.count('.') > 2 and len(domain.split('.')[-2]) > 2:
+                #alternate ruleset for e.g. .co.uk
+                domain = '.'.join(domain.split('.')[1:])
     return domain
 
 
-class ImageGetter():
+class PluginInterface():
     def __init__(self, database, candidates, output):
-        """The ImageGetter class handles all of the logic necessary to
-        translate data from reddit (in this case, a filtered list of upvoted
-        posts is input) and enumerates any that it can into listings of
-        direct links. The goal at the end is to have every possible upvoted
-        image link parsed into a direct link or links for retrieval. Then
-        links can be retrieved and a slew of metadata is tokenized into a
-        database that tracks which posts have already been acquired,
-        which links have already been acquired, and at its most granular
-        level, the md5 of every image already acquired. It tries to retrieve
-        as little as possible using this progressive keyspace reduction,
-        the worst case scenario being that it might retrieve the same image
-        from two disparate sources, but then chuck it right at the end
-        because of the MD5 check.
+        """
+        The PluginInterface takes care of reading the plugins, determining
+        which ones are valid, and iterating through them. It is a wrapper
+        around the plugins that makes sure that they are valid subclasses of
+        the BasePlugin class.
 
         :param str database: the prefix for the database filename.
-        :param list candidates: a list of dictionaries converted from the json
+        :param list candidates: a list of candidate json objects from the
+        `class` RedditConnect class
         :param str output: the location on disk to store your images (note
         that this can be changed and the database data will handle all
         duplicate filtering
@@ -37,15 +38,12 @@ class ImageGetter():
         self.database = database
         self.candidates = candidates
         self.output = output
+        #set up some class variables
         self.handled = []
         self.unhandled = []
 
     def hand_off_to_plugins(self):
-        """Call each plugin module and hand the list of unhandled links off to
-        it. Plugin *must* return a list of the links that were successfully
-        handled AND a list of to_acquire where each member of that list is
-        a dictionary with the following keys: 'url', 'subreddit', 'title'
-
+        """Calls each plugin module and hand the CandidateList off to it.
         """
         self.candidates_backup = set()
         for plugin in loaded_plugins:
@@ -68,6 +66,11 @@ class ImageGetter():
             self.candidates_backup.update(plug_inst.candidates_backup)
 
     def check_unhandled_links(self):
+        """
+        Create a list of unhandled links along with domains for those
+        links which we output at the end to help target plugin
+        development/maintenance
+        """
         for original in self.candidates_backup:
             if original in self.handled or original in \
                     self.image_urls_already_fetched or \
@@ -102,6 +105,9 @@ class ImageGetter():
         print 'The following posts had links that were unhandled:'
         self.check_unhandled_links()
         if len(self.unhandled) > 0:
+            #iterating through these sorted puts them in alpha order by domain
+            #so you should be able to see which domains you want or need to
+            # target
             for uh in sorted(self.unhandled):
                 print uh[0], '\t', uh[1]
             print '\n'

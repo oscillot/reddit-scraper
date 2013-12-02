@@ -1,6 +1,6 @@
 import os
 from reddit_connect import RedditConnect
-from image_getter import ImageGetter
+from image_getter import PluginInterface
 
 #run this manually, through jenkins or as a cron job
 
@@ -25,7 +25,7 @@ my_subs = ['apocalypseporn', 'bigwallpapers', 'conceptart',
 candidates = rc.get_upvoted_wallpapers(my_subs, liked_data)
 #instaniate the image acquisition class with a daabase name,
 # list of candidates and set a location to save images to.
-ig = ImageGetter(database='db_name', candidates=candidates,
+ig = PluginInterface(database='db_name', candidates=candidates,
                  output=os.path.join('X:\\', 'location_to_save_to'))
 ig.acquire()
 

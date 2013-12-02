@@ -16,15 +16,17 @@ IMAGE_HEADERS = ['image/bmp',
 
 class BasePlugin():
     def __init__(self, database, candidates, output):
-        """Constructs the plugin calls and executes them, saving successes,
-        failures and links as class attributes
+        """The BasePlugin class actually does all of the work under the hood.
+        It creates the database, performs the database calls. Retrieves images
+        from content servers, does any error handling that plugins neglect to 
+        do and outputs it without bombing the whole job out.
 
-        :param list candidates: a list of dictionaries converted from the json
-        response given back by reddit.
-        :rtype list, list: a list of the dictionary data that was successfully
-        parsed by this plugin, a list of dictionaries with the url,
-        subreddit and title of the direct link for later acquisition and database
-         entry
+        :param str database: the prefix for the database filename.
+        :param list candidates: a list of candidate json objects from the
+        `class` RedditConnect class
+        :param str output: the location on disk to store your images (note
+        that this can be changed and the database data will handle all
+        duplicate filtering
         """
         self.candidates = candidates
         self.output_dir = output
@@ -50,10 +52,10 @@ class BasePlugin():
 
     def enforcer(self):
         """
-        This hidden executor handles iterating through the list of links and
-        catching any unexpected exceptions thrown by the plugin gracefully,
-        reporting the plugin, link and exception for output at the end of the
-         run
+        The enforcer is a hidden executor handles iterating through the list
+        of links and catching any unexpected exceptions thrown by the plugin
+        gracefully, reporting the plugin, link and exception for output at
+        the end of the run
         """
         #Convert candidates from the generic format provided by my eddit
         # connect class to something specific with only the necessary
@@ -131,6 +133,13 @@ class BasePlugin():
                         self.handled.append(candidate)
 
     def convert_candidates(self):
+        """
+        This converts the candidates list from the generic list of
+        dictionaries that came from the `class` RedditConnect json data into
+        the internal CandidateList data format which contains only the
+        necessary information and makes the code much easier to read and
+        understand
+        """
         new_cands = []
         for c in self.candidates:
             if c.__class__.__name__ == 'Download':
@@ -144,6 +153,10 @@ class BasePlugin():
         self.revised = self.candidates
 
     def save_img(self, data):
+        """
+        What it sounds like. Code responsible for saving off the image to the
+        filesystem and display any errors that might arise
+        """
         img_path = os.path.join(self.output_dir, self.current.filename)
         with open(img_path, 'wb') as f:
             f.write(data)
@@ -154,6 +167,12 @@ class BasePlugin():
             os.remove(img_path)
 
     def valid_image_header(self):
+        """
+        This checks the response header for the content type so we aren't
+        saving bunk data into a file and calling it an image. This happens a
+        lot especially with sites that try not to let you scrape them for
+        their high quality images, so it's an important check.
+        """
         if self.resp.headers.get('content-type') not in IMAGE_HEADERS:
             #or maybe we got very close, or an image got removed,
             # in any case MAKE SURE IT'S AN IMAGE!
@@ -161,6 +180,7 @@ class BasePlugin():
                              '%s' % (self.resp.headers.get('content-type'),
                                      self.current.url))
             print err
+            #print self.resp.content #DEBUG the content coming down
             return False
         else:
             return True
@@ -169,7 +189,8 @@ class BasePlugin():
         """
         To be overridden by subclasses. The subclassed versions of this
         method should be written to handle just one post link,
-        but can call other functions as needed.
+        but can call other functions as needed. See the plugin readme on how
+        this should be done.
         """
         raise NotImplementedError
 
@@ -184,9 +205,9 @@ class BasePlugin():
 
     def check_db_for_finished_post_urls(self):
         """
-        Returns the list of previous liked posts that successfully went all
-        the way through the scraper, this is needed for gallery posts that
-        may fail partway through a job to not get skipped on retry
+        Returns a `class` DownloadList of previous posts that successfully
+        went allthe way through the scraper, this is needed for gallery posts
+        that may fail partway through a job to not get skipped on retry
         """
         conn = self.engine.connect()
         finished_posts_select = sql.select([self.retrieved])
@@ -195,10 +216,10 @@ class BasePlugin():
 
     def check_db_for_finished_image_urls(self):
         """
-        Returns the list of urls that has successfully been downloaded. This
-        helps make sure that if a gallery post is picked up partway that we
-        don't re-attempt the first already fetched posts as well as for
-        skipping already fetched single image posts.
+        Returns a `class` DownloadList of urls that has successfully been
+        downloaded. This helps make sure that if a gallery post is picked up
+        partway that we don't re-attempt the first already fetched posts as
+        well as for skipping already fetched single image posts.
         """
         conn = self.engine.connect()
         finished_urls_select = sql.select([self.wallpapers])
@@ -231,6 +252,11 @@ class BasePlugin():
         conn.execute(wall_ins)
 
     def early_prune(self):
+        """
+        Remove anything from the new `class` CandidatesList that is found in
+        the database from the beginning, try to be as econmoical as possible
+        and avoid getting ip or other form of blacklisted at all costs
+        """
         for fetched in self.image_urls_already_fetched.downloads:
             if fetched in self.candidates:
                 self.candidates.remove(fetched)
@@ -242,6 +268,10 @@ class BasePlugin():
 
 
 class Download(object):
+    """
+    A convenience class, the datatype that comprises a `class` DownloadList
+    or a `class` CandidatesList
+    """
     def __init__(self, title, subreddit, url):
         self.title = title
         self.subreddit = subreddit
@@ -254,6 +284,11 @@ class Download(object):
 
 
 class DownloadList(object):
+    """
+    A list made up of `class` Download objects with a specific implementation
+    of __contains__ to make `keyword` in work properly. Used for lists of
+    already handled posts and anready fetched image urls
+    """
     def __init__(self, downloads):
         self.downloads = downloads
 
@@ -269,6 +304,11 @@ class DownloadList(object):
 
 
 class CandidatesList(object):
+    """
+    A list made up of `class` Download objects with a specific implementation
+    of __contains__ to make `keyword` in work properly. Used for list of
+    candidates returned from `class` RedditConnect
+    """
     def __init__(self, candidates):
         self.candidates = candidates
 
