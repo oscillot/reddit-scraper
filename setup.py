@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='reddit-scraper',
-    version='2.02',
+    version='2.03',
     packages=find_packages(),
     install_requires=['pillow>=1.7.8',
                       'lxml>=3.0.2',

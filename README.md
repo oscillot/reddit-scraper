@@ -24,15 +24,15 @@ CandidateList that has been passed to it. The current Download candidate
 object will be the one in the plugin at self.candidate.
 
 A Download object has 5 attributes, 4 of which are set on creation:
-    title     - this is taken from the reddit post
-    subreddit - this is also taken from the reddit post
-    url       - this is the url of the POST and not necessarily the IMAGE or
+* title     - this is taken from the reddit post
+* subreddit - this is also taken from the reddit post
+* url       - this is the url of the POST and not necessarily the IMAGE or
                 IMAGES that you want (this is why we are doing this!)
-    filename  - this is created automatically by a function that parses the
+* filename  - this is created automatically by a function that parses the
                 url. It does NOT matter if the post is for a multi-image
                 gallery because you will be making a new Download object for
                 each image in that gallery anyway
-    md5       - you set this once you have downloaded the image it's one of
+* md5       - you set this once you have downloaded the image it's one of
                 the last things you do but you still check it against the
                 database to avoid duplicate images
 
@@ -59,9 +59,12 @@ For example,for non direct imgur links, it looks like this (abridged):
             ...
             return urls
 
-If you have a gallery, it gets slightly more complicated. You cannot simply
-set the self.current object because you will only get the last object that
-you set it to.
+If you have a gallery, it isn't any more complicated. Just return an iterable
+and iterate through the list, setting the self.current object each time
+through the loop. self.current is a property that has a setter. If it is not
+set to None, the acquisition logic is triggered so you can set the object as
+few or as many times as you want from within execute and the logic to acquire
+ te image will still fire off each time you set the object.
 
     class ImgurAlbum(BasePlugin):
         def execute(self, candidate):
