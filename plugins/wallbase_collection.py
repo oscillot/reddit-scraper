@@ -6,7 +6,6 @@ import re
 import base64
 import time
 
-import requests
 from lxml import etree
 
 from plugins.base_plugin import *

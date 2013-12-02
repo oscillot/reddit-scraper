@@ -1,6 +1,3 @@
-#Handles getting a single imgur image that isn't a direct link but rather a
-# link to its imgur page
-import requests
 from lxml import etree
 from plugins.base_plugin import *
 

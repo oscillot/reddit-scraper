@@ -1,4 +1,3 @@
-import requests
 from lxml import etree
 
 from plugins.base_plugin import *

@@ -1,5 +1,4 @@
 import re
-import requests
 
 from plugins.base_plugin import *
 

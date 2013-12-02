@@ -1,5 +1,4 @@
 #Handles getting all of the images from an album linked to on imgur
-import requests
 from lxml import etree
 from plugins.base_plugin import *
 

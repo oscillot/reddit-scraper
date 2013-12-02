@@ -1,0 +1,61 @@
+class CandidatesList(object):
+    """
+    A list made up of `class` Download objects with a specific implementation
+    of __contains__ to make `keyword` in work properly. Used for list of
+    candidates returned from `class` RedditConnect
+    """
+    def __init__(self, candidates):
+        self.candidates = candidates
+
+    def __contains__(self, item):
+        for c in self.candidates:
+                if item == c.url:
+                    return item
+
+    def remove(self, item):
+        for c in self.candidates:
+            if c.url == item:
+                return self.candidates.remove(c)
+
+    def __len__(self):
+        return len(self.candidates)
+
+    def __iter__(self):
+        for c in self.candidates:
+            yield c
+
+
+class DownloadList(object):
+    """
+    A list made up of `class` Download objects with a specific implementation
+    of __contains__ to make `keyword` in work properly. Used for lists of
+    already handled posts and anready fetched image urls
+    """
+    def __init__(self, downloads):
+        self.downloads = downloads
+
+    def __contains__(self, item):
+        for dl in self.downloads:
+            if dl.title == item.title and \
+                dl.subreddit == item.subreddit and \
+                    dl.url == item.url:
+                        return dl
+
+    def append(self, item):
+        self.downloads.append(item)
+
+
+class Download(object):
+    """
+    A convenience class, the datatype that comprises a `class` DownloadList
+    or a `class` CandidatesList
+    """
+    def __init__(self, title, subreddit, url):
+        self.title = title
+        self.subreddit = subreddit
+        self.url = url
+        self.filename = self.name_from_url()
+        self.md5 = None
+
+    def name_from_url(self):
+        return self.url.split('/')[-1].replace(' ', '_')

@@ -3,7 +3,6 @@
 
 #works as of 09-30-13
 
-import requests
 from lxml import etree
 from plugins.base_plugin import *
 

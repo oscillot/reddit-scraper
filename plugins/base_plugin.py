@@ -6,6 +6,7 @@ from PIL import Image
 import requests
 from sqlalchemy import *
 import sqlalchemy.sql as sql
+from data_types import CandidatesList, DownloadList, Download
 
 IMAGE_HEADERS = ['image/bmp',
                  'image/png',
@@ -69,18 +70,18 @@ class BasePlugin(object):
         if self.current.url in self.posts_already_finished:
             #skip any posts that already have been done
             print '%s: Skipping post: %s - previously acquired' % \
-                  (self.__class__.__name__.upper(), self.current.url)
+                  (self.__class__.__name__, self.current.url)
         else:
             self.posts_already_finished.append(self.current.url)
 
         if self.current.url in self.image_urls_already_fetched:
             #skip any exact url matches from the db
             print '%s: Skipping url %s: already downloaded\n' % \
-                  (self.__class__.__name__.upper(), self.current.url)
+                  (self.__class__.__name__, self.current.url)
         else:
             #print data about the current acquisition
             print '%s: Attempting: %s \n' % \
-                  (self.__class__.__name__.upper(), self.current.url)
+                  (self.__class__.__name__, self.current.url)
             #CLUTTER CLUTTER CLUTTER
             #print self.current.title.encode('ascii', 'replace'),
             #self.current.subreddit.encode('ascii', 'replace'),
@@ -270,66 +271,3 @@ class BasePlugin(object):
             if finished in self.candidates:
                 self.candidates.remove(finished)
                 continue
-
-
-class Download(object):
-    """
-    A convenience class, the datatype that comprises a `class` DownloadList
-    or a `class` CandidatesList
-    """
-    def __init__(self, title, subreddit, url):
-        self.title = title
-        self.subreddit = subreddit
-        self.url = url
-        self.filename = self.name_from_url()
-        self.md5 = None
-
-    def name_from_url(self):
-        return self.url.split('/')[-1].replace(' ', '_')
-
-
-class DownloadList(object):
-    """
-    A list made up of `class` Download objects with a specific implementation
-    of __contains__ to make `keyword` in work properly. Used for lists of
-    already handled posts and anready fetched image urls
-    """
-    def __init__(self, downloads):
-        self.downloads = downloads
-
-    def __contains__(self, item):
-        for dl in self.downloads:
-            if dl.title == item.title and \
-                dl.subreddit == item.subreddit and \
-                    dl.url == item.url:
-                        return dl
-
-    def append(self, item):
-        self.downloads.append(item)
-
-
-class CandidatesList(object):
-    """
-    A list made up of `class` Download objects with a specific implementation
-    of __contains__ to make `keyword` in work properly. Used for list of
-    candidates returned from `class` RedditConnect
-    """
-    def __init__(self, candidates):
-        self.candidates = candidates
-
-    def __contains__(self, item):
-        for c in self.candidates:
-                if item == c.url:
-                    return item
-
-    def remove(self, item):
-        for c in self.candidates:
-            if c.url == item:
-                return self.candidates.remove(c)
-
-    def __len__(self):
-        return len(self.candidates)
-
-    def __iter__(self):
-        for c in self.candidates:
-            yield c
