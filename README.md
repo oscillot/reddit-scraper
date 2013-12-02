@@ -45,34 +45,34 @@ Download object with a valid url so that the BasePlugin can do its work.
 
 For example,for non direct imgur links, it looks like this (abridged):
 
-class ImgurSingleIndirect(BasePlugin):
-    def execute(self, candidate):
-        if (candidate.url.lower().startswith('http://imgur.com/'):
-            img_url = self.get_imgur_single(candidate.url)
-            for album_img in album_imgs:
-                ...
-                self.current = Download(candidate.title,
-                                        candidate.subreddit,
-                                        img_url)
+    class ImgurSingleIndirect(BasePlugin):
+        def execute(self, candidate):
+            if (candidate.url.lower().startswith('http://imgur.com/'):
+                img_url = self.get_imgur_single(candidate.url)
+                for album_img in album_imgs:
+                    ...
+                    self.current = Download(candidate.title,
+                                            candidate.subreddit,
+                                            img_url)
 
-    def get_imgur_single(self, url):
-        ...
-        return urls
+        def get_imgur_single(self, url):
+            ...
+            return urls
 
 If you have a gallery, it gets slightly more complicated. You cannot simply
 set the self.current object because you will only get the last object that
 you set it to.
 
-class ImgurAlbum(BasePlugin):
-    def execute(self, candidate):
-        if candidate.url.lower().startswith('http://imgur.com/a/'):
-            album_imgs = self.get_imgur_album(candidate.url)
-            for album_img in album_imgs:
-                ...
-                self.current = Download(candidate.title,
-                                        candidate.subreddit,
-                                        album_img_url)
+    class ImgurAlbum(BasePlugin):
+        def execute(self, candidate):
+            if candidate.url.lower().startswith('http://imgur.com/a/'):
+                album_imgs = self.get_imgur_album(candidate.url)
+                for album_img in album_imgs:
+                    ...
+                    self.current = Download(candidate.title,
+                                            candidate.subreddit,
+                                            album_img_url)
 
-    def get_imgur_album(self, url):
-        ...
-        return urls
+        def get_imgur_album(self, url):
+            ...
+            return urls
