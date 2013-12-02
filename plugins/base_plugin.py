@@ -104,6 +104,7 @@ class BasePlugin(object):
                                'link: %s' %
                                (self.resp.headers.get('content-type'),
                                 self.current.url))
+                print e.message
                 self.current = None
             else:
                 #finally! we have image!
