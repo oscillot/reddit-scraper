@@ -13,16 +13,16 @@ from plugins.base_plugin import *
 
 
 class WallbaseCollection(BasePlugin):
-    def execute(self, candidate):
+    def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
-        :param Download candidate: data from a reddit post json
         """
-        if candidate.url.lower().startswith('http://wallbase.cc/user/collection/'):
-            collection_imgs = self.get_wallbase_collection(candidate.url)
+        if self.candidate.url.lower().startswith(
+                'http://wallbase.cc/user/collection/'):
+            collection_imgs = self.get_wallbase_collection(self.candidate.url)
             for img_url in collection_imgs:
-                self.current = Download(candidate.title,
-                                        candidate.subreddit,
+                self.current = Download(self.candidate.title,
+                                        self.candidate.subreddit,
                                         img_url)
 
     def get_wallbase_collection(self, url):

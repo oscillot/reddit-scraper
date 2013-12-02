@@ -18,10 +18,10 @@ by this.
 Your plugin must be a class that subclasses BasePlugin from the base_plugin
 module in this folder. If it does not subclass this, it will not be executed.
 
-Your plugin needs exactly one function, "execute". It must accept one positional
-argument that will be a single candidate that will be a Download object.
-Execute is called repeatedly by the logic in the BasePlugin class, once per
-Download object in the CandidateList that has been passed to it.
+Your plugin needs exactly one function, "execute". Execute is called repeatedly
+by the logic in the BasePlugin class, once per Download object in the
+CandidateList that has been passed to it. The current Download candidate
+object will be the one in the plugin at self.candidate.
 
 A Download object has 5 attributes, 4 of which are set on creation:
     title     - this is taken from the reddit post
@@ -40,7 +40,7 @@ The approach that I take for writing plugins is typically to have the execute
 function call a helper function that returns an img_url,
 typically I just run a little xpath, nothing too fancy.
 
-This important part is to create the self.current objectand set it to a
+This important part is to create the self.current object and set it to a
 Download object with a valid url so that the BasePlugin can do its work.
 
 For example,for non direct imgur links, it looks like this (abridged):

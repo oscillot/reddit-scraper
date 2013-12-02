@@ -1,24 +1,20 @@
-#Handles getting the image url from the download button of a single image on
-# deviant art
 import requests
 from lxml import etree
 from plugins.base_plugin import *
 
 
 class DeviantArt(BasePlugin):
-    def execute(self, candidate):
+    def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
-        :param Download candidate: data from a reddit post json
         """
-        if 'deviantart.com' in candidate.url.lower():
-            deviant_art_img_url = self.get_deviant_art_image(candidate.url)
+        if 'deviantart.com' in self.candidate.url.lower():
+            deviant_art_img_url = self.get_deviant_art_image(self.candidate.url)
             if deviant_art_img_url is not None:
                 if deviant_art_img_url == 'deviantART: 404 Not Found':
-                    self.unhandled.append(candidate)
                     return
-                self.current = Download(candidate.title,
-                                        candidate.subreddit,
+                self.current = Download(self.candidate.title,
+                                        self.candidate.subreddit,
                                         deviant_art_img_url)
 
     def get_deviant_art_image(self, url):

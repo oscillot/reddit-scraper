@@ -5,21 +5,20 @@ from plugins.base_plugin import *
 
 
 class ImgurAlbum(BasePlugin):
-    def execute(self, candidate):
+    def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
-        :param Download candidate: data from a reddit post json
         """
-        if candidate.url.lower().startswith('http://imgur.com/a/'):
-            album_imgs = self.get_imgur_album(candidate.url)
+        if self.candidate.url.lower().startswith('http://imgur.com/a/'):
+            album_imgs = self.get_imgur_album(self.candidate.url)
             for album_img in album_imgs:
                 #This handles the links that come down with extensions like
                 # `jpg?1` that have been showing up lately. Regular links
                 # should be unaffected by this. This is done here so that the
                 #  list of handled links is still accurate.
                 album_img_url = album_img.split('?')[0]
-                self.current = Download(candidate.title,
-                                        candidate.subreddit,
+                self.current = Download(self.candidate.title,
+                                        self.candidate.subreddit,
                                         album_img_url)
 
     def get_imgur_album(self, url):

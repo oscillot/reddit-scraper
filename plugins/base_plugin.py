@@ -48,7 +48,66 @@ class BasePlugin():
         #Create the DB tables if not there
         metadata.create_all()
         self.unique_img_hashes = self.get_previous_md5s()
+
+        self._current = None
         self.enforcer()
+
+    @property
+    def current(self):
+        return self._current
+
+    @current.setter
+    def current(self, value):
+        self._current = value
+        if value is not None:
+            self.acquisition_tasks()
+        else:
+            self.unhandled.append(self.candidate)
+
+    def acquisition_tasks(self):
+        if self.current.url in self.posts_already_finished:
+            print 'Skipping previously acquired post: ' \
+                  '%s' % self.current.url
+            self.current = None
+            return
+        else:
+            self.posts_already_finished.append(self.current.url)
+
+        if self.current.url in self.image_urls_already_fetched:
+            #skip any exact url matches from the db
+            print 'Skipping %s: already downloaded\n' % self.current.filename
+            self.current = None
+            return
+        else:
+            #print data about the current acquisition
+            print 'Attempting %s \n' % self.current.filename
+            print self.current.title.encode('ascii', 'replace'),
+            self.current.subreddit.encode('ascii', 'replace'),
+            self.current.url.encode('ascii', 'replace'), '\n'
+
+            try:
+                #snag the image! woot! that's what it all leads up to
+                # in the end!
+                self.resp = requests.get(self.current.url)
+            except requests.HTTPError:
+                #or abject failure, you know, whichever...
+                self.unhandled.append(self.candidate)
+                self.current = None
+                return
+
+            if not self.valid_image_header():
+                self.current = None
+                return
+            else:
+                #finally! we have image!
+                new_img = self.resp.content
+            self.current.md5 = hashlib.md5(new_img).hexdigest()
+            if self.current.md5 not in self.unique_img_hashes:
+                self.save_img(new_img)
+                self.unique_img_hashes.append(self.current.md5)
+                self.add_to_main_db_table()
+                self.revised.remove(self.candidate)
+                self.handled.append(self.candidate)
 
     def enforcer(self):
         """
@@ -68,69 +127,23 @@ class BasePlugin():
         #remove the above, if found, from the returned list before doing
         # anything
         self.early_prune()
-        total = len(self.candidates)
-        for i, candidate in enumerate(self.candidates):
+        for candidate in self.candidates:
+            self.candidate = candidate
             #reset the Download object to None on each iteration of the loop
             self.current = None
             try:
                 #this creates a Download object at self.current (or loops
                 # around)
-                self.execute(candidate)
+                self.execute()
                 #iterate when the plugin returns None
                 if not self.current:
-                    print 'Skipping #%d/%d: ' \
-                          '%s was not handled by %s\n' % \
-                          (i + 1, total, candidate.url,
-                           self.__class__.__name__)
+                    print 'Skipping %s: was not handled by %s\n' % \
+                          (self.candidate.url, self.__class__.__name__)
                     continue
             except Exception, e:
                 print traceback.print_exc()
                 self.unhandled.append(candidate)
-            else:
-                if self.current.url in self.posts_already_finished:
-                    print 'Skipping previously acquired post: ' \
-                          '%s' % self.current.url
-                    continue
-                else:
-                    self.posts_already_finished.append(self.current.url)
 
-                if self.current.url in self.image_urls_already_fetched:
-                    #skip any exact url matches from the db
-                    print 'Skipping #%d/%d: ' \
-                          '%s has already been downloaded\n' % \
-                          (i + 1, total, self.current.filename)
-                    continue
-                else:
-                    #print data about the current acquisition
-                    print 'Attempting #%d/%d: ' \
-                          '%s \n' % \
-                          (i + 1, total, self.current.filename)
-                    print self.current.title.encode('ascii', 'replace'),
-                    self.current.subreddit.encode('ascii', 'replace'),
-                    self.current.url.encode('ascii', 'replace'), \
-                    '\n'
-
-                    try:
-                        #snag the image! woot! that's what it all leads up to
-                        # in the end!
-                        self.resp = requests.get(self.current.url)
-                    except requests.HTTPError:
-                        #or abject failure, you know, whichever...
-                        self.unhandled.append(candidate)
-                        continue
-
-                    if not self.valid_image_header():
-                        continue
-                    else:
-                        #finally! we have image!
-                        new_img = self.resp.content
-                    self.current.md5 = hashlib.md5(new_img).hexdigest()
-                    if self.current.md5 not in self.unique_img_hashes:
-                        self.save_img(new_img)
-                        self.unique_img_hashes.append(self.current.md5)
-                        self.add_to_main_db_table()
-                        self.revised.remove(candidate)
-                        self.handled.append(candidate)
 
     def convert_candidates(self):
         """
@@ -185,7 +198,7 @@ class BasePlugin():
         else:
             return True
 
-    def execute(self, candidate):
+    def execute(self):
         """
         To be overridden by subclasses. The subclassed versions of this
         method should be written to handle just one post link,

@@ -6,16 +6,15 @@ from plugins.base_plugin import *
 
 
 class Get500pxSingle(BasePlugin):
-    def execute(self, candidate):
+    def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
-        :param Download candidate: data from a reddit post json
         """
-        if candidate.url.lower().startswith(
+        if self.candidate.url.lower().startswith(
                 'http://500px.com/photo/'):
-            img_url = self.get_500px_img(candidate.url)
-            self.current = Download(candidate.title,
-                                    candidate.subreddit,
+            img_url = self.get_500px_img(self.candidate.url)
+            self.current = Download(self.candidate.title,
+                                    self.candidate.subreddit,
                                     img_url)
 
     def get_500px_img(self, url):

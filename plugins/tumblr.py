@@ -5,16 +5,15 @@ from plugins.base_plugin import *
 
 
 class Tumblr(BasePlugin):
-    def execute(self, candidate):
+    def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
-        :param Download candidate: data from a reddit post json
         """
-        if 'tumblr.com' in candidate.url.lower():
-            img_urls = self.get_tumblr_imgs(candidate.url)
+        if 'tumblr.com' in self.candidate.url.lower():
+            img_urls = self.get_tumblr_imgs(self.candidate.url)
             for img_url in img_urls:
-                self.current = Download(candidate.title,
-                                        candidate.subreddit,
+                self.current = Download(self.candidate.title,
+                                        self.candidate.subreddit,
                                         img_url)
 
     def get_tumblr_imgs(self, url):
