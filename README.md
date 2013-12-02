@@ -43,7 +43,7 @@ typically I just run a little xpath, nothing too fancy.
 This important part is to create the self.current object and set it to a
 Download object with a valid url so that the BasePlugin can do its work.
 
-For example,for non direct imgur links, it looks like this (abridged):
+For example, for non direct imgur links, it looks like this (abridged):
 
     class ImgurSingleIndirect(BasePlugin):
         def execute(self, candidate):
@@ -64,7 +64,7 @@ and iterate through the list, setting the self.current object each time
 through the loop. self.current is a property that has a setter. If it is not
 set to None, the acquisition logic is triggered so you can set the object as
 few or as many times as you want from within execute and the logic to acquire
- te image will still fire off each time you set the object.
+the image will still fire off each time you set the object.
 
     class ImgurAlbum(BasePlugin):
         def execute(self, candidate):
