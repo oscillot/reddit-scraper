@@ -1,6 +1,6 @@
 import os
 from reddit_connect import RedditConnect
-from image_getter import PluginInterface
+from plugin_interface import PluginInterface
 
 #run this manually, through jenkins or as a cron job
 

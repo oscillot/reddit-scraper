@@ -41,17 +41,18 @@ class PluginInterface():
         #set up some class variables
         self.handled = []
         self.unhandled = []
+        self.posts_already_finished = None
+        self.image_urls_already_fetched = None
+        self.candidates_backup = set()
 
     def hand_off_to_plugins(self):
         """Calls each plugin module and hand the CandidateList off to it.
         """
-        self.candidates_backup = set()
         for plugin in loaded_plugins:
-            print 'Loading plugin: %s.' % plugin.__name__
+            print 'Loading plugin: %s.\n' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output)
             self.handled.extend(plug_inst.handled)
-            print '%s handled the following links:' % \
-                  plugin.__name__
+            print '%s handled the following links:\n' % plugin.__name__
             if len(plug_inst.handled) > 0:
                 for h in plug_inst.handled:
                     print h.url
@@ -62,7 +63,8 @@ class PluginInterface():
             self.candidates = plug_inst.revised
             #the last instance of these should be fine
             self.posts_already_finished = plug_inst.posts_already_finished
-            self.image_urls_already_fetched = plug_inst.image_urls_already_fetched
+            self.image_urls_already_fetched = \
+                plug_inst.image_urls_already_fetched
             self.candidates_backup.update(plug_inst.candidates_backup)
 
     def check_unhandled_links(self):

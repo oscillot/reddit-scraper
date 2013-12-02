@@ -105,7 +105,7 @@ class BasePlugin(object):
                     self.unique_img_hashes.append(self.current.md5)
                     self.add_to_main_db_table()
                     self.revised.remove(self.candidate)
-                    self.handled.append(self.candidate)
+                    self.handled.append(self.current)
             if not self.current:
                 print 'Skipping %s: was not handled by %s\n' % \
                       (self.candidate.url, self.__class__.__name__)
