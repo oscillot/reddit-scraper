@@ -1,6 +1,15 @@
 import os
+import re
 
 from plugins import loaded_plugins
+
+
+def extract_domain(url):
+    dom_pat = re.compile(r'^.*://(?:[wW]{3}\.)?([^:/]*).*$')
+    domain = re.findall(dom_pat, url)[0]
+    if domain.count('.') > 1:
+        domain = '.'.join(domain.split('.')[-2:])
+    return domain
 
 
 class ImageGetter():
@@ -43,7 +52,8 @@ class ImageGetter():
             print 'Loading plugin: %s.' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output)
             self.handled.extend(plug_inst.handled)
-            print 'Plugin handled the following links:'
+            print '%s handled the following links:' % \
+                  plugin.__name__
             if len(plug_inst.handled) > 0:
                 for h in plug_inst.handled:
                     print h.url
@@ -53,17 +63,19 @@ class ImageGetter():
             #trim down the candidates from what got parsed
             self.candidates = plug_inst.revised
             #the last instance of these should be fine
-            self.already_handled = plug_inst.already_handled
-            self.already_dled = plug_inst.already_dled
+            self.posts_already_finished = plug_inst.posts_already_finished
+            self.image_urls_already_fetched = plug_inst.image_urls_already_fetched
             self.candidates_backup.update(plug_inst.candidates_backup)
 
     def check_unhandled_links(self):
         for original in self.candidates_backup:
-            if original in self.handled or original in self.already_dled or \
-                    original in self.already_handled:
+            if original in self.handled or original in \
+                    self.image_urls_already_fetched or \
+                    original in self.posts_already_finished:
                 continue
             else:
-                self.unhandled.append(original)
+                self.unhandled.append((extract_domain(original.url),
+                                       original.url))
 
     def acquire(self):
         """
@@ -90,8 +102,8 @@ class ImageGetter():
         print 'The following posts had links that were unhandled:'
         self.check_unhandled_links()
         if len(self.unhandled) > 0:
-            for uh in self.unhandled:
-                print uh.url
+            for uh in sorted(self.unhandled):
+                print uh[0], '\t', uh[1]
             print '\n'
         else:
             print 'None\n'

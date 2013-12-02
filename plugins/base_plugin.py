@@ -55,12 +55,16 @@ class BasePlugin():
         reporting the plugin, link and exception for output at the end of the
          run
         """
+        #Convert candidates from the generic format provided by my eddit
+        # connect class to something specific with only the necessary
+        # attributes needed for downloading images
         self.convert_candidates()
-        ##WHY ARE THERE TWO OF THESE YOU MORON??
-        #create self.already_dled
-        self.check_db_for_already_dled()
         #create self.already_handled
-        self.check_db_for_already_handled()
+        self.check_db_for_finished_post_urls()
+        #create self.already_dled
+        self.check_db_for_finished_image_urls()
+        #remove the above, if found, from the returned list before doing
+        # anything
         self.early_prune()
         total = len(self.candidates)
         for i, candidate in enumerate(self.candidates):
@@ -81,16 +85,14 @@ class BasePlugin():
                 print traceback.print_exc()
                 self.unhandled.append(candidate)
             else:
-                if self.current.url not in self.already_handled:
-                    ##WHY DO I DO THIS?
-                    ###WTF DOUBLE NEGATIVE???
-                    self.already_handled.append(self.current.url)
-                else:
+                if self.current.url in self.posts_already_finished:
                     print 'Skipping previously acquired post: ' \
                           '%s' % self.current.url
                     continue
+                else:
+                    self.posts_already_finished.append(self.current.url)
 
-                if self.current.url in self.already_dled:
+                if self.current.url in self.image_urls_already_fetched:
                     #skip any exact url matches from the db
                     print 'Skipping #%d/%d: ' \
                           '%s has already been downloaded\n' % \
@@ -98,7 +100,7 @@ class BasePlugin():
                     continue
                 else:
                     #print data about the current acquisition
-                    print 'Acquiring #%d/%d: ' \
+                    print 'Attempting #%d/%d: ' \
                           '%s \n' % \
                           (i + 1, total, self.current.filename)
                     print self.current.title.encode('ascii', 'replace'),
@@ -180,24 +182,28 @@ class BasePlugin():
         unique_img_hashes = [h[0] for h in conn.execute(md5_select).fetchall()]
         return unique_img_hashes
 
-    def check_db_for_already_handled(self):
+    def check_db_for_finished_post_urls(self):
         """
         Returns the list of previous liked posts that successfully went all
-        the way through the scraper
+        the way through the scraper, this is needed for gallery posts that
+        may fail partway through a job to not get skipped on retry
         """
         conn = self.engine.connect()
-        retrieved_select = sql.select([self.retrieved])
-        self.already_handled = DownloadList([a[0] for a in conn.execute(
-                                            retrieved_select).fetchall()])
+        finished_posts_select = sql.select([self.retrieved])
+        self.posts_already_finished = DownloadList([a[0] for a in conn.execute(
+                                            finished_posts_select).fetchall()])
 
-    def check_db_for_already_dled(self):
+    def check_db_for_finished_image_urls(self):
         """
-        Returns the list of urls that has successfully been downloaded.
+        Returns the list of urls that has successfully been downloaded. This
+        helps make sure that if a gallery post is picked up partway that we
+        don't re-attempt the first already fetched posts as well as for
+        skipping already fetched single image posts.
         """
         conn = self.engine.connect()
-        handled_select = sql.select([self.wallpapers])
-        self.already_dled = DownloadList([a[2] for a in conn.execute(
-                                         handled_select).fetchall()])
+        finished_urls_select = sql.select([self.wallpapers])
+        self.image_urls_already_fetched = DownloadList([a[2] for a in conn.execute(
+                                         finished_urls_select).fetchall()])
 
     def add_to_previous_aquisitions(self):
         """
@@ -206,7 +212,7 @@ class BasePlugin():
         #prevent hash collision in the table
         uniques = set()
         for h in self.handled:
-            if h.url not in self.already_handled:
+            if h.url not in self.posts_already_finished:
                 uniques.add(h.url)
         for u in uniques:
             conn = self.engine.connect()
@@ -225,19 +231,13 @@ class BasePlugin():
         conn.execute(wall_ins)
 
     def early_prune(self):
-        print 'already dled'
-        print self.already_dled.downloads
-        print 'already handled'
-        print self.already_handled.downloads
-        print 'candidates'
-        print self.candidates
-        for already in self.already_dled.downloads:
-            if already in self.candidates:
-                self.candidates.remove(already)
+        for fetched in self.image_urls_already_fetched.downloads:
+            if fetched in self.candidates:
+                self.candidates.remove(fetched)
                 continue
-        for handled in self.already_handled.downloads:
-            if handled in self.candidates:
-                self.candidates.remove(handled)
+        for finished in self.posts_already_finished.downloads:
+            if finished in self.candidates:
+                self.candidates.remove(finished)
                 continue
 
 
@@ -276,13 +276,9 @@ class CandidatesList(object):
         for c in self.candidates:
                 if item == c.url:
                     return item
-        #return item in self.candidates
 
     def remove(self, item):
         for c in self.candidates:
-            print '==='
-            print c.url
-            print item
             if c.url == item:
                 return self.candidates.remove(c)
 
