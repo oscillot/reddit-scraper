@@ -9,9 +9,7 @@ class RedditConnect():
 
     :param str username: The reddit username
     :param str password: The password for above username
-    :param str database: The prefix for the database name for %s_downloaded.db
     """
-    #TODO: Consider using SQLAlchemy to make this less ugly
     def __init__(self, username, password):
         self.username = username
         self.password = password

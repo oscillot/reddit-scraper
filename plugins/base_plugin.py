@@ -63,7 +63,7 @@ class BasePlugin(object):
             self.acquisition_tasks()
         else:
             print '%s: Skipping %s: not handled by this plugin\n' % \
-                      (self.__class__.__name__, self.candidate.url)
+                  (self.__class__.__name__, self.candidate.url)
             self.unhandled.append(self.candidate)
 
     def acquisition_tasks(self):
@@ -94,7 +94,7 @@ class BasePlugin(object):
             except requests.HTTPError, e:
                 #or abject failure, you know, whichever...
                 print '%s: Failure: %s \n' % \
-                  (self.__class__.__name__, e.message)
+                      (self.__class__.__name__, e.message)
                 self.current = None
 
             #maybe we got very close, or an image got removed, in any case
@@ -117,10 +117,79 @@ class BasePlugin(object):
                     self.revised.remove(self.candidate)
                     self.handled.append(self.current)
                     print '%s: Success! %s saved.\n' % \
-                        (self.__class__.__name__, self.current.filename)
+                          (self.__class__.__name__, self.current.filename)
                 else:
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
-                        (self.__class__.__name__, self.current.filename)
+                          (self.__class__.__name__, self.current.filename)
+
+    def add_to_main_db_table(self):
+        """
+        Inserts the full handled link info into the wallpaers table of the db
+        """
+        conn = self.engine.connect()
+        wall_data = (self.current.subreddit, self.current.title,
+                     self.current.url, self.current.filename, self.current.md5)
+        wall_ins = self.wallpapers.insert(wall_data)
+        conn.execute(wall_ins)
+
+    def add_to_previous_aquisitions(self):
+        """
+        Adds to the list of previously handled links
+        """
+        #prevent hash collision in the table
+        uniques = set()
+        for h in self.handled:
+            if h.url not in self.posts_already_finished:
+                uniques.add(h.url)
+        for u in uniques:
+            conn = self.engine.connect()
+            retrieved_ins = sql.insert(table=self.retrieved,
+                                       values=[u])
+            conn.execute(retrieved_ins)
+
+    def check_db_for_finished_image_urls(self):
+        """
+        Returns a `class` DownloadList of urls that has successfully been
+        downloaded. This helps make sure that if a gallery post is picked up
+        partway that we don't re-attempt the first already fetched posts as
+        well as for skipping already fetched single image posts.
+        """
+        conn = self.engine.connect()
+        finished_urls_select = sql.select([self.wallpapers])
+        self.image_urls_already_fetched = DownloadList(
+            [a[2] for a in conn.execute(
+                finished_urls_select).fetchall()])
+
+    def check_db_for_finished_post_urls(self):
+        """
+        Returns a `class` DownloadList of previous posts that successfully
+        went allthe way through the scraper, this is needed for gallery posts
+        that may fail partway through a job to not get skipped on retry
+        """
+        conn = self.engine.connect()
+        finished_posts_select = sql.select([self.retrieved])
+        self.posts_already_finished = DownloadList([a[0] for a in conn.execute(
+            finished_posts_select).fetchall()])
+
+    def convert_candidates(self):
+        """
+        This converts the candidates list from the generic list of
+        dictionaries that came from the `class` RedditConnect json data into
+        the internal CandidateList data format which contains only the
+        necessary information and makes the code much easier to read and
+        understand
+        """
+        new_cands = []
+        for c in self.candidates:
+            if c.__class__.__name__ == 'Download':
+                new_cands.append(c)
+            else:
+                new_cands.append(Download(c['data']['title'],
+                                          c['data']['subreddit'],
+                                          c['data']['url']))
+        self.candidates = CandidatesList(new_cands)
+        self.candidates_backup = self.candidates
+        self.revised = self.candidates
 
     def enforcer(self):
         """
@@ -152,26 +221,38 @@ class BasePlugin(object):
                 print traceback.print_exc()
                 self.unhandled.append(self.candidate)
 
+    def execute(self):
+        """
+        To be overridden by subclasses. The subclassed versions of this
+        method should be written to handle just one post link,
+        but can call other functions as needed. See the plugin readme on how
+        this should be done.
+        """
+        raise NotImplementedError
 
-    def convert_candidates(self):
+    def get_previous_md5s(self):
         """
-        This converts the candidates list from the generic list of
-        dictionaries that came from the `class` RedditConnect json data into
-        the internal CandidateList data format which contains only the
-        necessary information and makes the code much easier to read and
-        understand
+        Returns the list of md5s already in the database
         """
-        new_cands = []
-        for c in self.candidates:
-            if c.__class__.__name__ == 'Download':
-                new_cands.append(c)
-            else:
-                new_cands.append(Download(c['data']['title'],
-                                          c['data']['subreddit'],
-                                          c['data']['url']))
-        self.candidates = CandidatesList(new_cands)
-        self.candidates_backup = self.candidates
-        self.revised = self.candidates
+        conn = self.engine.connect()
+        md5_select = sql.select(from_obj=self.wallpapers, columns=['md5'])
+        unique_img_hashes = [h[0] for h in conn.execute(md5_select).fetchall()]
+        return unique_img_hashes
+
+    def prune(self):
+        """
+        Remove anything from the new `class` CandidatesList that is found in
+        the database from the beginning, try to be as econmoical as possible
+        and avoid getting ip or other form of blacklisted at all costs
+        """
+        for fetched in self.image_urls_already_fetched.downloads:
+            if fetched in self.candidates:
+                self.candidates.remove(fetched)
+                continue
+        for finished in self.posts_already_finished.downloads:
+            if finished in self.candidates:
+                self.candidates.remove(finished)
+                continue
 
     def save_img(self, data):
         """
@@ -198,84 +279,3 @@ class BasePlugin(object):
             return False
         else:
             return True
-
-    def execute(self):
-        """
-        To be overridden by subclasses. The subclassed versions of this
-        method should be written to handle just one post link,
-        but can call other functions as needed. See the plugin readme on how
-        this should be done.
-        """
-        raise NotImplementedError
-
-    def get_previous_md5s(self):
-        """
-        Returns the list of md5s already in the database
-        """
-        conn = self.engine.connect()
-        md5_select = sql.select(from_obj=self.wallpapers, columns=['md5'])
-        unique_img_hashes = [h[0] for h in conn.execute(md5_select).fetchall()]
-        return unique_img_hashes
-
-    def check_db_for_finished_post_urls(self):
-        """
-        Returns a `class` DownloadList of previous posts that successfully
-        went allthe way through the scraper, this is needed for gallery posts
-        that may fail partway through a job to not get skipped on retry
-        """
-        conn = self.engine.connect()
-        finished_posts_select = sql.select([self.retrieved])
-        self.posts_already_finished = DownloadList([a[0] for a in conn.execute(
-                                            finished_posts_select).fetchall()])
-
-    def check_db_for_finished_image_urls(self):
-        """
-        Returns a `class` DownloadList of urls that has successfully been
-        downloaded. This helps make sure that if a gallery post is picked up
-        partway that we don't re-attempt the first already fetched posts as
-        well as for skipping already fetched single image posts.
-        """
-        conn = self.engine.connect()
-        finished_urls_select = sql.select([self.wallpapers])
-        self.image_urls_already_fetched = DownloadList([a[2] for a in conn.execute(
-                                         finished_urls_select).fetchall()])
-
-    def add_to_previous_aquisitions(self):
-        """
-        Adds to the list of previously handled links
-        """
-        #prevent hash collision in the table
-        uniques = set()
-        for h in self.handled:
-            if h.url not in self.posts_already_finished:
-                uniques.add(h.url)
-        for u in uniques:
-            conn = self.engine.connect()
-            retrieved_ins = sql.insert(table=self.retrieved,
-                                       values=[u])
-            conn.execute(retrieved_ins)
-
-    def add_to_main_db_table(self):
-        """
-        Inserts the full handled link info into the wallpaers table of the db
-        """
-        conn = self.engine.connect()
-        wall_data = (self.current.subreddit, self.current.title,
-                     self.current.url, self.current.filename, self.current.md5)
-        wall_ins = self.wallpapers.insert(wall_data)
-        conn.execute(wall_ins)
-
-    def prune(self):
-        """
-        Remove anything from the new `class` CandidatesList that is found in
-        the database from the beginning, try to be as econmoical as possible
-        and avoid getting ip or other form of blacklisted at all costs
-        """
-        for fetched in self.image_urls_already_fetched.downloads:
-            if fetched in self.candidates:
-                self.candidates.remove(fetched)
-                continue
-        for finished in self.posts_already_finished.downloads:
-            if finished in self.candidates:
-                self.candidates.remove(finished)
-                continue

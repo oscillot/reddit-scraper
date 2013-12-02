@@ -1,3 +1,7 @@
+2.04
+----
+Restructure the BasePlugin class (PEP8 style)
+
 2.03
 ----
 Update the README
