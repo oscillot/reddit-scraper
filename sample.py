@@ -25,9 +25,9 @@ my_subs = ['apocalypseporn', 'bigwallpapers', 'conceptart',
 candidates = rc.get_upvoted_wallpapers(my_subs, liked_data)
 #instaniate the image acquisition class with a daabase name,
 # list of candidates and set a location to save images to.
-ig = PluginInterface(database='db_name', candidates=candidates,
+plugins = PluginInterface(database='db_name', candidates=candidates,
                  output=os.path.join('X:\\', 'location_to_save_to'))
-ig.acquire()
+plugins.acquire()
 
 #If you use Jenkins with the EnvInject plugin, you can expose parameter input to the web interface and configure from
 # over your network instead of editing the module directly, e.g.:
