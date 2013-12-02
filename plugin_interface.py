@@ -52,13 +52,13 @@ class PluginInterface():
             print 'Loading plugin: %s.\n' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output)
             self.handled.extend(plug_inst.handled)
-            print '%s handled the following links:\n' % plugin.__name__
+            print '%s handled the following urls:\n' % plugin.__name__
             if len(plug_inst.handled) > 0:
                 for h in plug_inst.handled:
-                    print h.url
+                    print '\t', h.url
                 print '\n'
             else:
-                print 'None\n'
+                print '\tNone\n'
             #trim down the candidates from what got parsed
             self.candidates = plug_inst.revised
             #the last instance of these should be fine

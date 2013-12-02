@@ -116,9 +116,11 @@ class BasePlugin(object):
                     self.add_to_main_db_table()
                     self.revised.remove(self.candidate)
                     self.handled.append(self.current)
-                print '%s: Success! %s saved.\n' % \
-                  (self.__class__.__name__, self.current.filename)
-
+                    print '%s: Success! %s saved.\n' % \
+                        (self.__class__.__name__, self.current.filename)
+                else:
+                    print '%s: MD5 duplicate. Discarding: %s.\n' % \
+                        (self.__class__.__name__, self.current.filename)
 
     def enforcer(self):
         """
