@@ -1,0 +1,16 @@
+2.02
+----
+Added the CHANGELOG
+Fix for md5 mismatches outputting "SUCCESS!" messages stupidly.
+
+2.01
+----
+A bugfix for accidentally supressing the bad image header error message
+
+2.00
+----
+
+Massive refactor. Everything before this works technically,
+but is really bad and wrong. Most notable change architecturally is that
+plugins now handle download tasks themselves (the BasePlugin class does)
+instead of creating a huge list and doing it all as a secondary post process.
