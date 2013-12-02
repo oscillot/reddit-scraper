@@ -48,7 +48,6 @@ class BasePlugin(object):
         #Create the DB tables if not there
         metadata.create_all()
         self.unique_img_hashes = self.get_previous_md5s()
-
         self._current = None
         self.enforcer()
 
@@ -62,24 +61,30 @@ class BasePlugin(object):
         if value is not None:
             self.acquisition_tasks()
         else:
+            print '%s: Skipping %s: not handled by this plugin\n' % \
+                      (self.__class__.__name__, self.candidate.url)
             self.unhandled.append(self.candidate)
 
     def acquisition_tasks(self):
         if self.current.url in self.posts_already_finished:
-            print 'Skipping previously acquired post: ' \
-                  '%s' % self.current.url
+            #skip any posts that already have been done
+            print '%s: Skipping post: %s - previously acquired' % \
+                  (self.__class__.__name__.upper(), self.current.url)
         else:
             self.posts_already_finished.append(self.current.url)
 
         if self.current.url in self.image_urls_already_fetched:
             #skip any exact url matches from the db
-            print 'Skipping %s: already downloaded\n' % self.current.filename
+            print '%s: Skipping url %s: already downloaded\n' % \
+                  (self.__class__.__name__.upper(), self.current.url)
         else:
             #print data about the current acquisition
-            print 'Attempting %s \n' % self.current.filename
-            print self.current.title.encode('ascii', 'replace'),
-            self.current.subreddit.encode('ascii', 'replace'),
-            self.current.url.encode('ascii', 'replace'), '\n'
+            print '%s: Attempting: %s \n' % \
+                  (self.__class__.__name__.upper(), self.current.url)
+            #CLUTTER CLUTTER CLUTTER
+            #print self.current.title.encode('ascii', 'replace'),
+            #self.current.subreddit.encode('ascii', 'replace'),
+            #self.current.url.encode('ascii', 'replace'), '\n'
 
             try:
                 #snag the image! woot! that's what it all leads up to
@@ -89,13 +94,13 @@ class BasePlugin(object):
                 #or abject failure, you know, whichever...
                 self.unhandled.append(self.candidate)
 
-            #or maybe we got very close, or an image got removed,
-            # in any case MAKE SURE IT'S AN IMAGE!
+            #maybe we got very close, or an image got removed, in any case
+            # MAKE SURE IT'S AN IMAGE!
             if not self.valid_image_header():
                 print ValueError('Non-image header \"%s\" was found at the link: '
                                  '%s' % (self.resp.headers.get('content-type'),
                                          self.current.url))
-                #print self.resp.content #DEBUG the content coming down
+                self.current = None
             else:
                 #finally! we have image!
                 new_img = self.resp.content
@@ -106,9 +111,7 @@ class BasePlugin(object):
                     self.add_to_main_db_table()
                     self.revised.remove(self.candidate)
                     self.handled.append(self.current)
-            if not self.current:
-                print 'Skipping %s: was not handled by %s\n' % \
-                      (self.candidate.url, self.__class__.__name__)
+
 
     def enforcer(self):
         """
