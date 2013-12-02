@@ -225,6 +225,12 @@ class BasePlugin():
         conn.execute(wall_ins)
 
     def early_prune(self):
+        print 'already dled'
+        print self.already_dled.downloads
+        print 'already handled'
+        print self.already_handled.downloads
+        print 'candidates'
+        print self.candidates
         for already in self.already_dled.downloads:
             if already in self.candidates:
                 self.candidates.remove(already)
@@ -267,7 +273,10 @@ class CandidatesList(object):
         self.candidates = candidates
 
     def __contains__(self, item):
-        return item in self.candidates
+        for c in self.candidates:
+                if item == c.url:
+                    return item
+        #return item in self.candidates
 
     def remove(self, item):
         for c in self.candidates:
