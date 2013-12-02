@@ -80,7 +80,7 @@ class BasePlugin(object):
                   (self.__class__.__name__, self.current.url)
         else:
             #print data about the current acquisition
-            print '%s: Attempting: %s \n' % \
+            print '%s: Requesting: %s \n' % \
                   (self.__class__.__name__, self.current.url)
             #CLUTTER CLUTTER CLUTTER
             #print self.current.title.encode('ascii', 'replace'),
@@ -91,16 +91,19 @@ class BasePlugin(object):
                 #snag the image! woot! that's what it all leads up to
                 # in the end!
                 self.resp = requests.get(self.current.url)
-            except requests.HTTPError:
+            except requests.HTTPError, e:
                 #or abject failure, you know, whichever...
-                self.unhandled.append(self.candidate)
+                print '%s: Failure: %s \n' % \
+                  (self.__class__.__name__, e.message)
+                self.current = None
 
             #maybe we got very close, or an image got removed, in any case
             # MAKE SURE IT'S AN IMAGE!
             if not self.valid_image_header():
-                print ValueError('Non-image header \"%s\" was found at the link: '
-                                 '%s' % (self.resp.headers.get('content-type'),
-                                         self.current.url))
+                e = ValueError('Non-image header \"%s\" was found at the '
+                               'link: %s' %
+                               (self.resp.headers.get('content-type'),
+                                self.current.url))
                 self.current = None
             else:
                 #finally! we have image!
@@ -112,6 +115,8 @@ class BasePlugin(object):
                     self.add_to_main_db_table()
                     self.revised.remove(self.candidate)
                     self.handled.append(self.current)
+                print '%s: Success! %s saved.\n' % \
+                  (self.__class__.__name__, self.current.filename)
 
 
     def enforcer(self):
