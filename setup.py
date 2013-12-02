@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='reddit-scraper',
-    version='1.23',
+    version='2.0',
     packages=find_packages(),
     install_requires=['pillow>=1.7.8',
                       'lxml>=3.0.2',
@@ -14,5 +14,7 @@ setup(
     author='Oscillot',
     author_email='oscillot@trioptimum.com',
     description='Automatically download upvoted wallpapers using cron or '
-                'jenkins'
+                'jenkins easily extended with plugins you can write yourself. '
+                'Requires SQLite be already installed. See the README to get '
+                'started with plugins or just dive into the code.'
 )

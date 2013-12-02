@@ -18,7 +18,7 @@ class BasePlugin():
     def __init__(self, database, candidates, output):
         """The BasePlugin class actually does all of the work under the hood.
         It creates the database, performs the database calls. Retrieves images
-        from content servers, does any error handling that plugins neglect to 
+        from content servers, does any error handling that plugins neglect to
         do and outputs it without bombing the whole job out.
 
         :param str database: the prefix for the database filename.
