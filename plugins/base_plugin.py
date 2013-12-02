@@ -14,7 +14,7 @@ IMAGE_HEADERS = ['image/bmp',
                  'image/gif']
 
 
-class BasePlugin():
+class BasePlugin(object):
     def __init__(self, database, candidates, output):
         """The BasePlugin class actually does all of the work under the hood.
         It creates the database, performs the database calls. Retrieves images
@@ -68,16 +68,12 @@ class BasePlugin():
         if self.current.url in self.posts_already_finished:
             print 'Skipping previously acquired post: ' \
                   '%s' % self.current.url
-            self.current = None
-            return
         else:
             self.posts_already_finished.append(self.current.url)
 
         if self.current.url in self.image_urls_already_fetched:
             #skip any exact url matches from the db
             print 'Skipping %s: already downloaded\n' % self.current.filename
-            self.current = None
-            return
         else:
             #print data about the current acquisition
             print 'Attempting %s \n' % self.current.filename
@@ -92,22 +88,27 @@ class BasePlugin():
             except requests.HTTPError:
                 #or abject failure, you know, whichever...
                 self.unhandled.append(self.candidate)
-                self.current = None
-                return
 
+            #or maybe we got very close, or an image got removed,
+            # in any case MAKE SURE IT'S AN IMAGE!
             if not self.valid_image_header():
-                self.current = None
-                return
+                print ValueError('Non-image header \"%s\" was found at the link: '
+                                 '%s' % (self.resp.headers.get('content-type'),
+                                         self.current.url))
+                #print self.resp.content #DEBUG the content coming down
             else:
                 #finally! we have image!
                 new_img = self.resp.content
-            self.current.md5 = hashlib.md5(new_img).hexdigest()
-            if self.current.md5 not in self.unique_img_hashes:
-                self.save_img(new_img)
-                self.unique_img_hashes.append(self.current.md5)
-                self.add_to_main_db_table()
-                self.revised.remove(self.candidate)
-                self.handled.append(self.candidate)
+                self.current.md5 = hashlib.md5(new_img).hexdigest()
+                if self.current.md5 not in self.unique_img_hashes:
+                    self.save_img(new_img)
+                    self.unique_img_hashes.append(self.current.md5)
+                    self.add_to_main_db_table()
+                    self.revised.remove(self.candidate)
+                    self.handled.append(self.candidate)
+            if not self.current:
+                print 'Skipping %s: was not handled by %s\n' % \
+                      (self.candidate.url, self.__class__.__name__)
 
     def enforcer(self):
         """
@@ -126,23 +127,18 @@ class BasePlugin():
         self.check_db_for_finished_image_urls()
         #remove the above, if found, from the returned list before doing
         # anything
-        self.early_prune()
+        self.prune()
         for candidate in self.candidates:
+            #make the candidate object easily available everywhere
             self.candidate = candidate
             #reset the Download object to None on each iteration of the loop
             self.current = None
             try:
-                #this creates a Download object at self.current (or loops
-                # around)
+                #this creates a Download object at self.current
                 self.execute()
-                #iterate when the plugin returns None
-                if not self.current:
-                    print 'Skipping %s: was not handled by %s\n' % \
-                          (self.candidate.url, self.__class__.__name__)
-                    continue
             except Exception, e:
                 print traceback.print_exc()
-                self.unhandled.append(candidate)
+                self.unhandled.append(self.candidate)
 
 
     def convert_candidates(self):
@@ -187,13 +183,6 @@ class BasePlugin():
         their high quality images, so it's an important check.
         """
         if self.resp.headers.get('content-type') not in IMAGE_HEADERS:
-            #or maybe we got very close, or an image got removed,
-            # in any case MAKE SURE IT'S AN IMAGE!
-            err = ValueError('Non-image header \"%s\" was found at the link: '
-                             '%s' % (self.resp.headers.get('content-type'),
-                                     self.current.url))
-            print err
-            #print self.resp.content #DEBUG the content coming down
             return False
         else:
             return True
@@ -264,7 +253,7 @@ class BasePlugin():
         wall_ins = self.wallpapers.insert(wall_data)
         conn.execute(wall_ins)
 
-    def early_prune(self):
+    def prune(self):
         """
         Remove anything from the new `class` CandidatesList that is found in
         the database from the beginning, try to be as econmoical as possible
