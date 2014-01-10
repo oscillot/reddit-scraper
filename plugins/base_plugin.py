@@ -259,7 +259,15 @@ class BasePlugin(object):
         What it sounds like. Code responsible for saving off the image to the
         filesystem and display any errors that might arise
         """
-        img_path = os.path.join(self.output_dir, self.current.filename)
+        orig_img_path = os.path.join(self.output_dir, self.current.filename)
+        img_path = orig_img_path
+        orig_path, orig_ext = orig_img_path.rsplit('.', 1)
+        inc = 1
+        #prevent stupidly named files like image.jpg from being overwritten
+        # all the time
+        while os.path.exists(img_path):
+            img_path = '%s_%d.%s' % (orig_path, inc, orig_ext)
+            inc += 1
         with open(img_path, 'wb') as f:
             f.write(data)
         try:
