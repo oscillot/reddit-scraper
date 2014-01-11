@@ -90,7 +90,11 @@ class BasePlugin(object):
             try:
                 #snag the image! woot! that's what it all leads up to
                 # in the end!
-                self.resp = requests.get(self.current.url)
+                if hasattr(self.current, 'cookies') and self.current.cookies:
+                    self.resp = requests.get(self.current.url,
+                                             cookies=self.current.cookies)
+                else:
+                    self.resp = requests.get(self.current.url)
             except requests.HTTPError, e:
                 #or abject failure, you know, whichever...
                 print '%s: Failure: %s \n' % \

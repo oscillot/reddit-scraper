@@ -8,13 +8,15 @@ class DeviantArt(BasePlugin):
         operate to handle links.
         """
         if 'deviantart.com' in self.candidate.url.lower():
-            deviant_art_img_url = self.get_deviant_art_image(self.candidate.url)
+            deviant_art_img_url, deviant_art_cookie = self\
+                .get_deviant_art_image(self.candidate.url)
             if deviant_art_img_url is not None:
                 if deviant_art_img_url == 'deviantART: 404 Not Found':
                     return
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
-                                        deviant_art_img_url)
+                                        deviant_art_img_url,
+                                        deviant_art_cookie)
 
     def get_deviant_art_image(self, url):
         """Helper for the deviant art execute function
@@ -34,7 +36,7 @@ class DeviantArt(BasePlugin):
         for title in tree.findall('.//head/title'):
             if title.text == 'deviantART: 404 Not Found':
                 print '%s: %s' % (url, title.text)
-                return title.text
+                return title.text, resp.cookies
         #//*[@id="output"]/div[1]/div[4]/div[1]/div/div[2]/a
         for dl in tree.findall(".//*/a[@class='dev-page-button dev-page-button-with-text dev-page-download']"):
             if dl is not None and dl.get('href'):
@@ -42,7 +44,7 @@ class DeviantArt(BasePlugin):
                     href = dl.attrib['href']
                     if '?token' in href:
                         href = href.split('?token')[0]
-                    return href
+                    return href, resp.cookies
         #Possibly the above catches all images as of 9-30, not sure yet
         for dl in tree.findall('.//*[@id="download-button"]'):
             if dl is not None and dl.get('href'):
@@ -50,6 +52,6 @@ class DeviantArt(BasePlugin):
                     return dl.attrib['href']
         dl = tree.find('.//*/meta[@name="og:image"]')
         if dl is not None:
-            return dl.attrib['content']
+            return dl.attrib['content'], resp.cookies
 
 
