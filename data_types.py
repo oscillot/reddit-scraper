@@ -50,13 +50,13 @@ class Download(object):
     A convenience class, the datatype that comprises a `class` DownloadList
     or a `class` CandidatesList
     """
-    def __init__(self, title, subreddit, url, cookie=None):
+    def __init__(self, title, subreddit, url, cookies=None):
         self.title = title
         self.subreddit = subreddit
         self.url = url
         self.filename = self.name_from_url()
         self.md5 = None
-        self.cookie = cookie
+        self.cookies = cookies
 
     def name_from_url(self):
         return self.url.split('/')[-1].replace(' ', '_')

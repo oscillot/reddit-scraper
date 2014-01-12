@@ -90,7 +90,8 @@ class BasePlugin(object):
             try:
                 #snag the image! woot! that's what it all leads up to
                 # in the end!
-                if hasattr(self.current, 'cookies') and self.current.cookies:
+                if hasattr(self.current, 'cookies') and \
+                        self.current.cookies is not None:
                     self.resp = requests.get(self.current.url,
                                              cookies=self.current.cookies)
                 else:

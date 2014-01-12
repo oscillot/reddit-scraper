@@ -36,7 +36,7 @@ class DeviantArt(BasePlugin):
         for title in tree.findall('.//head/title'):
             if title.text == 'deviantART: 404 Not Found':
                 print '%s: %s' % (url, title.text)
-                return title.text, resp.cookies
+                return title.text, resp.cookies.get_dict()
         #//*[@id="output"]/div[1]/div[4]/div[1]/div/div[2]/a
         for dl in tree.findall(".//*/a[@class='dev-page-button dev-page-button-with-text dev-page-download']"):
             if dl is not None and dl.get('href'):
@@ -44,7 +44,7 @@ class DeviantArt(BasePlugin):
                     href = dl.attrib['href']
                     if '?token' in href:
                         href = href.split('?token')[0]
-                    return href, resp.cookies
+                    return href, resp.cookies.get_dict()
         #Possibly the above catches all images as of 9-30, not sure yet
         for dl in tree.findall('.//*[@id="download-button"]'):
             if dl is not None and dl.get('href'):
@@ -52,6 +52,6 @@ class DeviantArt(BasePlugin):
                     return dl.attrib['href']
         dl = tree.find('.//*/meta[@name="og:image"]')
         if dl is not None:
-            return dl.attrib['content'], resp.cookies
+            return dl.attrib['content'], resp.cookies.get_dict()
 
 
