@@ -13,6 +13,7 @@ setup(
     license='GPL2',
     author='Oscillot',
     author_email='oscillot@trioptimum.com',
+    test_suite='tests',
     description='Automatically download upvoted wallpapers using cron or '
                 'jenkins easily extended with plugins you can write yourself. '
                 'Requires SQLite be already installed. See the README to get '
