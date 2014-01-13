@@ -126,6 +126,8 @@ class BasePlugin(object):
                 else:
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
                           (self.__class__.__name__, self.current.filename)
+                    #remove successes so the whole run goes faster
+                    self.candidates.remove(self.current)
 
     def add_to_main_db_table(self):
         """
