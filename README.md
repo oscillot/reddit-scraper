@@ -42,11 +42,13 @@ along with an optional sixth attribute, which you set if needed:
                 and let the BasePlugin handle it for you.
 
 The approach that I take for writing plugins is typically to have the execute
-function call a helper function that returns an img_url,
-typically I just run a little xpath, nothing too fancy.
+function call a helper function that returns an img_url (and when needed a
+cookie), typically I just drill down the tree with find or find_all using
+BeautifulSoup, nothing too fancy, though there are some exceptions.
 
 This important part is to create the self.current object and set it to a
-Download object with a valid url so that the BasePlugin can do its work.
+Download object with a valid url and whatever else it may need so that the
+BasePlugin can do its work.
 
 For example, for non direct imgur links, it looks like this (abridged):
 
