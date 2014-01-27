@@ -300,7 +300,10 @@ class BasePlugin(object):
         lot especially with sites that try not to let you scrape them for
         their high quality images, so it's an important check.
         """
-        if self.resp.headers.get('content-type') not in IMAGE_HEADERS:
-            return False
-        else:
-            return True
+        for header in IMAGE_HEADERS:
+            #this handles headers that look like this:
+            #image/jpeg; charset=UTF-8
+            if self.resp.headers.get('content-type') in header:
+                return True
+        #if we get here no header matched
+        return False
