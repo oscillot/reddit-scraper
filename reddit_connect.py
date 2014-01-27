@@ -102,47 +102,51 @@ class RedditConnect():
             raise ValueError
         return the_page
 
-    def get_liked(self, max_pages=1):
+    def get_upvotes(self, max_pages=1):
         """
-        Get the json listing of the user's liked posts. Must be logged in
+        Get the json listing of the user's upvoted posts. Must be logged in
         and cookied for this to work!
 
         :param int max_pages: How many pages of liked data to parse. 1 page =
          25 posts.
         :returns list: A list of dictionaries converted from the json response
         """
-        print 'Retrieving likes...'
-        total_liked_data = []
-        liked_json = self.basic_request('http://www.reddit.com/user/%s/liked'
+        print 'Retrieving upvotes...'
+        total_upvoted_data = []
+        upvoted_json = self.basic_request('http://www.reddit.com/user/%s/liked'
                                         '.json' % self.username)
-        if liked_json is None:
+        if upvoted_json is None:
             print 'Nothing returned trying to request your likes (%s/liked' \
                   '.json)!\n' % self.username
             raise ValueError
-        json_data = json.loads(liked_json)
-        total_liked_data += json_data['data']['children']
+        json_data = json.loads(upvoted_json)
+        total_upvoted_data += json_data['data']['children']
         for r in range(1, max_pages+1):
-            liked_json = self.basic_request('http://www.reddit'
+            upvoted_json = self.basic_request('http://www.reddit'
                                             '.com/user/%s/liked'
                                             '.json?count=%d&after=%s' % (
                                             self.username, r * 25,
                                             json_data['data']['after']))
-            json_data = json.loads(liked_json)
-            total_liked_data += json_data['data']['children']
-            print '%d Pages Processed: %d Liked Found So Far...' % (r,
-                                                       len(total_liked_data))
+            json_data = json.loads(upvoted_json)
+            total_upvoted_data += json_data['data']['children']
+            print '%d Pages Processed: %d Upvotes Found So Far...' % (r,
+                                                       len(total_upvoted_data))
             self.wait()
-        print 'Likes retrieved!\n'
-        return total_liked_data
+        print 'Upvotes retrieved!\n'
+        return total_upvoted_data
 
     def get_upvoted_wallpapers(self, subs, liked_data):
         """
-        Get the urls for likes in a specific subset of subreddits
+        Get the urls for upvotes in a specific subset of subreddits. This is
+        the list of candidate upvotes from which we try to extract an
+        actionable url to either download directly from or we pass to a
+        plugin for the purpose or parsing and eventual odwnload link
+        extraction.
         :param list subs: A list of strings naming each subreddit to get
         images from.
 
         :param list liked_data: the list of dictionaries returned from :func:
-        get_liked. The 'url' key of these dictionaries can go to any webpage
+        get_upvotes. The 'url' key of these dictionaries can go to any webpage
         but need an explicit handler for albums or to parse non-direct links.
          See the included plugins for examples.
         :returns list: A list of dictionaries where each key 'url' is a

@@ -9,7 +9,7 @@ rc = RedditConnect('username', 'password')
 #perform the login
 rc.login()
 #retrieve X pages of likes
-liked_data = rc.get_liked(max_pages=5)
+liked_data = rc.get_upvotes(max_pages=5)
 #if you use jenkins with envinject, you can specify a multi-reddit or list
 # there, otherwise pass a list in directly
 # e.g.

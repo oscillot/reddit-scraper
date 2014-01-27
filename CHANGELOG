@@ -1,8 +1,14 @@
+2.12
+----
+Change the API spec to be Reddit-ier. Now the output makes more sense and a
+casual user will make more sense of what the class is doing (even though
+before it was strictly conforming to the terminology in the API spec,
+it's better to use the layman's vernacular, dog).
+
 2.11
 ----
 Add connection throttling to the `meth` get_liked() method in `class`
 RedditConnect. If you request more than 30 pages, you now no longer get banned.
-
 
 2.10
 ----
