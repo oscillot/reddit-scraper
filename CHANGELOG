@@ -1,3 +1,13 @@
+2.1
+----
+Add the ability to return cookies with the url from plugins
+Make image header detection more flexible to things like included encoding
+information
+Convert all the plugins over to use BeautifulSoup4 (overdue)
+Added a test for the plugin interface (more of these needed you lazy bastard!)
+Tried to prune the successes a little better to reduce test run time in the
+2.0 architecture
+
 2.04
 ----
 Restructure the BasePlugin class (PEP8 style)
