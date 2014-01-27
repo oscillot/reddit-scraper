@@ -1,7 +1,12 @@
+import os
 import time
 import json
 
 import requests
+
+HERE = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(HERE, 'VERSION')) as f:
+    VERSION = f.read()
 
 
 class RedditConnect():
@@ -15,9 +20,11 @@ class RedditConnect():
     def __init__(self, username, password):
         self.username = username
         self.password = password
-        self.headers = {'User-agent': 'Downloader for /user/%s\'s upvoted '
-                                      'images in specified subreddits by '
-                                      '/user/oscillot' % self.username}
+        self.headers = {
+            'User-agent': 'reddit-scraper/%s : Downloader for upvoted '
+                          'images in specified subreddits by /user/oscillot.'
+                          'https://github.com/oscillot/reddit-scraper' %
+                          VERSION}
         self.cookie = None
 
     def login(self):

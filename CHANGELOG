@@ -1,3 +1,11 @@
+2.15
+----
+Update the user agent to be more inline with the API Rules and also no longer
+broadcast the logging in user's username in the user agent (author's
+username is still there as this never changes) so that people with the
+expectation of privacy when using secure login aren't leaking their own
+username unknowingly in plain text.
+
 2.14
 ----
 Fixed the upvote counter missing the first page.

@@ -1,8 +1,13 @@
+import os
 from setuptools import setup, find_packages
+
+HERE = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(HERE, 'VERSION')) as f:
+    VERSION = f.read()
 
 setup(
     name='reddit-scraper',
-    version='2.14',
+    version=VERSION,
     packages=find_packages(),
     install_requires=['pillow>=1.7.8',
                       'lxml>=3.0.2',
