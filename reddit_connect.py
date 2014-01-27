@@ -114,33 +114,37 @@ class RedditConnect():
         print 'Retrieving upvotes...'
         total_upvoted_data = []
         upvoted_json = self.basic_request('http://www.reddit.com/user/%s/liked'
-                                        '.json' % self.username)
+                                          '.json' % self.username)
         if upvoted_json is None:
-            print 'Nothing returned trying to request your likes (%s/liked' \
+            print 'Nothing returned trying to request your upvotes (%s/liked' \
                   '.json)!\n' % self.username
             raise ValueError
         json_data = json.loads(upvoted_json)
         total_upvoted_data += json_data['data']['children']
-        for r in range(1, max_pages + 1):
-            try:
-                upvoted_json = self.basic_request('http://www.reddit'
-                                                  '.com/user/%s/liked'
-                                                  '.json?count=%d&after=%s' % (
-                                                  self.username, r * 25,
-                                                  json_data['data']['after']))
-            except requests.exceptions.ConnectionError, e:
-                if len(total_upvoted_data) > 0:
-                    print 'WARNING: Connection error!'
-                    print e
-                    print 'Upvotes only partially retrieved.'
-                    return total_upvoted_data
-                else:
-                    raise e
-            json_data = json.loads(upvoted_json)
-            total_upvoted_data += json_data['data']['children']
-            print '%d Pages Processed: %d Upvotes Found So Far...' % \
-                  (r, len(total_upvoted_data))
-            self.wait()
+        print '1 Page Processed: %d Upvotes Found So Far...' % \
+              len(total_upvoted_data)
+        if max_pages > 1:
+            for r in range(1, max_pages + 1):
+                try:
+                    upvoted_json = self.basic_request('http://www.reddit'
+                                                      '.com/user/%s/liked'
+                                                      '.json?count=%d&after=%s'
+                                                      % (self.username, r * 25,
+                                                      json_data['data']
+                                                      ['after']))
+                except requests.exceptions.ConnectionError, e:
+                    if len(total_upvoted_data) > 0:
+                        print 'WARNING: Connection error!'
+                        print e
+                        print 'Upvotes only partially retrieved.'
+                        return total_upvoted_data
+                    else:
+                        raise e
+                json_data = json.loads(upvoted_json)
+                total_upvoted_data += json_data['data']['children']
+                print '%d Pages Processed: %d Upvotes Found So Far...' % \
+                      (r + 1, len(total_upvoted_data))
+                self.wait()
         print 'Upvotes retrieved!\n'
         return total_upvoted_data
 
