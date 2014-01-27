@@ -3,8 +3,8 @@ For windows, I used the prebuilt binaries at:
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
 This project was built using lxml 3.02, and Python 2.7.3-2.7.5,
-though other versions may work. It also requires requests, sqlalchemy and
-pillow.
+though other versions may work. It also requires requests, sqlalchemy,
+pillow and BeautifulSoup4.
 
 HOW TO WRITE PLUGINS
 --------------------------------------------------------------------------------
@@ -23,7 +23,8 @@ by the logic in the BasePlugin class, once per Download object in the
 CandidateList that has been passed to it. The current Download candidate
 object will be the one in the plugin at self.candidate.
 
-A Download object has 5 attributes, 4 of which are set on creation:
+A Download object has 5 attributes, 4 of which are set on creation,
+along with an optional sixth attribute, which you set if needed:
 * title     - this is taken from the reddit post
 * subreddit - this is also taken from the reddit post
 * url       - this is the url of the POST and not necessarily the IMAGE or
@@ -35,6 +36,10 @@ A Download object has 5 attributes, 4 of which are set on creation:
 * md5       - you set this once you have downloaded the image it's one of
                 the last things you do but you still check it against the
                 database to avoid duplicate images
+* cookies   - you set this attribute as needed if a cookie is necessary for
+                the download to complete successfully. It is not necessary to
+                set this to None if you do not have a cookie, simply omit it,
+                and let the BasePlugin handle it for you.
 
 The approach that I take for writing plugins is typically to have the execute
 function call a helper function that returns an img_url,
