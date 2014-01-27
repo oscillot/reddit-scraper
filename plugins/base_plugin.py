@@ -303,7 +303,7 @@ class BasePlugin(object):
         for header in IMAGE_HEADERS:
             #this handles headers that look like this:
             #image/jpeg; charset=UTF-8
-            if self.resp.headers.get('content-type') in header:
+            if header in self.resp.headers.get('content-type'):
                 return True
         #if we get here no header matched
         return False
