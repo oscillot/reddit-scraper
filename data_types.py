@@ -11,11 +11,15 @@ class CandidatesList(object):
         for c in self.candidates:
                 if item == c.url:
                     return item
+                elif item == c:
+                    return item
 
     def remove(self, item):
         for c in self.candidates:
             if c.url == item:
-                return self.candidates.remove(c)
+                self.candidates.remove(c)
+            elif item in self.candidates:
+                self.candidates.remove(item)
 
     def __len__(self):
         return len(self.candidates)

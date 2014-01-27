@@ -2,8 +2,7 @@
 # link to its imgur page
 
 #works as of 09-30-13
-
-from lxml import etree
+from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
 
@@ -22,10 +21,6 @@ class ImgurSingleIndirect(BasePlugin):
                  and not self.candidate.url.lower()[-4:] in ['.jpg', '.bmp',
                                                              '.png', '.gif']):
             img_url = self.get_imgur_single(self.candidate.url)
-            #This handles the links that come down with extensions like
-            # `jpg?1` that have been showing up lately. Regular links
-            # should be unaffected by this. This is done here so that the
-            #  list of handled links is still accurate.
             if img_url is not None:
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
@@ -43,10 +38,10 @@ class ImgurSingleIndirect(BasePlugin):
             print 'Error contacting imgur (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.text)
-        al = tree.findall('.//head/link')
+        root = BeautifulSoup(resp.text)
+        al = root.find('head').find_all('link')
         for a in al:
-            href = a.attrib['href']
+            href = a.attrs.get('href')
             if url.lstrip('http://') in href:
                 #Fix The single indirect links that look like this:
                 #<link rel="image_src" href="//i.imgur.com/IZZayKa.png" />

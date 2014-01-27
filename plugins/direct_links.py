@@ -17,5 +17,5 @@ class DirectLinks(BasePlugin):
                     img_type):
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
-                                        self.candidate.url.rsplit('?')[0])
+                                        self.candidate.url)
                 break

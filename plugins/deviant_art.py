@@ -1,4 +1,4 @@
-from lxml import etree
+from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
 
@@ -31,27 +31,28 @@ class DeviantArt(BasePlugin):
             print 'Error reaching deviantart (%s):' % url
             print e
             return
-        tree = etree.HTML(resp.text)
-        #/html/head/title
-        for title in tree.findall('.//head/title'):
+        root = BeautifulSoup(resp.text)
+
+        for title in root.find_all('title'):
             if title.text == 'deviantART: 404 Not Found':
                 print '%s: %s' % (url, title.text)
                 return title.text, resp.cookies.get_dict()
-        #//*[@id="output"]/div[1]/div[4]/div[1]/div/div[2]/a
-        for dl in tree.findall(".//*/a[@class='dev-page-button dev-page-button-with-text dev-page-download']"):
-            if dl is not None and dl.get('href'):
-                if '/download/' in dl.attrib['href']:
-                    href = dl.attrib['href']
-                    if '?token' in href:
-                        href = href.split('?token')[0]
-                    return href, resp.cookies.get_dict()
-        #Possibly the above catches all images as of 9-30, not sure yet
-        for dl in tree.findall('.//*[@id="download-button"]'):
-            if dl is not None and dl.get('href'):
-                if '/download/' in dl.attrib['href']:
-                    return dl.attrib['href']
-        dl = tree.find('.//*/meta[@name="og:image"]')
+
+        dl = root.find('meta', {'name': 'og:image'})
         if dl is not None:
-            return dl.attrib['content'], resp.cookies.get_dict()
+            return dl.attrs.get('content'), resp.cookies.get_dict()
 
+        for dl in root.find_all('a', ['dev-page-button',
+                                      'dev-page-button-with-text',
+                                      'dev-page-download']):
+            if '/download/' in dl.attrs.get('href') and '?token' in \
+                dl.attrs.get('href'):
+                href = dl.attrs.get('href')
+                #why do we split off the token here? let's turn that off
+                # for now...
+                # href = href.split('?token')[0]
+                return href, resp.cookies.get_dict()
 
+        for dl in root.find_all(id='download-button'):
+            if '/download/' in dl.attrs.get('href'):
+                return dl.attrs.get('href'), resp.cookies.get_dict()

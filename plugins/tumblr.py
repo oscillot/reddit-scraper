@@ -1,5 +1,4 @@
-from lxml import etree
-
+from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
 
@@ -22,12 +21,11 @@ class Tumblr(BasePlugin):
             print 'Error contacting tumblr (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.text)
-        urls = []
+        root = BeautifulSoup(resp.text)
         imgs = []
 
-        for iframe in tree.findall('.//*/iframe[@class="photoset"]'):
-            src = iframe.attrib['src']
+        for iframe in root.find_all('iframe', {'class': 'photoset'}):
+            src = iframe.attrs.get('src')
 
             try:
                 resp = requests.get(src)
@@ -35,8 +33,8 @@ class Tumblr(BasePlugin):
                 print 'Error contacting tumblr (%s):' % url
                 print e
                 return []
-            tree = etree.HTML(resp.text)
+            root = BeautifulSoup(resp.text)
 
-            for img in tree.findall('.//*[@class="photoset_photo"]'):
-                imgs.append(img.attrib['href'])
+            for img in root.find_all({'class': 'photoset_photo'}):
+                imgs.append(img.attrs.get('href'))
         return imgs

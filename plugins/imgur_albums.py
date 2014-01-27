@@ -1,5 +1,5 @@
 #Handles getting all of the images from an album linked to on imgur
-from lxml import etree
+from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
 
@@ -11,14 +11,9 @@ class ImgurAlbum(BasePlugin):
         if self.candidate.url.lower().startswith('http://imgur.com/a/'):
             album_imgs = self.get_imgur_album(self.candidate.url)
             for album_img in album_imgs:
-                #This handles the links that come down with extensions like
-                # `jpg?1` that have been showing up lately. Regular links
-                # should be unaffected by this. This is done here so that the
-                #  list of handled links is still accurate.
-                album_img_url = album_img.split('?')[0]
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
-                                        album_img_url)
+                                        album_img)
 
     def get_imgur_album(self, url):
         """Helper for the imgur album execute function
@@ -32,10 +27,10 @@ class ImgurAlbum(BasePlugin):
             print 'Error contacting imgur (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.text)
+        root = BeautifulSoup(resp.text)
         urls = []
-        for script in tree.findall('body/script'):
-            if script.text is not None:
+        for script in root.find('body').find_all('script'):
+            if script.attrs.get('text') is not None:
                 if script.text.replace('\n', '').lstrip().rstrip()\
                         .startswith('var album'):
                     album = eval('[{%s}]' % script.text.split('[{')[1].split(

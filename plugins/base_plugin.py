@@ -87,9 +87,10 @@ class BasePlugin(object):
             #self.current.subreddit.encode('ascii', 'replace'),
             #self.current.url.encode('ascii', 'replace'), '\n'
 
+            #snag the image! woot! that's what it all leads up to
+            # in the end!
             try:
-                #snag the image! woot! that's what it all leads up to
-                # in the end!
+                #use the cookie if we have one
                 if hasattr(self.current, 'cookies') and \
                         self.current.cookies is not None:
                     self.resp = requests.get(self.current.url,
@@ -127,11 +128,13 @@ class BasePlugin(object):
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
                           (self.__class__.__name__, self.current.filename)
                     #remove successes so the whole run goes faster
-                    self.candidates.remove(self.current)
+                    if self.current in self.candidates:
+                        # print '@@@@@@@@@@@@@@@@@@IT MATTERS'
+                        self.candidates.remove(self.current)
 
     def add_to_main_db_table(self):
         """
-        Inserts the full handled link info into the wallpaers table of the db
+        Inserts the full handled link info into the wallpapers table of the db
         """
         conn = self.engine.connect()
         wall_data = (self.current.subreddit, self.current.title,
@@ -266,7 +269,14 @@ class BasePlugin(object):
         What it sounds like. Code responsible for saving off the image to the
         filesystem and display any errors that might arise
         """
+        #Move the logic that strips url args here in case they were needed for
+        # downloads (was stripping it before acquisition like a total noob)
+        if '?' in self.current.filename:
+            self.current.filename = self.current.filename.split('?')[0]
+        #Add the output path the the filename
         orig_img_path = os.path.join(self.output_dir, self.current.filename)
+        #handle incrementing the image name with a number if we pass the MD5
+        # but the filename was taken
         img_path = orig_img_path
         orig_path, orig_ext = orig_img_path.rsplit('.', 1)
         inc = 1

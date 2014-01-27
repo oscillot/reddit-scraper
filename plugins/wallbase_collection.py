@@ -6,8 +6,7 @@ import re
 import base64
 import time
 
-from lxml import etree
-
+from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
 
@@ -38,8 +37,11 @@ class WallbaseCollection(BasePlugin):
             print 'Error contacting wallbase (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.text)
-        max_images = int(tree.find('.//*[@id="delwrap"]/div[1]/div[3]/span[1]').text)
+        root = BeautifulSoup(resp.text)
+        max_images = int(root.find({'id': 'delwrap'})
+                             .find_all('div', recursive=False)[1]
+                             .find_all('div', recursive=False)[3]
+                             .find_all('span', recursive=False)[1].text)
         pages = []
         start = 1
         end = 32
@@ -52,10 +54,9 @@ class WallbaseCollection(BasePlugin):
         urls = []
         for i, p in enumerate(pages):
             thumb_links = []
-            tree = etree.HTML(requests.get(p).text)
-            t1 = time.time()
-            for script in tree.findall('.//*[@class="thumb"]/a'):
-                img_link = script.get('href')
+            root = BeautifulSoup(requests.get(p).text)
+            for script in root.find_all({'class': 'thumb'}, 'a'):
+                img_link = script.attrs.get('href')
                 thumb_links.append(img_link)
             for link in thumb_links:
                 try:
@@ -64,8 +65,8 @@ class WallbaseCollection(BasePlugin):
                     print 'Error contacting wallbase (%s):' % url
                     print e
                     continue
-                tree = etree.HTML(resp.text)
-                js = tree.find('.//*[@id="bigwall"]/script').text
+                root = BeautifulSoup(resp.text)
+                js = root.find(id='bigwall').find('script').text
                 pat = re.compile(r'src="\'\+B\(\'[a-zA-Z0-9=\+\\]+\'\)\+\'"')
                 match = re.search(pat, js)
                 m = match.group().lstrip(r'src="\'\+B\(\'').rstrip(r'\'\)\+\'"')

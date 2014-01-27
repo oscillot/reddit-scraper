@@ -1,4 +1,4 @@
-from lxml import etree
+from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
 
@@ -26,7 +26,6 @@ class Get500pxSingle(BasePlugin):
             print 'Error contacting imgur (%s):' % url
             print e
             return []
-        tree = etree.HTML(resp.text)
-        a = tree.findall('.//*[@id="thephoto"]/a')
-        href = a[0].attrib['href']
-        return href
+        root = BeautifulSoup(resp.text)
+        a = root.find(id='thephoto').find('a')
+        return a.attrs.get('href')
