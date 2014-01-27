@@ -1,4 +1,10 @@
-2.1
+2.11
+----
+Add connection throttling to the `meth` get_liked() method in `class`
+RedditConnect. If you request more than 30 pages, you now no longer get banned.
+
+
+2.10
 ----
 Add the ability to return cookies with the url from plugins
 Make image header detection more flexible to things like included encoding

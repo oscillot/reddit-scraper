@@ -1,5 +1,7 @@
-import requests
+import time
 import json
+
+import requests
 
 
 class RedditConnect():
@@ -119,16 +121,15 @@ class RedditConnect():
             raise ValueError
         json_data = json.loads(liked_json)
         total_liked_data += json_data['data']['children']
-        if max_pages > 1:
-            for r in range(1, max_pages+1):
-                liked_json = self.basic_request('http://www.reddit'
-                                                '.com/user/%s/liked'
-                                                '.json?count=%d&after=%s' % (
-                                                self.username, r * 25,
-                                                json_data['data']['after']))
-
-                json_data = json.loads(liked_json)
-                total_liked_data += json_data['data']['children']
+        for r in range(1, max_pages+1):
+            liked_json = self.basic_request('http://www.reddit'
+                                            '.com/user/%s/liked'
+                                            '.json?count=%d&after=%s' % (
+                                            self.username, r * 25,
+                                            json_data['data']['after']))
+            json_data = json.loads(liked_json)
+            total_liked_data += json_data['data']['children']
+            self.wait()
         print 'Likes retrieved!\n'
         return total_liked_data
 
@@ -154,3 +155,14 @@ class RedditConnect():
             if child['data']['subreddit'].lower() in subs:
                 candidates.append(child)
         return candidates
+
+    def wait(self):
+        """
+        Waits two seconds whenever the API agreement decrees that you must
+        wait. This prevents the bot from getting blocked and having requests
+        sit around for the max timeout, the effects of which are worse on
+        large jobs which is usually when this happens anyway.
+
+        https://github.com/reddit/reddit/wiki/API#rules
+        """
+        time.sleep(2)
