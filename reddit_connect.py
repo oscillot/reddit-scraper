@@ -129,6 +129,8 @@ class RedditConnect():
                                             json_data['data']['after']))
             json_data = json.loads(liked_json)
             total_liked_data += json_data['data']['children']
+            print '%d Pages Processed: %d Liked Data Found' % (r,
+                                                       len(total_liked_data))
             self.wait()
         print 'Likes retrieved!\n'
         return total_liked_data
