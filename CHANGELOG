@@ -1,3 +1,8 @@
+2.16
+----
+Add some output for the candidate curation stage so there isn't such a dead
+zone between API request and acquisition.
+
 2.15
 ----
 Update the user agent to be more inline with the API Rules and also no longer

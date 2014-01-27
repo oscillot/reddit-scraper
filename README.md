@@ -86,3 +86,7 @@ the image will still fire off each time you set the object.
         def get_imgur_album(self, url):
             ...
             return urls
+
+NOTES: It is recommended to set PYTHONUNBUFFERED=1 when running in Jenkins so
+ that the console updates in something closer to real-time,
+ otherwise trying to watch the console pretty much sucks.

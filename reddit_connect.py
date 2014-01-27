@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import string
 
 import requests
 
@@ -155,7 +156,7 @@ class RedditConnect():
         print 'Upvotes retrieved!\n'
         return total_upvoted_data
 
-    def get_upvoted_wallpapers(self, subs, liked_data):
+    def get_upvoted_wallpapers(self, subs, upvotes_data):
         """
         Get the urls for upvotes in a specific subset of subreddits. This is
         the list of candidate upvotes from which we try to extract an
@@ -165,21 +166,24 @@ class RedditConnect():
         :param list subs: A list of strings naming each subreddit to get
         images from.
 
-        :param list liked_data: the list of dictionaries returned from :func:
+        :param list upvotes_data: the list of dictionaries returned from :func:
         get_upvotes. The 'url' key of these dictionaries can go to any webpage
         but need an explicit handler for albums or to parse non-direct links.
-         See the included plugins for examples.
+        See the included plugins for examples.
         :returns list: A list of dictionaries where each key 'url' is a
         direct link to an image
         """
         print 'Getting candidates...\n'
-        for i, sub in enumerate(subs):
-            subs[i] = sub.lower()
+        #make the list of subreddits lowercase for easier comparisons
+        subs = map(string.lower, subs)
 
+        matches = 0
         candidates = []
-        for child in liked_data:
+        for child in upvotes_data:
             if child['data']['subreddit'].lower() in subs:
                 candidates.append(child)
+                matches += 1
+                print 'Candidates found so far: %d' % matches
         return candidates
 
     def wait(self):
