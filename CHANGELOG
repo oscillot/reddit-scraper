@@ -1,3 +1,9 @@
+2.13
+----
+Make partial successes fail gracefully when getting large numbers of upvote
+pages all at once. So long as we got some response report a warning and make
+due with what we got instead of throwing an exception and losing everything.
+
 2.12
 ----
 Change the API spec to be Reddit-ier. Now the output makes more sense and a
