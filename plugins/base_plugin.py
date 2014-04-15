@@ -65,8 +65,6 @@ class BasePlugin(object):
         if value is not None:
             self.acquisition_tasks()
         else:
-            print '%s: Skipping %s: not handled by this plugin\n' % \
-                  (self.__class__.__name__, self.candidate.url)
             self.unhandled.append(self.candidate)
 
     def acquisition_tasks(self):

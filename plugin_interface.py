@@ -135,4 +135,5 @@ class PluginInterface():
 
         for plugin in plugins_count.keys():
             if plugins_count[plugin] == 0:
+                print 'No matches for %s, unloading.' % plugin.__name__
                 loaded_plugins.remove(plugin)
