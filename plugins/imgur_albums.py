@@ -9,7 +9,7 @@ class ImgurAlbum(BasePlugin):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
-        if self.url_matches():
+        if self.url_matches(self.candidate.url):
             album_imgs = self.get_imgur_album(self.candidate.url)
             for album_img in album_imgs:
                 self.current = Download(self.candidate.title,
@@ -17,14 +17,14 @@ class ImgurAlbum(BasePlugin):
                                         album_img)
 
     @staticmethod
-    def url_matches(self):
+    def url_matches(url):
         """
         This matches only imgur albums
         """
 
         imgur_alb_pat = re.compile(r'^http[s]?://.*imgur\.com/a/.*$',
                                    flags=re.IGNORECASE)
-        if imgur_alb_pat.match(self.candidate.url):
+        if imgur_alb_pat.match(url):
             return True
         else:
             return False

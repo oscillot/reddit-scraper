@@ -132,8 +132,7 @@ class PluginInterface():
         for plugin in loaded_plugins:
             plugins_count[plugin] = 0
             for link in self.candidates:
-                plugin.candidate.url = link
-                if plugin.url_matches():
+                if plugin.url_matches(link):
                     plugins_count[plugin] += 1
 
         for plugin in plugins_count.keys():

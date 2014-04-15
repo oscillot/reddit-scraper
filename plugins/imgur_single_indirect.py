@@ -12,7 +12,7 @@ class ImgurSingleIndirect(BasePlugin):
         """
         #prevent this plugin from handling links such as the following:
         #http://i.imgur.com/nbsQ4SF.jpg#.UTtRkqYGmy0.reddit
-        if self.url_matches():
+        if self.url_matches(self.candidate.url):
             img_url = self.get_imgur_single()
             if img_url is not None:
                 self.current = Download(self.candidate.title,
@@ -20,7 +20,7 @@ class ImgurSingleIndirect(BasePlugin):
                                         img_url)
 
     @staticmethod
-    def url_matches(self):
+    def url_matches(url):
         """
         This matches single image pages on imgur that are not direct links to
         the image. Yeah, look at that sexy regex. Nested non-captureing groups
@@ -46,7 +46,7 @@ class ImgurSingleIndirect(BasePlugin):
             r').)*$',
             flags=re.IGNORECASE)
         #strip the url args since we are looking to match against file types
-        if imgur_single_page_pat.match(self.candidate.url.split('#')[0]):
+        if imgur_single_page_pat.match(url.split('#')[0]):
             return True
         else:
             return False

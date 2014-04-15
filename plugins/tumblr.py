@@ -8,7 +8,7 @@ class Tumblr(BasePlugin):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
-        if 'tumblr.com' in self.candidate.url.lower():
+        if self.url_matches(self.candidate.url):
             img_urls = self.get_tumblr_imgs(self.candidate.url)
             for img_url in img_urls:
                 self.current = Download(self.candidate.title,
@@ -16,14 +16,14 @@ class Tumblr(BasePlugin):
                                         img_url)
 
     @staticmethod
-    def url_matches(self):
+    def url_matches(url):
         """
         This matches all tumblr urls
         """
 
         tumplr_pat = re.compile(r'^http[s]?://.*tumblr\.com.*$',
                                 flags=re.IGNORECASE)
-        if tumplr_pat.match(self.candidate.url):
+        if tumplr_pat.match(url):
             return True
         else:
             return False

@@ -8,21 +8,21 @@ class Get500pxSingle(BasePlugin):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
-        if self.url_matches():
+        if self.url_matches(self.candidate.url):
             img_url = self.get_500px_img(self.candidate.url)
             self.current = Download(self.candidate.title,
                                     self.candidate.subreddit,
                                     img_url)
 
     @staticmethod
-    def url_matches(self):
+    def url_matches(url):
         """
         This matches 500px photo pages
         """
 
         px500_pat = re.compile(r'^http[s]?://.*500px\.com/photo/.*$',
                                  flags=re.IGNORECASE)
-        if px500_pat.match(self.candidate.url):
+        if px500_pat.match(url):
             return True
         else:
             return False

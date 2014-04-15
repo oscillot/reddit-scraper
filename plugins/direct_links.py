@@ -7,7 +7,7 @@ class DirectLinks(BasePlugin):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
-        if self.url_matches():
+        if self.url_matches(self.candidate.url):
             #This helps handle the new imgur links that are direct links but
             # have some kind of reddit argument e.g.
             # http://i.imgur.com/nbsQ4SF.jpg#.UTtRkqYGmy0.reddit
@@ -23,13 +23,13 @@ class DirectLinks(BasePlugin):
                     break
 
     @staticmethod
-    def url_matches(self):
+    def url_matches(url):
         """
         This is just a link that looks like it's a direct link to an image
         """
         direct_pat = re.compile(r'^http[s]?://.*(?:.jpg|.jpeg|.gif|.bmp|.png).*$',
                                 flags=re.IGNORECASE)
-        if direct_pat.match(self.candidate.url):
+        if direct_pat.match(url):
             return True
         else:
             return False

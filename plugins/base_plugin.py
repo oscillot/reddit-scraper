@@ -247,7 +247,7 @@ class BasePlugin(object):
         raise NotImplementedError
 
     @staticmethod
-    def url_matches(self):
+    def url_matches(url):
         """
         To be overridden by subclasses. The subclassed versions of this
         method should be a regex takes self.candidate.url and returns True if
