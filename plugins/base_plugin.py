@@ -290,13 +290,15 @@ class BasePlugin(object):
             self.current.filename = self.current.filename.split('?')[0]
         #Add the subfolders conditionally:
         if self.categorize:
-            self.output_dir = os.path.join(self.output_dir,
+            category_dir = os.path.join(self.output_dir,
                                            self.current.subreddit)
             #since this is a subfolder, it may not yet exist!
-            if not os.path.exists(self.output_dir):
-                os.makedirs(self.output_dir)
+            if not os.path.exists(category_dir):
+                os.makedirs(category_dir)
+        else:
+            category_dir = self.output_dir
         #Add the output path to the filename
-        orig_img_path = os.path.join(self.output_dir, self.current.filename)
+        orig_img_path = os.path.join(category_dir, self.current.filename)
         #handle incrementing the image name with a number if we pass the MD5
         # but the filename was taken
         #wait, what the hell am I  doing here, was I drunk??
