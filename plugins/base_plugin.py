@@ -192,7 +192,7 @@ class BasePlugin(object):
         necessary information and makes the code much easier to read and
         understand
         """
-        if type(self.candidates == CandidatesList):
+        if type(self.candidates) == 'CandidatesList':
             return
         else:
             new_cands = []

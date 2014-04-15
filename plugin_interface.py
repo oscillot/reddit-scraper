@@ -45,7 +45,6 @@ class PluginInterface():
         self.posts_already_finished = None
         self.image_urls_already_fetched = None
         self.candidates_backup = set()
-        self.revised = set()
 
     def hand_off_to_plugins(self):
         """Calls each plugin module and hand the CandidateList off to it.
@@ -69,7 +68,6 @@ class PluginInterface():
             self.image_urls_already_fetched = \
                 plug_inst.image_urls_already_fetched
             self.candidates_backup.update(plug_inst.candidates_backup)
-            self.revised.update(plug_inst.revised)
 
     def check_unhandled_links(self):
         """
@@ -131,8 +129,8 @@ class PluginInterface():
         plugins_count = {}
         for plugin in loaded_plugins:
             plugins_count[plugin] = 0
-            for link in self.candidates:
-                if plugin.url_matches(link):
+            for candidate in self.candidates:
+                if plugin.url_matches(candidate.url):
                     plugins_count[plugin] += 1
 
         for plugin in plugins_count.keys():
