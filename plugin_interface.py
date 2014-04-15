@@ -76,9 +76,9 @@ class PluginInterface():
         development/maintenance
         """
         for original in self.candidates_backup:
-            if original in self.handled or original in \
-                    self.image_urls_already_fetched or \
-                    original in self.posts_already_finished:
+            if original in self.handled or \
+               original in self.image_urls_already_fetched or \
+               original in self.posts_already_finished:
                 continue
             else:
                 self.unhandled.append((extract_domain(original.url),

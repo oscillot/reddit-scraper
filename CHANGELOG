@@ -1,3 +1,7 @@
+2.21
+____
+Added a plugin to handle JSON for single images from the Imgur API
+
 2.20
 ----
 Made all plugins use a staticmethod called url_matches so we can prune out
