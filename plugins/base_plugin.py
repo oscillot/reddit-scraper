@@ -12,7 +12,9 @@ IMAGE_HEADERS = ['image/bmp',
                  'image/png',
                  'image/jpg',
                  'image/jpeg',
-                 'image/gif']
+                 'image/gif',
+                 'application/json' #imgur api uses this sometimes
+]
 
 
 class BasePlugin(object):
