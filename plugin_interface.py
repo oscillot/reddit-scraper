@@ -21,7 +21,7 @@ def extract_domain(url):
 
 
 class PluginInterface():
-    def __init__(self, database, candidates, output):
+    def __init__(self, database, candidates, output, categorize=False):
         """
         The PluginInterface takes care of reading the plugins, determining
         which ones are valid, and iterating through them. It is a wrapper
@@ -38,19 +38,22 @@ class PluginInterface():
         self.database = database
         self.candidates = candidates
         self.output = output
+        self.categorize = categorize
         #set up some class variables
         self.handled = []
         self.unhandled = []
         self.posts_already_finished = None
         self.image_urls_already_fetched = None
         self.candidates_backup = set()
+        self.revised = set()
 
     def hand_off_to_plugins(self):
         """Calls each plugin module and hand the CandidateList off to it.
         """
         for plugin in loaded_plugins:
             print 'Loading plugin: %s.\n' % plugin.__name__
-            plug_inst = plugin(self.database, self.candidates, self.output)
+            plug_inst = plugin(self.database, self.candidates, self.output,
+                               self.categorize)
             self.handled.extend(plug_inst.handled)
             print '%s handled the following urls:\n' % plugin.__name__
             if len(plug_inst.handled) > 0:
@@ -66,6 +69,7 @@ class PluginInterface():
             self.image_urls_already_fetched = \
                 plug_inst.image_urls_already_fetched
             self.candidates_backup.update(plug_inst.candidates_backup)
+            self.revised.update(plug_inst.revised)
 
     def check_unhandled_links(self):
         """
@@ -100,6 +104,10 @@ class PluginInterface():
         if not os.path.exists(self.output):
             os.makedirs(self.output)
 
+        #parse through links once and try to remove any unneeded plugins
+        # (saves time once you have a lot of plugins)
+        self.remove_unneeded_plugins()
+
         #parse links through plugins
         print '\nProcessing: parse links through plugins...'
         self.hand_off_to_plugins()
@@ -118,3 +126,16 @@ class PluginInterface():
 
         print '\nComplete. %d new images were acquired this run.' \
               % len(self.handled)
+
+    def remove_unneeded_plugins(self):
+        plugins_count = {}
+        for plugin in loaded_plugins:
+            plugins_count[plugin] = 0
+            for link in self.candidates:
+                plugin.candidate.url = link
+                if plugin.url_matches():
+                    plugins_count[plugin] += 1
+
+        for plugin in plugins_count.keys():
+            if plugins_count[plugin] == 0:
+                loaded_plugins.remove(plugin)

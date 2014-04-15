@@ -15,13 +15,25 @@ class WallbaseCollection(BasePlugin):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
-        if self.candidate.url.lower().startswith(
-                'http://wallbase.cc/user/collection/'):
+        if self.url_matches():
             collection_imgs = self.get_wallbase_collection(self.candidate.url)
             for img_url in collection_imgs:
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
                                         img_url)
+
+    @staticmethod
+    def url_matches(self):
+        """
+        This matches only wallbase user collections.
+        """
+
+        wallbase_coll_pat = re.compile(r'^http[s]?://.*wallbase.cc/user/collection/.*$',
+                                       flags=re.IGNORECASE)
+        if wallbase_coll_pat.match(self.candidate.url):
+            return True
+        else:
+            return False
 
     def get_wallbase_collection(self, url):
         """Helper for the wallbase collection function. This will try to

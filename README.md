@@ -1,4 +1,4 @@
-The reddit-scraper requires lxml. Please install it from lxml.de.
+The reddit_scraper requires lxml. Please install it from lxml.de.
 For windows, I used the prebuilt binaries at:
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
@@ -9,7 +9,7 @@ pillow and BeautifulSoup4.
 HOW TO WRITE PLUGINS
 --------------------------------------------------------------------------------
 Plugin modules can have any name but must go in the plugins folder
-(reddit-scraper/plugins).
+(reddit_scraper/plugins).
 
 The built-in DirectLink plugin should handle most direct links,
 so when you a writing a plugin it is likely because something was not handled

@@ -1,6 +1,6 @@
 import os
 import sys
-from base_plugin import *
+from base_plugin import BasePlugin
 
 #Load an arbitrary number of arbitrarily named plugins from the plugins folder
 
@@ -18,13 +18,30 @@ for r, d, f in os.walk(plugins_folder):
 
 sys.path.insert(0, plugins_folder)
 
+
+def valid_plugin(cls):
+    #Make sure all plugins subclass the base plugin!
+    if not issubclass(cls, BasePlugin):
+        # print 'Plugin Import Failed!\t %s does not subclass the BasePlugin' % cls.__name__ ##Wow too loud!
+        return False
+    if cls.__name__ == 'BasePlugin':
+        return False
+    if not hasattr(cls, 'url_matches') and \
+            type(cls.url_matches != 'instancemethod'):
+        print 'Plugin Import Failed!\t %s does not have a static method called ' \
+              '`url_matches` to match URLs!'
+        return False
+    return True
+
 for plugin in plugin_list:
+    if plugin in ['base_plugin', '__init__']:
+        continue
     try:
         loaded = __import__(plugin)
         for attr in dir(loaded):
             try:
                 cls = getattr(loaded, attr)
-                if issubclass(cls, BasePlugin) and cls.__name__ != 'BasePlugin':
+                if valid_plugin(cls):
                     good_plugins.append(cls.__name__)
                     loaded_plugins.append(cls)
             except TypeError:

@@ -1,4 +1,5 @@
 #Handles getting all of the images from an album linked to on imgur
+import re
 from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
@@ -8,12 +9,25 @@ class ImgurAlbum(BasePlugin):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
-        if self.candidate.url.lower().startswith('http://imgur.com/a/'):
+        if self.url_matches():
             album_imgs = self.get_imgur_album(self.candidate.url)
             for album_img in album_imgs:
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
                                         album_img)
+
+    @staticmethod
+    def url_matches(self):
+        """
+        This matches only imgur albums
+        """
+
+        imgur_alb_pat = re.compile(r'^http[s]?://.*imgur\.com/a/.*$',
+                                   flags=re.IGNORECASE)
+        if imgur_alb_pat.match(self.candidate.url):
+            return True
+        else:
+            return False
 
     def get_imgur_album(self, url):
         """Helper for the imgur album execute function

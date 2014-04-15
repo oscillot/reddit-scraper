@@ -8,7 +8,7 @@ class FlickrSingle(BasePlugin):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
-        if 'www.flickr.com/photos/' in self.candidate.url:
+        if self.url_matches():
             #This just throws us back in case the link we have is for a
             # pre-selected size, so we can choose high quality like normal
             if '/sizes/' in self.candidate.url:
@@ -18,6 +18,19 @@ class FlickrSingle(BasePlugin):
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
                                         flickr_img_url)
+
+    @staticmethod
+    def url_matches(self):
+        """
+        This matches flickr photo pages
+        """
+
+        flickr_pat = re.compile(r'^http[s]?://.*www\.flickr\.com/photos/.*$',
+                                flags=re.IGNORECASE)
+        if flickr_pat.match(self.candidate.url):
+            return True
+        else:
+            return False
 
     def get_best_quality(self, url):
         try:

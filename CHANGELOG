@@ -1,3 +1,11 @@
+2.20
+----
+Made all plugins use a staticmethod called url_matches so we can prune out
+unused plugins sooner (BETA)
+
+Added an optional categorize argument to the Plugin Interface class that makes
+subfolders based on subreddit, useful for OCD.
+
 2.16
 ----
 Add some output for the candidate curation stage so there isn't such a dead

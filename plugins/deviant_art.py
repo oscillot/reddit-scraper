@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
@@ -7,7 +8,7 @@ class DeviantArt(BasePlugin):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
-        if 'deviantart.com' in self.candidate.url.lower():
+        if self.url_matches():
             deviant_art_img_url, deviant_art_cookie = self\
                 .get_deviant_art_image(self.candidate.url)
             if deviant_art_img_url is not None:
@@ -17,6 +18,19 @@ class DeviantArt(BasePlugin):
                                         self.candidate.subreddit,
                                         deviant_art_img_url,
                                         deviant_art_cookie)
+
+    @staticmethod
+    def url_matches(self):
+        """
+        This is matches all deviant art pages
+        """
+
+        deviant_pat = re.compile(r'^http[s]?://.*deviantart\.com.*$',
+                                 flags=re.IGNORECASE)
+        if deviant_pat.match(self.candidate.url):
+            return True
+        else:
+            return False
 
     def get_deviant_art_image(self, url):
         """Helper for the deviant art execute function

@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
@@ -13,6 +14,19 @@ class Tumblr(BasePlugin):
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
                                         img_url)
+
+    @staticmethod
+    def url_matches(self):
+        """
+        This matches all tumblr urls
+        """
+
+        tumplr_pat = re.compile(r'^http[s]?://.*tumblr\.com.*$',
+                                flags=re.IGNORECASE)
+        if tumplr_pat.match(self.candidate.url):
+            return True
+        else:
+            return False
 
     def get_tumblr_imgs(self, url):
         try:

@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 from plugins.base_plugin import *
 
@@ -7,12 +8,24 @@ class Get500pxSingle(BasePlugin):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
-        if self.candidate.url.lower().startswith(
-                'http://500px.com/photo/'):
+        if self.url_matches():
             img_url = self.get_500px_img(self.candidate.url)
             self.current = Download(self.candidate.title,
                                     self.candidate.subreddit,
                                     img_url)
+
+    @staticmethod
+    def url_matches(self):
+        """
+        This matches 500px photo pages
+        """
+
+        px500_pat = re.compile(r'^http[s]?://.*500px\.com/photo/.*$',
+                                 flags=re.IGNORECASE)
+        if px500_pat.match(self.candidate.url):
+            return True
+        else:
+            return False
 
     def get_500px_img(self, url):
         """Helper for the 500px execute function

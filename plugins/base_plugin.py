@@ -16,7 +16,7 @@ IMAGE_HEADERS = ['image/bmp',
 
 
 class BasePlugin(object):
-    def __init__(self, database, candidates, output):
+    def __init__(self, database, candidates, output, categorize=False):
         """The BasePlugin class actually does all of the work under the hood.
         It creates the database, performs the database calls. Retrieves images
         from content servers, does any error handling that plugins neglect to
@@ -28,9 +28,12 @@ class BasePlugin(object):
         :param str output: the location on disk to store your images (note
         that this can be changed and the database data will handle all
         duplicate filtering
+        :param bool categorize: whether to create subfolders of the subreddit
+        names where images came from. Defaults to False.
         """
         self.candidates = candidates
         self.output_dir = output
+        self.categorize = categorize
         self.to_acquire = []
         self.handled = []
         self.unhandled = []
@@ -128,7 +131,7 @@ class BasePlugin(object):
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
                           (self.__class__.__name__, self.current.filename)
                     #remove successes so the whole run goes faster
-                    if self.current in self.candidates:
+                    while self.current in self.candidates:
                         # print '@@@@@@@@@@@@@@@@@@IT MATTERS'
                         self.candidates.remove(self.current)
 
@@ -189,26 +192,29 @@ class BasePlugin(object):
         necessary information and makes the code much easier to read and
         understand
         """
-        new_cands = []
-        for c in self.candidates:
-            if c.__class__.__name__ == 'Download':
-                new_cands.append(c)
-            else:
-                new_cands.append(Download(c['data']['title'],
-                                          c['data']['subreddit'],
-                                          c['data']['url']))
-        self.candidates = CandidatesList(new_cands)
-        self.candidates_backup = self.candidates
-        self.revised = self.candidates
+        if type(self.candidates == CandidatesList):
+            return
+        else:
+            new_cands = []
+            for c in self.candidates:
+                if c.__class__.__name__ == 'Download':
+                    new_cands.append(c)
+                else:
+                    new_cands.append(Download(c['data']['title'],
+                                              c['data']['subreddit'],
+                                              c['data']['url']))
+            self.candidates = CandidatesList(new_cands)
+            self.candidates_backup = self.candidates
+            self.revised = self.candidates
 
     def enforcer(self):
         """
-        The enforcer is a hidden executor handles iterating through the list
-        of links and catching any unexpected exceptions thrown by the plugin
-        gracefully, reporting the plugin, link and exception for output at
-        the end of the run
+        The enforcer is a hidden executor that handles iterating through the
+        list of links and catching any unexpected exceptions thrown by the
+        plugin gracefully, reporting the plugin, link and exception output as
+        the run progresses
         """
-        #Convert candidates from the generic format provided by my eddit
+        #Convert candidates from the generic format provided by my Reddit
         # connect class to something specific with only the necessary
         # attributes needed for downloading images
         self.convert_candidates()
@@ -237,6 +243,17 @@ class BasePlugin(object):
         method should be written to handle just one post link,
         but can call other functions as needed. See the plugin readme on how
         this should be done.
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def url_matches(self):
+        """
+        To be overridden by subclasses. The subclassed versions of this
+        method should be a regex takes self.candidate.url and returns True if
+        the plugin should attempt it or False if the plugin should not.
+
+        This MUST be a @staticmethod
         """
         raise NotImplementedError
 
@@ -273,10 +290,18 @@ class BasePlugin(object):
         # downloads (was stripping it before acquisition like a total noob)
         if '?' in self.current.filename:
             self.current.filename = self.current.filename.split('?')[0]
-        #Add the output path the the filename
+        #Add the subfolders conditionally:
+        if self.categorize:
+            self.output_dir = os.path.join(self.output_dir,
+                                           self.current.subreddit)
+            #since this is a subfolder, it may not yet exist!
+            if not os.path.exists(self.output_dir):
+                os.makedirs(self.output_dir)
+        #Add the output path to the filename
         orig_img_path = os.path.join(self.output_dir, self.current.filename)
         #handle incrementing the image name with a number if we pass the MD5
         # but the filename was taken
+        #wait, what the hell am I  doing here, was I drunk??
         img_path = orig_img_path
         orig_path, orig_ext = orig_img_path.rsplit('.', 1)
         inc = 1

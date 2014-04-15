@@ -6,7 +6,7 @@ with open(os.path.join(HERE, 'VERSION')) as f:
     VERSION = f.read()
 
 setup(
-    name='reddit-scraper',
+    name='reddit_scraper',
     version=VERSION,
     packages=find_packages(),
     install_requires=['pillow>=1.7.8',
@@ -15,7 +15,7 @@ setup(
                       'requests>=2.0.0',
                       'BeautifulSoup4'
     ],
-    url='https://github.com/oscillot/reddit-scraper',
+    url='https://github.com/oscillot/reddit_scraper',
     license='GPL2',
     author='Oscillot',
     author_email='oscillot@trioptimum.com',
