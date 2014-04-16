@@ -16,13 +16,15 @@ class Imgur(BasePlugin):
                 for album_img in album_imgs:
                     self.current = Download(self.candidate.title,
                                             self.candidate.subreddit,
-                                            album_img)
+                                            album_img,
+                                            self.candidate.nsfw)
             elif self.api_url():
                 img_url = self.get_url_from_api()
                 if img_url is not None:
                     self.current = Download(self.candidate.title,
                                             self.candidate.subreddit,
-                                            img_url)
+                                            img_url,
+                                            self.candidate.nsfw)
             #if you add more, try to keep this guy down at the bottom...
             # he tends to grab everything!
             elif self.image_url():
@@ -30,7 +32,8 @@ class Imgur(BasePlugin):
                 if img_url is not None:
                     self.current = Download(self.candidate.title,
                                             self.candidate.subreddit,
-                                            img_url)
+                                            img_url,
+                                            self.candidate.nsfw)
 
     @staticmethod
     def url_matches(url):

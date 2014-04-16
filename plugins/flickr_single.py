@@ -17,7 +17,8 @@ class FlickrSingle(BasePlugin):
             if flickr_img_url is not None:
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
-                                        flickr_img_url)
+                                        flickr_img_url,
+                                        self.candidate.nsfw)
 
     @staticmethod
     def url_matches(url):

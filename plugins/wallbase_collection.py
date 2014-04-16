@@ -4,7 +4,6 @@
 
 import re
 import base64
-import time
 
 from bs4 import BeautifulSoup
 from plugins.base_plugin import *
@@ -20,7 +19,8 @@ class WallbaseCollection(BasePlugin):
             for img_url in collection_imgs:
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
-                                        img_url)
+                                        img_url,
+                                        self.candidate.nsfw)
 
     @staticmethod
     def url_matches(url):

@@ -17,6 +17,7 @@ class DeviantArt(BasePlugin):
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
                                         deviant_art_img_url,
+                                        self.candidate.nsfw,
                                         deviant_art_cookie)
 
     @staticmethod

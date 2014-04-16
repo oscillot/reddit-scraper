@@ -22,7 +22,8 @@ def extract_domain(url):
 
 
 class PluginInterface():
-    def __init__(self, database, candidates, output, categorize=False):
+    def __init__(self, database, candidates, output, categorize=False,
+                 nsfw=False):
         """
         The PluginInterface takes care of reading the plugins, determining
         which ones are valid, and iterating through them. It is a wrapper
@@ -40,6 +41,7 @@ class PluginInterface():
         self.candidates = candidates
         self.output = output
         self.categorize = categorize
+        self.nsfw = nsfw
         #set up some class variables
         self.handled = DownloadList(set())
         self.unhandled = DownloadList(set())

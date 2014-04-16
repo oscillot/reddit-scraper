@@ -12,7 +12,8 @@ class Get500pxSingle(BasePlugin):
             img_url = self.get_500px_img(self.candidate.url)
             self.current = Download(self.candidate.title,
                                     self.candidate.subreddit,
-                                    img_url)
+                                    img_url,
+                                    self.candidate.nsfw)
 
     @staticmethod
     def url_matches(url):

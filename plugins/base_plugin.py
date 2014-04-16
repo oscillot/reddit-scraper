@@ -200,7 +200,8 @@ class BasePlugin(object):
                 else:
                     new_cands.add(Download(c['data']['title'],
                                            c['data']['subreddit'],
-                                           c['data']['url']))
+                                           c['data']['url'],
+                                           c['data']['over_18']))
             self.candidates = CandidatesList(new_cands)
             self.candidates_backup = self.candidates
             self.revised = self.candidates

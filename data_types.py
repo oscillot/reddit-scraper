@@ -83,10 +83,11 @@ class Download(object):
     A convenience class, the datatype that comprises a `class` DownloadList
     or a `class` CandidatesList
     """
-    def __init__(self, title, subreddit, url, cookies=None):
+    def __init__(self, title, subreddit, url, nsfw, cookies=None):
         self.title = title
         self.subreddit = subreddit
         self.url = url
+        self.nsfw = nsfw
         self.filename = self.name_from_url()
         self.md5 = None
         self.cookies = cookies

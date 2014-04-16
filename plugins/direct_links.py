@@ -19,7 +19,8 @@ class DirectLinks(BasePlugin):
                         img_type):
                     self.current = Download(self.candidate.title,
                                             self.candidate.subreddit,
-                                            self.candidate.url)
+                                            self.candidate.url,
+                                            self.candidate.nsfw)
                     break
 
     @staticmethod
