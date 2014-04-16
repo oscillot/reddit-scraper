@@ -75,7 +75,14 @@ class PluginInterface():
         links which we output at the end to help target plugin
         development/maintenance
         """
+        print self.handled
+        print self.image_urls_already_fetched
+        print self.posts_already_finished
         for original in self.candidates_backup:
+            print original
+            print original in self.handled
+            print original in self.image_urls_already_fetched
+            print original in self.posts_already_finished
             if original in self.handled or \
                original in self.image_urls_already_fetched or \
                original in self.posts_already_finished:
