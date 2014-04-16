@@ -28,9 +28,9 @@ class CandidatesList(object):
         for c in self.candidates:
             #allows an object to be removed by url reference
             if c.url == item:
-                self.candidates.remove(c)
+                return self.candidates.difference(set(c))
             elif item in self.candidates:
-                self.candidates.remove(item)
+                return self.candidates.difference(set(item))
 
     def update(self, item):
         self.candidates.update(item)

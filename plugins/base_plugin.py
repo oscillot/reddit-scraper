@@ -122,7 +122,7 @@ class BasePlugin(object):
                     self.save_img(new_img)
                     self.unique_img_hashes.add(self.current.md5)
                     self.add_to_main_db_table()
-                    self.revised.remove(self.candidate)
+                    self.revised = self.revised.remove(self.candidate)
                     self.handled.add(self.current)
                     print '%s: Success! %s saved.\n' % \
                           (self.__class__.__name__, self.current.filename)
@@ -132,7 +132,7 @@ class BasePlugin(object):
                     #remove successes so the whole run goes faster
                     while self.current in self.candidates:
                         # print '@@@@@@@@@@@@@@@@@@IT MATTERS'
-                        self.candidates.remove(self.current)
+                        self.candidates = self.candidates.remove(self.current)
 
     def add_to_main_db_table(self):
         """
