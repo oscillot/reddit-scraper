@@ -271,14 +271,12 @@ class BasePlugin(object):
         the database from the beginning, try to be as econmoical as possible
         and avoid getting ip or other form of blacklisted at all costs
         """
-        for fetched in self.image_urls_already_fetched.downloads:
-            if fetched in self.candidates:
-                self.candidates.remove(fetched)
-                continue
-        for finished in self.posts_already_finished.downloads:
-            if finished in self.candidates:
-                self.candidates.remove(finished)
-                continue
+        self.candidates = \
+            self.candidates.difference(
+                self.image_urls_already_fetched.downloads)
+
+        self.candidates = \
+            self.candidates.difference(self.posts_already_finished.downloads)
 
     def save_img(self, data):
         """
