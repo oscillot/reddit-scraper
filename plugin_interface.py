@@ -1,7 +1,7 @@
 import os
 import re
 
-from data_types import DownloadList
+from data_types import DownloadList, CandidatesList
 from plugins import loaded_plugins
 
 
@@ -45,7 +45,7 @@ class PluginInterface():
         self.unhandled = DownloadList([])
         self.posts_already_finished = None
         self.image_urls_already_fetched = None
-        self.candidates_backup = set()
+        self.candidates_backup = CandidatesList([])
 
     def hand_off_to_plugins(self):
         """Calls each plugin module and hand the CandidateList off to it.
@@ -81,7 +81,9 @@ class PluginInterface():
         print self.candidates_backup
         print len(self.handled)
         print len(self.image_urls_already_fetched)
+        print self.image_urls_already_fetched
         print len(self.posts_already_finished)
+        print self.posts_already_finished
         for original in self.candidates_backup:
             print original
             print original in self.handled

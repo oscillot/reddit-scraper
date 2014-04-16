@@ -21,6 +21,9 @@ class CandidatesList(object):
             elif item in self.candidates:
                 self.candidates.remove(item)
 
+    def update(self, update_object):
+        self.candidates.update(update_object)
+
     def __len__(self):
         return len(self.candidates)
 
@@ -49,7 +52,8 @@ class DownloadList(object):
         return len(self.downloads)
 
     def __iter__(self):
-        return iter(self.downloads)
+        for d in self.downloads:
+            yield d
 
     def append(self, item):
         self.downloads.append(item)
