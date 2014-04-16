@@ -151,7 +151,7 @@ class RedditConnect():
                 json_data = json.loads(upvoted_json)
                 total_upvoted_data += json_data['data']['children']
                 print '%d Pages Processed: %d Upvotes Found So Far...' % \
-                      (r, len(total_upvoted_data))
+                      (r + 1, len(total_upvoted_data))
                 self.wait()
         print 'Upvotes retrieved!\n'
         return total_upvoted_data
