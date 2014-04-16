@@ -58,6 +58,10 @@ class DownloadList(object):
     def append(self, item):
         self.downloads.append(item)
 
+    def extend(self, update_object):
+        self.downloads.extend(update_object)
+
+
 
 class Download(object):
     """

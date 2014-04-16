@@ -65,12 +65,12 @@ class PluginInterface():
                 print '\tNone\n'
             #trim down the candidates from what got parsed
             self.candidates = plug_inst.revised
-            #the last instance of these should be fine
-            #really? why? all of them? HOW???
+            self.handled.extend(plug_inst.handled)
+            self.candidates_backup.extend(plug_inst.candidates_backup)
+            #these two shouldn't(?) change so assigning them each time is fine
             self.posts_already_finished = plug_inst.posts_already_finished
             self.image_urls_already_fetched = \
                 plug_inst.image_urls_already_fetched
-            self.candidates_backup.extend(plug_inst.candidates_backup)
 
     def check_unhandled_links(self):
         """
