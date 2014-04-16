@@ -55,7 +55,7 @@ class PluginInterface():
             plug_inst = plugin(self.database, self.candidates, self.output,
                                self.categorize)
             for dl in plug_inst.handled:
-                self.handled.append(dl)
+                self.handled.add(dl)
             print '%s handled the following urls:\n' % plugin.__name__
             if len(plug_inst.handled) > 0:
                 for h in plug_inst.handled:
@@ -65,8 +65,8 @@ class PluginInterface():
                 print '\tNone\n'
             #trim down the candidates from what got parsed
             self.candidates = plug_inst.revised
-            self.handled.extend(plug_inst.handled)
-            self.candidates_backup.extend(plug_inst.candidates_backup)
+            self.handled.update(plug_inst.handled)
+            self.candidates_backup.update(plug_inst.candidates_backup)
             #these two shouldn't(?) change so assigning them each time is fine
             self.posts_already_finished = plug_inst.posts_already_finished
             self.image_urls_already_fetched = \
@@ -78,24 +78,13 @@ class PluginInterface():
         links which we output at the end to help target plugin
         development/maintenance
         """
-        print self.candidates_backup
-        print len(self.handled)
-        print len(self.image_urls_already_fetched)
-        print self.image_urls_already_fetched
-        print len(self.posts_already_finished)
-        print self.posts_already_finished
-        for original in self.candidates_backup:
-            print original
-            print original in self.handled
-            print original in self.image_urls_already_fetched
-            print original in self.posts_already_finished
-            if original in self.handled or \
-                    original in self.image_urls_already_fetched or \
-                    original in self.posts_already_finished:
-                continue
-            else:
-                self.unhandled.append((extract_domain(original.url),
-                                       original.url))
+        all_handled = self.handled.union(
+            self.image_urls_already_fetched).union(
+                self.posts_already_finished)
+        unhandled = self.candidates_backup.difference(all_handled)
+
+        for each in unhandled:
+            self.unhandled.add((extract_domain(each.url), each.url))
 
     def acquire(self):
         """

@@ -1,7 +1,7 @@
 class CandidatesList(object):
     """
-    A list made up of `class` Download objects with a specific implementation
-    of __contains__ to make `keyword` in work properly. Used for list of
+    A set made up of `class` Download objects with a specific implementation
+    of __contains__ to make `keyword` in work properly. Used for set of
     candidates returned from `class` RedditConnect
     """
     def __init__(self, candidates):
@@ -9,20 +9,10 @@ class CandidatesList(object):
 
     def __contains__(self, item):
         for c in self.candidates:
-                if item == c.url:
-                    return item
-                elif item == c:
-                    return item
-
-    def remove(self, item):
-        for c in self.candidates:
-            if c.url == item:
-                self.candidates.remove(c)
-            elif item in self.candidates:
-                self.candidates.remove(item)
-
-    def extend(self, update_object):
-        self.candidates.extend(update_object)
+            if item == c.url:
+                return item
+            elif item == c:
+                return item
 
     def __len__(self):
         return len(self.candidates)
@@ -30,6 +20,26 @@ class CandidatesList(object):
     def __iter__(self):
         for c in self.candidates:
             yield c
+
+    def add(self, item):
+        self.candidates.add(item)
+
+    def remove(self, item):
+        for c in self.candidates:
+            #allows an object to be removed by url reference
+            if c.url == item:
+                self.candidates.remove(c)
+            elif item in self.candidates:
+                self.candidates.remove(item)
+
+    def update(self, item):
+        self.candidates.update(item)
+
+    def difference(self, item):
+        return self.candidates.difference(item)
+
+    def union(self, item):
+        return self.candidates.union(item)
 
 
 class DownloadList(object):
@@ -55,12 +65,17 @@ class DownloadList(object):
         for d in self.downloads:
             yield d
 
-    def append(self, item):
-        self.downloads.append(item)
+    def add(self, item):
+        self.downloads.add(item)
 
-    def extend(self, update_object):
-        self.downloads.extend(update_object)
+    def update(self, item):
+        self.downloads.update(item)
 
+    def difference(self, item):
+        return self.downloads.difference(item)
+
+    def union(self, item):
+        return self.downloads.union(item)
 
 
 class Download(object):
