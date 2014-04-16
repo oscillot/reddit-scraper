@@ -12,9 +12,7 @@ IMAGE_HEADERS = ['image/bmp',
                  'image/png',
                  'image/jpg',
                  'image/jpeg',
-                 'image/gif',
-                 'application/json' #imgur api uses this sometimes
-]
+                 'image/gif']
 
 
 class BasePlugin(object):
@@ -37,8 +35,8 @@ class BasePlugin(object):
         self.output_dir = output
         self.categorize = categorize
         self.to_acquire = []
-        self.handled = []
-        self.unhandled = []
+        self.handled = set()
+        self.unhandled = set()
         self.db = os.path.join(os.getcwd(), '%s_downloaded.db' % database)
         self.engine = create_engine('sqlite:///%s' % self.db)
         metadata = MetaData(self.engine)
@@ -67,7 +65,7 @@ class BasePlugin(object):
         if value is not None:
             self.acquisition_tasks()
         else:
-            self.unhandled.append(self.candidate)
+            self.unhandled.add(self.candidate)
 
     def acquisition_tasks(self):
         if self.current.url in self.posts_already_finished:
@@ -75,7 +73,7 @@ class BasePlugin(object):
             print '%s: Skipping post: %s - previously acquired' % \
                   (self.__class__.__name__, self.current.url)
         else:
-            self.posts_already_finished.append(self.current.url)
+            self.posts_already_finished.add(self.current.url)
 
         if self.current.url in self.image_urls_already_fetched:
             #skip any exact url matches from the db
@@ -124,7 +122,7 @@ class BasePlugin(object):
                     self.unique_img_hashes.append(self.current.md5)
                     self.add_to_main_db_table()
                     self.revised.remove(self.candidate)
-                    self.handled.append(self.current)
+                    self.handled.add(self.current)
                     print '%s: Success! %s saved.\n' % \
                           (self.__class__.__name__, self.current.filename)
                 else:
@@ -170,8 +168,8 @@ class BasePlugin(object):
         conn = self.engine.connect()
         finished_urls_select = sql.select([self.wallpapers])
         self.image_urls_already_fetched = DownloadList(
-            [a[2] for a in conn.execute(
-                finished_urls_select).fetchall()])
+            set(a[2] for a in conn.execute(
+                finished_urls_select).fetchall()))
 
     def check_db_for_finished_post_urls(self):
         """
@@ -181,8 +179,8 @@ class BasePlugin(object):
         """
         conn = self.engine.connect()
         finished_posts_select = sql.select([self.retrieved])
-        self.posts_already_finished = DownloadList([a[0] for a in conn.execute(
-            finished_posts_select).fetchall()])
+        self.posts_already_finished = DownloadList(set(a[0] for a in
+            conn.execute(finished_posts_select).fetchall()))
 
     def convert_candidates(self):
         """
@@ -195,14 +193,14 @@ class BasePlugin(object):
         if type(self.candidates) == 'CandidatesList':
             return
         else:
-            new_cands = []
+            new_cands = set()
             for c in self.candidates:
                 if c.__class__.__name__ == 'Download':
-                    new_cands.append(c)
+                    new_cands.add(c)
                 else:
-                    new_cands.append(Download(c['data']['title'],
-                                              c['data']['subreddit'],
-                                              c['data']['url']))
+                    new_cands.add(Download(c['data']['title'],
+                                           c['data']['subreddit'],
+                                           c['data']['url']))
             self.candidates = CandidatesList(new_cands)
             self.candidates_backup = self.candidates
             self.revised = self.candidates
@@ -235,7 +233,7 @@ class BasePlugin(object):
                 self.execute()
             except Exception, e:
                 print traceback.print_exc()
-                self.unhandled.append(self.candidate)
+                self.unhandled.add(self.candidate)
 
     def execute(self):
         """
@@ -263,7 +261,8 @@ class BasePlugin(object):
         """
         conn = self.engine.connect()
         md5_select = sql.select(from_obj=self.wallpapers, columns=['md5'])
-        unique_img_hashes = [h[0] for h in conn.execute(md5_select).fetchall()]
+        unique_img_hashes = set(h[0] for h in
+                                conn.execute(md5_select).fetchall())
         return unique_img_hashes
 
     def prune(self):
@@ -293,7 +292,7 @@ class BasePlugin(object):
         #Add the subfolders conditionally:
         if self.categorize:
             category_dir = os.path.join(self.output_dir,
-                                           self.current.subreddit)
+                                        self.current.subreddit)
             #since this is a subfolder, it may not yet exist!
             if not os.path.exists(category_dir):
                 os.makedirs(category_dir)
