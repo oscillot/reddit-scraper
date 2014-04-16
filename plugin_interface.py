@@ -79,6 +79,9 @@ class PluginInterface():
         development/maintenance
         """
         print self.candidates_backup
+        print len(self.handled)
+        print len(self.image_urls_already_fetched)
+        print len(self.posts_already_finished)
         for original in self.candidates_backup:
             print original
             print original in self.handled
