@@ -21,8 +21,8 @@ class CandidatesList(object):
             elif item in self.candidates:
                 self.candidates.remove(item)
 
-    def update(self, update_object):
-        self.candidates.update(update_object)
+    def extend(self, update_object):
+        self.candidates.extend(update_object)
 
     def __len__(self):
         return len(self.candidates)

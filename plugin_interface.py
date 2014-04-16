@@ -70,7 +70,7 @@ class PluginInterface():
             self.posts_already_finished = plug_inst.posts_already_finished
             self.image_urls_already_fetched = \
                 plug_inst.image_urls_already_fetched
-            self.candidates_backup.update(plug_inst.candidates_backup)
+            self.candidates_backup.extend(plug_inst.candidates_backup)
 
     def check_unhandled_links(self):
         """
