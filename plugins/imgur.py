@@ -174,6 +174,7 @@ class Imgur(BasePlugin):
         al = root.find_all(attrs={'class': 'image textbox '})
         for a in al:
             href = a.img.attrs.get('src')
+            print href
             if self.candidate.url.lstrip('http://') in href:
                 #Fix The single indirect links that look like this:
                 #<link rel="image_src" href="//i.imgur.com/IZZayKa.png" />
