@@ -16,7 +16,7 @@ IMAGE_HEADERS = ['image/bmp',
 
 
 class BasePlugin(object):
-    def __init__(self, database, candidates, output, categorize=False):
+    def __init__(self, database, candidates, output, categorize=False, nsfw=False):
         """The BasePlugin class actually does all of the work under the hood.
         It creates the database, performs the database calls. Retrieves images
         from content servers, does any error handling that plugins neglect to
@@ -34,6 +34,7 @@ class BasePlugin(object):
         self.candidates = candidates
         self.output_dir = output
         self.categorize = categorize
+        self.nsfw = nsfw
         self.to_acquire = []
         self.handled = set()
         self.unhandled = set()
@@ -225,6 +226,11 @@ class BasePlugin(object):
         # anything
         self.prune()
         for candidate in self.candidates:
+            #check the NSFW flag for filtering
+            if not self.nsfw and self.candidate.nsfw:
+                print 'Skipping NSFW Image: %s' % self.candidate.url
+                self.unhandled.add(self.candidate)
+                continue
             #make the candidate object easily available everywhere
             self.candidate = candidate
             #reset the Download object to None on each iteration of the loop

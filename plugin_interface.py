@@ -42,6 +42,11 @@ class PluginInterface():
         self.output = output
         self.categorize = categorize
         self.nsfw = nsfw
+        if self.nsfw:
+            nsfw_flag = 'enabled'
+        else:
+            nsfw_flag = 'disabled'
+        print 'Fetching NSFW Images is %s.' % nsfw_flag
         #set up some class variables
         self.handled = DownloadList(set())
         self.unhandled = DownloadList(set())
@@ -55,7 +60,7 @@ class PluginInterface():
         for plugin in loaded_plugins:
             print 'Loading plugin: %s.\n' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output,
-                               self.categorize)
+                               self.categorize, self.nsfw)
             for dl in plug_inst.handled:
                 self.handled.add(dl)
             print '%s handled the following urls:\n' % plugin.__name__
