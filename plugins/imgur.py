@@ -171,7 +171,7 @@ class Imgur(BasePlugin):
             print e
             return []
         root = BeautifulSoup(resp.text)
-        al = root.find_all(attrs={'class':'image textbox'})
+        al = root.find_all(attrs={'class': 'image textbox '})
         for a in al:
             href = a.img.attrs.get('src')
             if self.candidate.url.lstrip('http://') in href:
