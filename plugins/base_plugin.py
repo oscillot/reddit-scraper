@@ -120,7 +120,7 @@ class BasePlugin(object):
                 self.current.md5 = hashlib.md5(new_img).hexdigest()
                 if self.current.md5 not in self.unique_img_hashes:
                     self.save_img(new_img)
-                    self.unique_img_hashes.append(self.current.md5)
+                    self.unique_img_hashes.add(self.current.md5)
                     self.add_to_main_db_table()
                     self.revised.remove(self.candidate)
                     self.handled.add(self.current)

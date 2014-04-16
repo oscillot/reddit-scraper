@@ -61,8 +61,7 @@ class PluginInterface():
             print 'Loading plugin: %s.\n' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output,
                                self.categorize, self.nsfw)
-            for dl in plug_inst.handled:
-                self.handled.add(dl)
+            self.handled.update(plug_inst.handled)
             print '%s handled the following urls:\n' % plugin.__name__
             if len(plug_inst.handled) > 0:
                 for h in plug_inst.handled:
@@ -72,7 +71,8 @@ class PluginInterface():
                 print '\tNone\n'
             #trim down the candidates from what got parsed
             self.candidates = plug_inst.revised
-            self.handled.update(plug_inst.handled)
+            # candidates backup is the original list of candidates
+            # (why would we update it if it is for preservation purposes??)
             self.candidates_backup.update(plug_inst.candidates_backup)
             #these two shouldn't(?) change so assigning them each time is fine
             self.posts_already_finished = plug_inst.posts_already_finished
