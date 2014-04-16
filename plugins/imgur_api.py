@@ -26,7 +26,7 @@ class ImgurAPI(BasePlugin):
         """
 
         imgur_single_page_pat = re.compile(
-            r'^http[s]?://api\.imgur\.com/oembed\.json.*$',
+            r'^http[s]?://api\.imgur\.com/oembed\.json\?.*$',
             flags=re.IGNORECASE)
         #strip the url args since we are looking to match against file types
         if imgur_single_page_pat.match(url):

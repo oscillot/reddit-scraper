@@ -34,10 +34,11 @@ class ImgurSingleIndirect(BasePlugin):
         and watch those!
         """
 
-        imgur_single_page_pat = re.compile( #an imgur page
-            r'^(?!(?:http[s]?://.*imgur\.com/a/|' #that is not an album
-            r'http[s]?://api\.imgur\.com))' #and not from the imgur API
-            r'http[s]?://.*imgur\.com' #from any subdomain
+        imgur_single_page_pat = re.compile(
+            r'^http[s]?://' #an imgur page
+            r'(?!(?:.*imgur\.com/a/|' #that is not an album
+            r'api\.imgur\.com/oembed\.json\?))' #and not from the imgur API
+            r'.*imgur\.com' #from any subdomain
             r'(?:(?![.]{1}(?:' #that doesn't end with the extension
                 r'jpg|' #jpeg
                 r'jpeg|' #jpeg
