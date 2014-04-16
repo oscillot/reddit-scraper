@@ -1,6 +1,7 @@
 import os
 import re
 
+from data_types import DownloadList
 from plugins import loaded_plugins
 
 
@@ -40,8 +41,8 @@ class PluginInterface():
         self.output = output
         self.categorize = categorize
         #set up some class variables
-        self.handled = []
-        self.unhandled = []
+        self.handled = DownloadList([])
+        self.unhandled = DownloadList([])
         self.posts_already_finished = None
         self.image_urls_already_fetched = None
         self.candidates_backup = set()
@@ -53,7 +54,8 @@ class PluginInterface():
             print 'Loading plugin: %s.\n' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output,
                                self.categorize)
-            self.handled.extend(plug_inst.handled)
+            for dl in plug_inst.handled:
+                self.handled.append(dl)
             print '%s handled the following urls:\n' % plugin.__name__
             if len(plug_inst.handled) > 0:
                 for h in plug_inst.handled:
@@ -64,6 +66,7 @@ class PluginInterface():
             #trim down the candidates from what got parsed
             self.candidates = plug_inst.revised
             #the last instance of these should be fine
+            #really? why? all of them? HOW???
             self.posts_already_finished = plug_inst.posts_already_finished
             self.image_urls_already_fetched = \
                 plug_inst.image_urls_already_fetched
@@ -75,17 +78,15 @@ class PluginInterface():
         links which we output at the end to help target plugin
         development/maintenance
         """
-        print self.handled
-        print self.image_urls_already_fetched
-        print self.posts_already_finished
+        print self.candidates_backup
         for original in self.candidates_backup:
             print original
             print original in self.handled
             print original in self.image_urls_already_fetched
             print original in self.posts_already_finished
             if original in self.handled or \
-               original in self.image_urls_already_fetched or \
-               original in self.posts_already_finished:
+                    original in self.image_urls_already_fetched or \
+                    original in self.posts_already_finished:
                 continue
             else:
                 self.unhandled.append((extract_domain(original.url),

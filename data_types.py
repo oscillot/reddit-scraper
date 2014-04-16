@@ -33,7 +33,7 @@ class DownloadList(object):
     """
     A list made up of `class` Download objects with a specific implementation
     of __contains__ to make `keyword` in work properly. Used for lists of
-    already handled posts and anready fetched image urls
+    already handled posts and already fetched image urls
     """
     def __init__(self, downloads):
         self.downloads = downloads
@@ -44,6 +44,12 @@ class DownloadList(object):
                 dl.subreddit == item.subreddit and \
                     dl.url == item.url:
                         return dl
+
+    def __len__(self):
+        return len(self.downloads)
+
+    def __iter__(self):
+        return iter(self.downloads)
 
     def append(self, item):
         self.downloads.append(item)
