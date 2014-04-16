@@ -41,11 +41,11 @@ class PluginInterface():
         self.output = output
         self.categorize = categorize
         #set up some class variables
-        self.handled = DownloadList([])
-        self.unhandled = DownloadList([])
+        self.handled = DownloadList(set())
+        self.unhandled = DownloadList(set())
         self.posts_already_finished = None
         self.image_urls_already_fetched = None
-        self.candidates_backup = CandidatesList([])
+        self.candidates_backup = CandidatesList(set())
 
     def hand_off_to_plugins(self):
         """Calls each plugin module and hand the CandidateList off to it.
