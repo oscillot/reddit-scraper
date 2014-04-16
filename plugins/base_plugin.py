@@ -303,8 +303,10 @@ class BasePlugin(object):
         orig_img_path = os.path.join(category_dir, self.current.filename)
         #handle incrementing the image name with a number if we pass the MD5
         # but the filename was taken
-        #wait, what the hell am I  doing here, was I drunk??
+        #the original image path is the INTENDED image path, the img_path is
+        # what it ends up being if there is a namespace collision on the filesystem
         img_path = orig_img_path
+
         orig_path, orig_ext = orig_img_path.rsplit('.', 1)
         inc = 1
         #prevent stupidly named files like image.jpg from being overwritten
