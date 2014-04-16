@@ -6,6 +6,32 @@ from plugins.base_plugin import *
 
 
 class Imgur(BasePlugin):
+    def execute(self):
+        """Executor for this plugin. The entry function by which any plugin must
+        operate to handle links.
+        """
+        if self.url_matches(self.candidate.url):
+            if self.album_url():
+                album_imgs = self.get_imgur_album()
+                for album_img in album_imgs:
+                    self.current = Download(self.candidate.title,
+                                            self.candidate.subreddit,
+                                            album_img)
+            elif self.api_url():
+                img_url = self.get_url_from_api()
+                if img_url is not None:
+                    self.current = Download(self.candidate.title,
+                                            self.candidate.subreddit,
+                                            img_url)
+            #if you add more, try to keep this guy down at the bottom...
+            # he tends to grab everything!
+            elif self.image_url():
+                img_url = self.get_imgur_single()
+                if img_url is not None:
+                    self.current = Download(self.candidate.title,
+                                            self.candidate.subreddit,
+                                            img_url)
+
     @staticmethod
     def url_matches(url):
         """
@@ -145,9 +171,9 @@ class Imgur(BasePlugin):
             print e
             return []
         root = BeautifulSoup(resp.text)
-        al = root.find('head').find_all('link')
+        al = root.find_all(attrs={'class':'image textbox'})
         for a in al:
-            href = a.attrs.get('href')
+            href = a.img.attrs.get('src')
             if self.candidate.url.lstrip('http://') in href:
                 #Fix The single indirect links that look like this:
                 #<link rel="image_src" href="//i.imgur.com/IZZayKa.png" />
@@ -155,29 +181,3 @@ class Imgur(BasePlugin):
                     if href.startswith('//'):
                         href = 'http:' + href
                 return href
-
-    def execute(self):
-        """Executor for this plugin. The entry function by which any plugin must
-        operate to handle links.
-        """
-        if self.url_matches(self.candidate.url):
-            if self.album_url():
-                album_imgs = self.get_imgur_album()
-                for album_img in album_imgs:
-                    self.current = Download(self.candidate.title,
-                                            self.candidate.subreddit,
-                                            album_img)
-            elif self.api_url():
-                img_url = self.get_url_from_api()
-                if img_url is not None:
-                    self.current = Download(self.candidate.title,
-                                            self.candidate.subreddit,
-                                            img_url)
-            #if you add more, try to keep this guy down at the bottom...
-            # he tends to grab everything!
-            elif self.image_url():
-                img_url = self.get_imgur_single()
-                if img_url is not None:
-                    self.current = Download(self.candidate.title,
-                                            self.candidate.subreddit,
-                                            img_url)
