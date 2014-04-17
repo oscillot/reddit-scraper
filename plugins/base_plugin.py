@@ -32,6 +32,8 @@ class BasePlugin(object):
         names where images came from. Defaults to False.
         """
         self.candidates = candidates
+        self.candidates_backup = None
+        self.revised = None
         self.output_dir = output
         self.categorize = categorize
         self.nsfw = nsfw
@@ -192,6 +194,8 @@ class BasePlugin(object):
         understand
         """
         if type(self.candidates) == 'CandidatesList':
+            self.candidates_backup = self.candidates
+            self.revised = self.candidates
             return
         else:
             new_cands = set()
