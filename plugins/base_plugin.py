@@ -227,9 +227,9 @@ class BasePlugin(object):
         self.prune()
         for candidate in self.candidates:
             #check the NSFW flag for filtering
-            if not self.nsfw and self.candidate.nsfw:
+            if not self.nsfw and candidate.nsfw:
                 print 'Skipping NSFW Image: %s' % self.candidate.url
-                self.unhandled.add(self.candidate)
+                self.unhandled.add(candidate)
                 continue
             #make the candidate object easily available everywhere
             self.candidate = candidate
