@@ -31,6 +31,8 @@ class CandidatesList(object):
                 return self.candidates.difference({c})
             elif item in self.candidates:
                 return self.candidates.difference({item})
+        #make sure we return the unaltered object when appropriate
+        return self.candidates
 
     def update(self, item):
         self.candidates.update(item)
