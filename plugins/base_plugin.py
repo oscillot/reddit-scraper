@@ -193,7 +193,7 @@ class BasePlugin(object):
         necessary information and makes the code much easier to read and
         understand
         """
-        if type(self.candidates) == 'CandidatesList':
+        if type(self.candidates) == CandidatesList:
             self.candidates_backup = self.candidates
             self.revised = self.candidates
             return
