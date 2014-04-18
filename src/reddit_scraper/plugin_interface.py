@@ -1,7 +1,7 @@
 import os
 import re
 
-from data_types import DownloadList, CandidatesList
+from reddit_scraper.data_types import DownloadList, CandidatesList
 from plugins import loaded_plugins
 
 

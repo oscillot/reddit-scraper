@@ -6,7 +6,9 @@ from PIL import Image
 import requests
 from sqlalchemy import *
 import sqlalchemy.sql as sql
-from data_types import CandidatesList, DownloadList, Download
+
+from reddit_scraper.data_types import CandidatesList, DownloadList, Download
+
 
 IMAGE_HEADERS = ['image/bmp',
                  'image/png',

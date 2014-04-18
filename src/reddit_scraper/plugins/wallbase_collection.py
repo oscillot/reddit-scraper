@@ -6,7 +6,8 @@ import re
 import base64
 
 from bs4 import BeautifulSoup
-from plugins.base_plugin import *
+
+from reddit_scraper.plugins.base_plugin import *
 
 
 class WallbaseCollection(BasePlugin):

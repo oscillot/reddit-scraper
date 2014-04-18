@@ -8,14 +8,15 @@ with open(os.path.join(HERE, 'VERSION')) as f:
 setup(
     name='reddit_scraper',
     version=VERSION,
-    packages=find_packages(),
+    package_dir={'':'src'},
+    packages=find_packages(where='src'),
     install_requires=['pillow>=1.7.8',
                       'lxml>=3.0.2',
                       'sqlalchemy>=0.8.0b2',
                       'requests>=2.0.0',
                       'BeautifulSoup4'
     ],
-    url='https://github.com/oscillot/reddit_scraper',
+    url='https://github.com/oscillot/reddit-scraper',
     license='GPL2',
     author='Oscillot',
     author_email='oscillot@trioptimum.com',

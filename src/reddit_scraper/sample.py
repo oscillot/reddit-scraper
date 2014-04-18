@@ -1,6 +1,8 @@
 import os
-from reddit_connect import RedditConnect
+
+from reddit_scraper.reddit_connect import RedditConnect
 from plugin_interface import PluginInterface
+
 
 #run this manually, through jenkins or as a cron job
 
