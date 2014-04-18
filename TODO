@@ -3,3 +3,7 @@ BUGFIX: items are not removed ever from the unhandled list (???)
 NEW_PLUGIN: Add a plugin for "behance"
 
 ENHANCEMENT: add a NSFW toggle mode
+
+INVESTIGATION: WEBM support
+
+INVESTIGATION: GFYCAT
