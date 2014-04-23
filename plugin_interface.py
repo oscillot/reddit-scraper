@@ -63,21 +63,27 @@ class PluginInterface():
                                self.categorize, self.nsfw)
             self.handled.update(plug_inst.handled)
             print '%s handled the following urls:\n' % plugin.__name__
+
+            #lazy instantiation so we only get it on the first loop
+            if len(self.candidates_backup) == 0:
+                # candidates backup is the original list of candidates
+                self.candidates_backup.update(plug_inst.candidates_backup)
+
+            #trim down the candidates from what got parsed
+            self.candidates = plug_inst.revised
+
+            #these two shouldn't(?) change so assigning them each time is fine
+            self.posts_already_finished = plug_inst.posts_already_finished
+            self.image_urls_already_fetched = \
+                plug_inst.image_urls_already_fetched
+
+
             if len(plug_inst.handled) > 0:
                 for h in plug_inst.handled:
                     print '\t', h.url
                 print '\n'
             else:
                 print '\tNone\n'
-            #trim down the candidates from what got parsed
-            self.candidates = plug_inst.revised
-            # candidates backup is the original list of candidates
-            # (why would we update it if it is for preservation purposes??)
-            self.candidates_backup.update(plug_inst.candidates_backup)
-            #these two shouldn't(?) change so assigning them each time is fine
-            self.posts_already_finished = plug_inst.posts_already_finished
-            self.image_urls_already_fetched = \
-                plug_inst.image_urls_already_fetched
 
     def check_unhandled_links(self):
         """

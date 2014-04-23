@@ -86,10 +86,6 @@ class BasePlugin(object):
             #print data about the current acquisition
             print '%s: Requesting: %s \n' % \
                   (self.__class__.__name__, self.current.url)
-            #CLUTTER CLUTTER CLUTTER
-            #print self.current.title.encode('ascii', 'replace'),
-            #self.current.subreddit.encode('ascii', 'replace'),
-            #self.current.url.encode('ascii', 'replace'), '\n'
 
             #snag the image! woot! that's what it all leads up to
             # in the end!
@@ -133,7 +129,6 @@ class BasePlugin(object):
                           (self.__class__.__name__, self.current.filename)
                     #remove successes so the whole run goes faster
                     while self.current in self.candidates:
-                        # print '@@@@@@@@@@@@@@@@@@IT MATTERS'
                         self.candidates = self.candidates.remove(self.current)
 
     def add_to_main_db_table(self):
@@ -233,7 +228,6 @@ class BasePlugin(object):
             #check the NSFW flag for filtering
             if not self.nsfw and candidate.nsfw:
                 print 'Skipping NSFW Image: %s' % self.candidate.url
-                self.unhandled.add(candidate)
                 continue
             #make the candidate object easily available everywhere
             self.candidate = candidate
