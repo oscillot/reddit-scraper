@@ -122,15 +122,13 @@ class BasePlugin(object):
                     self.save_img(new_img)
                     self.unique_img_hashes.add(self.current.md5)
                     self.add_to_main_db_table()
-                    self.revised = self.revised.remove(self.candidate)
                     print '%s: Success! %s saved.\n' % \
                           (self.__class__.__name__, self.current.filename)
                 else:
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
                           (self.__class__.__name__, self.current.filename)
-                    #remove successes so the whole run goes faster
-                    if self.current in self.candidates:
-                        self.candidates = self.candidates.remove(self.current)
+                #remove successes so the whole run goes faster
+                self.revised.remove(self.candidate)
 
     def add_to_main_db_table(self):
         """
@@ -277,12 +275,10 @@ class BasePlugin(object):
         the database from the beginning, try to be as econmoical as possible
         and avoid getting ip or other form of blacklisted at all costs
         """
-        self.candidates = \
-            self.candidates.difference(
+        self.candidates.difference(
                 self.image_urls_already_fetched.downloads)
 
-        self.candidates = \
-            self.candidates.difference(self.posts_already_finished.downloads)
+        self.candidates.difference(self.posts_already_finished.downloads)
 
     def save_img(self, data):
         """
