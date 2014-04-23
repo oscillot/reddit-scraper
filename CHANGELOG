@@ -1,11 +1,15 @@
+2.22
+----
+Finally fixed the unhandled list bug!
+
 2.21
-____
+----
 Added a plugin to handle JSON for single images from the Imgur API
 
 2.20
 ----
 Made all plugins use a staticmethod called url_matches so we can prune out
-unused plugins sooner (BETA)
+unused plugins sooner
 
 Added an optional categorize argument to the Plugin Interface class that makes
 subfolders based on subreddit, useful for OCD.
