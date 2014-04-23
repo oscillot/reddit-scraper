@@ -28,11 +28,9 @@ class CandidatesList(object):
         for c in self.candidates:
             #allows an object to be removed by url reference
             if c.url == item:
-                self.candidates.difference({c})
-                break
+                return self.candidates.difference({c})
             elif item in self.candidates:
-                self.candidates.difference({item})
-                break
+                return self.candidates.difference({item})
         #make sure we return the unaltered object when appropriate
         return self.candidates
 
