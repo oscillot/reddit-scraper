@@ -116,19 +116,19 @@ class BasePlugin(object):
                 #finally! we have image!
                 new_img = self.resp.content
                 self.current.md5 = hashlib.md5(new_img).hexdigest()
+                self.handled.add(self.current)
                 if self.current.md5 not in self.unique_img_hashes:
                     self.save_img(new_img)
                     self.unique_img_hashes.add(self.current.md5)
                     self.add_to_main_db_table()
                     self.revised = self.revised.remove(self.candidate)
-                    self.handled.add(self.current)
                     print '%s: Success! %s saved.\n' % \
                           (self.__class__.__name__, self.current.filename)
                 else:
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
                           (self.__class__.__name__, self.current.filename)
                     #remove successes so the whole run goes faster
-                    while self.current in self.candidates:
+                    if self.current in self.candidates:
                         self.candidates = self.candidates.remove(self.current)
 
     def add_to_main_db_table(self):
