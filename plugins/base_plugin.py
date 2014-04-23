@@ -38,8 +38,9 @@ class BasePlugin(object):
         self.categorize = categorize
         self.nsfw = nsfw
         self.to_acquire = []
-        self.handled = set()
-        self.unhandled = set()
+        self.handled_links = set()
+        self.handled_posts = set()
+        self.unhandled_posts = set()
         self.db = os.path.join(os.getcwd(), '%s_downloaded.db' % database)
         self.engine = create_engine('sqlite:///%s' % self.db)
         metadata = MetaData(self.engine)
@@ -68,7 +69,7 @@ class BasePlugin(object):
         if value is not None:
             self.acquisition_tasks()
         else:
-            self.unhandled.add(self.candidate)
+            self.unhandled_posts.add(self.candidate)
 
     def acquisition_tasks(self):
         if self.current.url in self.posts_already_finished:
@@ -116,7 +117,7 @@ class BasePlugin(object):
                 #finally! we have image!
                 new_img = self.resp.content
                 self.current.md5 = hashlib.md5(new_img).hexdigest()
-                self.handled.add(self.current)
+                self.handled_links.add(self.current)
                 if self.current.md5 not in self.unique_img_hashes:
                     self.save_img(new_img)
                     self.unique_img_hashes.add(self.current.md5)
@@ -147,7 +148,7 @@ class BasePlugin(object):
         """
         #prevent hash collision in the table
         uniques = set()
-        for h in self.handled:
+        for h in self.handled_links:
             if h.url not in self.posts_already_finished:
                 uniques.add(h.url)
         for u in uniques:
@@ -238,7 +239,7 @@ class BasePlugin(object):
                 self.execute()
             except Exception, e:
                 print traceback.print_exc()
-                self.unhandled.add(self.candidate)
+                self.unhandled_posts.add(self.candidate)
 
     def execute(self):
         """

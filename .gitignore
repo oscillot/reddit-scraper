@@ -1,8 +1,6 @@
 *.db
-ash_walls.py
-paul_walls.py
+scripts/*.py
 /.idea
-local_walls.py
 *.pyc
 /dist
 *.egg-info/

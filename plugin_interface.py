@@ -48,8 +48,9 @@ class PluginInterface():
             nsfw_flag = 'disabled'
         print 'Fetching NSFW Images is %s.' % nsfw_flag
         #set up some class variables
-        self.handled = DownloadList(set())
-        self.unhandled = DownloadList(set())
+        self.handled_links = DownloadList(set())
+        self.handled_posts = DownloadList(set())
+        self.unhandled_posts = DownloadList(set())
         self.posts_already_finished = None
         self.image_urls_already_fetched = None
         self.candidates_backup = CandidatesList(set())
@@ -61,8 +62,8 @@ class PluginInterface():
             print 'Loading plugin: %s.\n' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output,
                                self.categorize, self.nsfw)
-            self.handled.update(plug_inst.handled)
-            print '%s handled the following urls:\n' % plugin.__name__
+            self.handled_links.update(plug_inst.handled_links)
+            self.handled_posts.update(plug_inst.handled_posts)
 
             #lazy instantiation so we only get it on the first loop
             if len(self.candidates_backup) == 0:
@@ -77,27 +78,37 @@ class PluginInterface():
             self.image_urls_already_fetched = \
                 plug_inst.image_urls_already_fetched
 
+            print '%s handled the following posts:\n' % plugin.__name__
 
-            if len(plug_inst.handled) > 0:
-                for h in plug_inst.handled:
+            if len(plug_inst.handled_posts) > 0:
+                for h in plug_inst.handled_posts:
                     print '\t', h.url
                 print '\n'
             else:
                 print '\tNone\n'
 
-    def check_unhandled_links(self):
+            print '%s handled the following urls:\n' % plugin.__name__
+
+            if len(plug_inst.handled_links) > 0:
+                for h in plug_inst.handled_links:
+                    print '\t', h.url
+                print '\n'
+            else:
+                print '\tNone\n'
+
+    def check_unhandled_posts(self):
         """
-        Create a list of unhandled links along with domains for those
+        Create a list of unhandled posts along with domains for those
         links which we output at the end to help target plugin
         development/maintenance
         """
-        all_handled = self.handled.union(
+        all_handled = self.handled_links.union(
             self.image_urls_already_fetched).union(
                 self.posts_already_finished)
-        unhandled = self.candidates_backup.difference(all_handled)
+        unhandled_posts = self.candidates_backup.difference(all_handled)
 
-        for each in unhandled:
-            self.unhandled.add((extract_domain(each.url), each.url))
+        for each in unhandled_posts:
+            self.unhandled_posts.add((extract_domain(each.url), each.url))
 
     def acquire(self):
         """
@@ -126,19 +137,19 @@ class PluginInterface():
         self.hand_off_to_plugins()
 
         print 'The following posts had links that were unhandled:'
-        self.check_unhandled_links()
-        if len(self.unhandled) > 0:
+        self.check_unhandled_posts()
+        if len(self.unhandled_posts) > 0:
             #iterating through these sorted puts them in alpha order by domain
             #so you should be able to see which domains you want or need to
             # target
-            for uh in sorted(self.unhandled):
+            for uh in sorted(self.unhandled_posts):
                 print uh[0], '\t', uh[1]
             print '\n'
         else:
             print 'None\n'
 
         print '\nComplete. %d new images were acquired this run.' \
-              % len(self.handled)
+              % len(self.handled_links)
 
     def remove_unneeded_plugins(self):
         plugins_count = {}
