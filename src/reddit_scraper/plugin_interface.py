@@ -79,7 +79,7 @@ class PluginInterface():
             print '%s handled the following posts:\n' % plugin.__name__
             if len(plug_inst.handled_posts):
                 for post in plug_inst.handled_posts:
-                    print post.title
+                    print post.title.encode('ascii', 'xmlcharefreplace')
 
                     print '\n\t...which provided the following image urls:\n'
                     for link in plug_inst.handled_posts[post]:
