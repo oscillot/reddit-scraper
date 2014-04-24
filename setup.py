@@ -8,7 +8,7 @@ with open(os.path.join(HERE, 'VERSION')) as f:
 setup(
     name='reddit_scraper',
     version=VERSION,
-    package_dir={'':'src'},
+    package_dir={'': 'src'},
     packages=find_packages(where='src'),
     install_requires=['pillow>=1.7.8',
                       'lxml>=3.0.2',

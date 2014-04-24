@@ -1,7 +1,4 @@
 #Handles getting all of the images from a collection linked to on wallbase.cc
-
-#works as of 02-23-13
-
 import re
 import base64
 

@@ -2,7 +2,8 @@ import os
 import re
 
 from reddit_scraper.data_types import DownloadList, CandidatesList
-from plugins import loaded_plugins
+from reddit_scraper.plugins import loaded_plugins
+
 
 
 def extract_domain(url):
@@ -48,8 +49,8 @@ class PluginInterface():
             nsfw_flag = 'disabled'
         print 'Fetching NSFW Images is %s.' % nsfw_flag
         #set up some class variables
-        self.handled = DownloadList(set())
-        self.unhandled = DownloadList(set())
+        self.handled_posts = {}
+        self.unhandled_posts = set()
         self.posts_already_finished = None
         self.image_urls_already_fetched = None
         self.candidates_backup = CandidatesList(set())
@@ -61,37 +62,48 @@ class PluginInterface():
             print 'Loading plugin: %s.\n' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output,
                                self.categorize, self.nsfw)
-            self.handled.update(plug_inst.handled)
-            print '%s handled the following urls:\n' % plugin.__name__
-            if len(plug_inst.handled) > 0:
-                for h in plug_inst.handled:
-                    print '\t', h.url
-                print '\n'
-            else:
-                print '\tNone\n'
+            self.handled_posts.update(plug_inst.handled_posts)
+
+            #lazy instantiation so we only get it on the first loop
+            if len(self.candidates_backup) == 0:
+                # candidates backup is the original list of candidates
+                self.candidates_backup.update(plug_inst.candidates_backup)
+
             #trim down the candidates from what got parsed
             self.candidates = plug_inst.revised
-            # candidates backup is the original list of candidates
-            # (why would we update it if it is for preservation purposes??)
-            self.candidates_backup.update(plug_inst.candidates_backup)
+
             #these two shouldn't(?) change so assigning them each time is fine
             self.posts_already_finished = plug_inst.posts_already_finished
             self.image_urls_already_fetched = \
                 plug_inst.image_urls_already_fetched
 
-    def check_unhandled_links(self):
+            print '%s handled the following posts:\n' % plugin.__name__
+            if len(plug_inst.handled_posts):
+                for post in plug_inst.handled_posts:
+                    print post.title.encode('ascii', 'xmlcharefreplace')
+
+                    print '\n\t...which provided the following image urls:\n'
+                    for link in plug_inst.handled_posts[post]:
+                        print '\t%s' % link.url
+            else:
+                print 'None.'
+            print '\n'
+
+    def check_unhandled_posts(self):
         """
-        Create a list of unhandled links along with domains for those
+        Create a list of unhandled posts along with domains for those
         links which we output at the end to help target plugin
         development/maintenance
         """
-        all_handled = self.handled.union(
-            self.image_urls_already_fetched).union(
-                self.posts_already_finished)
-        unhandled = self.candidates_backup.difference(all_handled)
+        handled_posts = self.handled_posts.keys()
 
-        for each in unhandled:
-            self.unhandled.add((extract_domain(each.url), each.url))
+        # self.image_urls_already_fetched
+        # self.posts_already_finished
+
+        unhandled_posts = self.candidates_backup.difference(handled_posts)
+
+        for each in unhandled_posts:
+            self.unhandled_posts.add((extract_domain(each.url), each.url))
 
     def acquire(self):
         """
@@ -120,19 +132,19 @@ class PluginInterface():
         self.hand_off_to_plugins()
 
         print 'The following posts had links that were unhandled:'
-        self.check_unhandled_links()
-        if len(self.unhandled) > 0:
+        self.check_unhandled_posts()
+        if len(self.unhandled_posts) > 0:
             #iterating through these sorted puts them in alpha order by domain
             #so you should be able to see which domains you want or need to
             # target
-            for uh in sorted(self.unhandled):
+            for uh in sorted(self.unhandled_posts):
                 print uh[0], '\t', uh[1]
             print '\n'
         else:
             print 'None\n'
 
         print '\nComplete. %d new images were acquired this run.' \
-              % len(self.handled)
+              % sum([len(self.handled_posts[p]) for p in self.handled_posts])
 
     def remove_unneeded_plugins(self):
         plugins_count = {}

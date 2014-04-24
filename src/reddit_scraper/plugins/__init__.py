@@ -49,7 +49,7 @@ for plugin in plugin_list:
             except TypeError:
                 pass
     except ImportError, e:
-        print '%s failed to load: %s\n' % (cls.__name__, e)
+        print '%s failed to load: %s\n' % (plugin, e)
         failed_plugins.append(cls)
 
 sys.path.remove(plugins_folder)

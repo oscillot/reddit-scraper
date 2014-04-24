@@ -29,19 +29,14 @@ class CandidatesList(object):
             #allows an object to be removed by url reference
             if c.url == item:
                 self.candidates.difference({c})
-                break
             elif item in self.candidates:
                 self.candidates.difference({item})
-                break
-        #make sure we return the unaltered object when appropriate
-        return self.candidates
 
     def update(self, item):
         self.candidates.update(item)
 
     def difference(self, item):
-        self.candidates.difference(item)
-        return self.candidates
+        return self.candidates.difference(item)
 
     def union(self, item):
         return self.candidates.union(item)
@@ -77,8 +72,7 @@ class DownloadList(object):
         self.downloads.update(item)
 
     def difference(self, item):
-        self.downloads.difference(item)
-        return self.downloads
+        return self.downloads.difference(item)
 
     def union(self, item):
         return self.downloads.union(item)

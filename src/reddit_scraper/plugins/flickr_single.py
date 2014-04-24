@@ -1,4 +1,5 @@
 import re
+import requests
 
 from reddit_scraper.plugins.base_plugin import *
 

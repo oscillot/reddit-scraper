@@ -40,8 +40,8 @@ class BasePlugin(object):
         self.categorize = categorize
         self.nsfw = nsfw
         self.to_acquire = []
-        self.handled = set()
-        self.unhandled = set()
+        self.handled_posts = {}
+        self.unhandled_posts = set()
         self.db = os.path.join(os.getcwd(), '%s_downloaded.db' % database)
         self.engine = create_engine('sqlite:///%s' % self.db)
         metadata = MetaData(self.engine)
@@ -69,8 +69,9 @@ class BasePlugin(object):
         self._current = value
         if value is not None:
             self.acquisition_tasks()
+
         else:
-            self.unhandled.add(self.candidate)
+            self.unhandled_posts.add(self.candidate)
 
     def acquisition_tasks(self):
         if self.current.url in self.posts_already_finished:
@@ -88,10 +89,6 @@ class BasePlugin(object):
             #print data about the current acquisition
             print '%s: Requesting: %s \n' % \
                   (self.__class__.__name__, self.current.url)
-            #CLUTTER CLUTTER CLUTTER
-            #print self.current.title.encode('ascii', 'replace'),
-            #self.current.subreddit.encode('ascii', 'replace'),
-            #self.current.url.encode('ascii', 'replace'), '\n'
 
             #snag the image! woot! that's what it all leads up to
             # in the end!
@@ -117,26 +114,27 @@ class BasePlugin(object):
                                (self.resp.headers.get('content-type'),
                                 self.current.url))
                 print e.message
+                self.unhandled_posts.add(self.candidate)
                 self.current = None
             else:
                 #finally! we have image!
                 new_img = self.resp.content
                 self.current.md5 = hashlib.md5(new_img).hexdigest()
+                if self.candidate not in self.handled_posts.keys():
+                    self.handled_posts[self.candidate] = set()
+                self.handled_posts[self.candidate].add(self.current)
+                # self.handled_links.add(self.current)
                 if self.current.md5 not in self.unique_img_hashes:
                     self.save_img(new_img)
                     self.unique_img_hashes.add(self.current.md5)
                     self.add_to_main_db_table()
-                    self.revised = self.revised.remove(self.candidate)
-                    self.handled.add(self.current)
                     print '%s: Success! %s saved.\n' % \
                           (self.__class__.__name__, self.current.filename)
                 else:
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
                           (self.__class__.__name__, self.current.filename)
-                    #remove successes so the whole run goes faster
-                    while self.current in self.candidates:
-                        # print '@@@@@@@@@@@@@@@@@@IT MATTERS'
-                        self.candidates = self.candidates.remove(self.current)
+                #remove successes so the whole run goes faster
+                self.revised.remove(self.candidate)
 
     def add_to_main_db_table(self):
         """
@@ -154,9 +152,11 @@ class BasePlugin(object):
         """
         #prevent hash collision in the table
         uniques = set()
-        for h in self.handled:
-            if h.url not in self.posts_already_finished:
-                uniques.add(h.url)
+        for k in self.handled_posts.keys():
+            for h in self.handled_posts[k]:
+                if h.url not in self.posts_already_finished:
+                    uniques.add(h.url)
+
         for u in uniques:
             conn = self.engine.connect()
             retrieved_ins = sql.insert(table=self.retrieved,
@@ -235,7 +235,6 @@ class BasePlugin(object):
             #check the NSFW flag for filtering
             if not self.nsfw and candidate.nsfw:
                 print 'Skipping NSFW Image: %s' % self.candidate.url
-                self.unhandled.add(candidate)
                 continue
             #make the candidate object easily available everywhere
             self.candidate = candidate
@@ -246,7 +245,7 @@ class BasePlugin(object):
                 self.execute()
             except Exception, e:
                 print traceback.print_exc()
-                self.unhandled.add(self.candidate)
+                self.unhandled_posts.add(self.candidate)
 
     def execute(self):
         """
@@ -284,12 +283,10 @@ class BasePlugin(object):
         the database from the beginning, try to be as econmoical as possible
         and avoid getting ip or other form of blacklisted at all costs
         """
-        self.candidates = \
-            self.candidates.difference(
+        self.candidates.difference(
                 self.image_urls_already_fetched.downloads)
 
-        self.candidates = \
-            self.candidates.difference(self.posts_already_finished.downloads)
+        self.candidates.difference(self.posts_already_finished.downloads)
 
     def save_img(self, data):
         """
