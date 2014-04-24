@@ -1,8 +1,8 @@
 import os
 import re
 
-from data_types import DownloadList, CandidatesList
-from plugins import loaded_plugins
+from src.reddit_scraper.data_types import CandidatesList
+from src.reddit_scraper.plugins import loaded_plugins
 
 
 def extract_domain(url):
@@ -48,9 +48,8 @@ class PluginInterface():
             nsfw_flag = 'disabled'
         print 'Fetching NSFW Images is %s.' % nsfw_flag
         #set up some class variables
-        self.handled_links = DownloadList(set())
-        self.handled_posts = DownloadList(set())
-        self.unhandled_posts = DownloadList(set())
+        self.handled_posts = {}
+        self.unhandled_posts = set()
         self.posts_already_finished = None
         self.image_urls_already_fetched = None
         self.candidates_backup = CandidatesList(set())
@@ -62,7 +61,6 @@ class PluginInterface():
             print 'Loading plugin: %s.\n' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output,
                                self.categorize, self.nsfw)
-            self.handled_links.update(plug_inst.handled_links)
             self.handled_posts.update(plug_inst.handled_posts)
 
             #lazy instantiation so we only get it on the first loop
@@ -79,22 +77,16 @@ class PluginInterface():
                 plug_inst.image_urls_already_fetched
 
             print '%s handled the following posts:\n' % plugin.__name__
+            if len(plug_inst.handled_posts):
+                for post in plug_inst.handled_posts:
+                    print post.title
 
-            if len(plug_inst.handled_posts) > 0:
-                for h in plug_inst.handled_posts:
-                    print '\t', h.url
-                print '\n'
+                    print '\n\t...which provided the following image urls:\n'
+                    for link in plug_inst.handled_posts[post]:
+                        print '\t%s' % link.url
             else:
-                print '\tNone\n'
-
-            print '%s handled the following urls:\n' % plugin.__name__
-
-            if len(plug_inst.handled_links) > 0:
-                for h in plug_inst.handled_links:
-                    print '\t', h.url
-                print '\n'
-            else:
-                print '\tNone\n'
+                print 'None.'
+            print '\n'
 
     def check_unhandled_posts(self):
         """
@@ -102,10 +94,12 @@ class PluginInterface():
         links which we output at the end to help target plugin
         development/maintenance
         """
-        all_handled = self.handled_links.union(
-            self.image_urls_already_fetched).union(
-                self.posts_already_finished)
-        unhandled_posts = self.candidates_backup.difference(all_handled)
+        handled_posts = self.handled_posts.keys()
+
+        # self.image_urls_already_fetched
+        # self.posts_already_finished
+
+        unhandled_posts = self.candidates_backup.difference(handled_posts)
 
         for each in unhandled_posts:
             self.unhandled_posts.add((extract_domain(each.url), each.url))
@@ -149,7 +143,7 @@ class PluginInterface():
             print 'None\n'
 
         print '\nComplete. %d new images were acquired this run.' \
-              % len(self.handled_links)
+              % sum([len(self.handled_posts[p]) for p in self.handled_posts])
 
     def remove_unneeded_plugins(self):
         plugins_count = {}

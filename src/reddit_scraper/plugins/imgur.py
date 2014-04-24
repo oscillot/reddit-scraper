@@ -1,8 +1,10 @@
 #Handles getting all of the images from an album linked to on imgur
 import json
 import re
+
 from bs4 import BeautifulSoup
-from plugins.base_plugin import *
+
+from src.reddit_scraper.plugins.base_plugin import *
 
 
 class Imgur(BasePlugin):

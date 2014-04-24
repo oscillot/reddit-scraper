@@ -6,7 +6,7 @@ import string
 import requests
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(HERE, 'VERSION')) as f:
+with open(os.path.join(HERE, '..', '..', 'VERSION')) as f:
     VERSION = f.read()
 
 

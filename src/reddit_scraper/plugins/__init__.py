@@ -1,6 +1,8 @@
 import os
 import sys
-from base_plugin import BasePlugin
+
+from src.reddit_scraper.plugins.base_plugin import BasePlugin
+
 
 #Load an arbitrary number of arbitrarily named plugins from the plugins folder
 

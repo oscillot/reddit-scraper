@@ -1,6 +1,6 @@
 import re
 
-from plugins.base_plugin import *
+from src.reddit_scraper.plugins.base_plugin import *
 
 
 class FlickrSingle(BasePlugin):

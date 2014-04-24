@@ -36,7 +36,7 @@ class CandidatesList(object):
         self.candidates.update(item)
 
     def difference(self, item):
-        self.candidates.difference(item)
+        return self.candidates.difference(item)
 
     def union(self, item):
         return self.candidates.union(item)
@@ -72,7 +72,7 @@ class DownloadList(object):
         self.downloads.update(item)
 
     def difference(self, item):
-        self.downloads.difference(item)
+        return self.downloads.difference(item)
 
     def union(self, item):
         return self.downloads.union(item)

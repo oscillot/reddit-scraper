@@ -1,6 +1,6 @@
 import unittest
 
-from plugin_interface import extract_domain
+from src.reddit_scraper.plugin_interface import extract_domain
 
 
 class TestExtractDomain(unittest.TestCase):

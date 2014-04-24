@@ -6,7 +6,9 @@ from PIL import Image
 import requests
 from sqlalchemy import *
 import sqlalchemy.sql as sql
-from data_types import CandidatesList, DownloadList, Download
+
+from src.reddit_scraper.data_types import CandidatesList, DownloadList, Download
+
 
 IMAGE_HEADERS = ['image/bmp',
                  'image/png',
@@ -38,8 +40,7 @@ class BasePlugin(object):
         self.categorize = categorize
         self.nsfw = nsfw
         self.to_acquire = []
-        self.handled_links = set()
-        self.handled_posts = set()
+        self.handled_posts = {}
         self.unhandled_posts = set()
         self.db = os.path.join(os.getcwd(), '%s_downloaded.db' % database)
         self.engine = create_engine('sqlite:///%s' % self.db)
@@ -68,6 +69,7 @@ class BasePlugin(object):
         self._current = value
         if value is not None:
             self.acquisition_tasks()
+
         else:
             self.unhandled_posts.add(self.candidate)
 
@@ -112,12 +114,16 @@ class BasePlugin(object):
                                (self.resp.headers.get('content-type'),
                                 self.current.url))
                 print e.message
+                self.unhandled_posts.add(self.candidate)
                 self.current = None
             else:
                 #finally! we have image!
                 new_img = self.resp.content
                 self.current.md5 = hashlib.md5(new_img).hexdigest()
-                self.handled_links.add(self.current)
+                if self.candidate not in self.handled_posts.keys():
+                    self.handled_posts[self.candidate] = set()
+                self.handled_posts[self.candidate].add(self.current)
+                # self.handled_links.add(self.current)
                 if self.current.md5 not in self.unique_img_hashes:
                     self.save_img(new_img)
                     self.unique_img_hashes.add(self.current.md5)
@@ -146,9 +152,11 @@ class BasePlugin(object):
         """
         #prevent hash collision in the table
         uniques = set()
-        for h in self.handled_links:
-            if h.url not in self.posts_already_finished:
-                uniques.add(h.url)
+        for k in self.handled_posts.keys():
+            for h in self.handled_posts[k]:
+                if h.url not in self.posts_already_finished:
+                    uniques.add(h.url)
+
         for u in uniques:
             conn = self.engine.connect()
             retrieved_ins = sql.insert(table=self.retrieved,
