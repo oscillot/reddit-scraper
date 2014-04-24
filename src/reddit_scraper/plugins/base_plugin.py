@@ -7,7 +7,7 @@ import requests
 from sqlalchemy import *
 import sqlalchemy.sql as sql
 
-from src.reddit_scraper.data_types import CandidatesList, DownloadList, Download
+from reddit_scraper.data_types import CandidatesList, DownloadList, Download
 
 
 IMAGE_HEADERS = ['image/bmp',

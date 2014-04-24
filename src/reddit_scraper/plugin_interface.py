@@ -1,8 +1,8 @@
 import os
 import re
 
-from src.reddit_scraper.data_types import CandidatesList
-from src.reddit_scraper.plugins import loaded_plugins
+from reddit_scraper.data_types import CandidatesList
+from reddit_scraper.plugins import loaded_plugins
 
 
 def extract_domain(url):

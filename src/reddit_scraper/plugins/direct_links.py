@@ -1,6 +1,6 @@
 import re
 
-from src.reddit_scraper.plugins.base_plugin import *
+from reddit_scraper.plugins.base_plugin import *
 
 
 class DirectLinks(BasePlugin):
