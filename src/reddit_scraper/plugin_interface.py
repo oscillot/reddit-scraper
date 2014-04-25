@@ -100,10 +100,9 @@ class PluginInterface():
         """
         handled_posts = self.handled_posts.keys()
 
-        # self.image_urls_already_fetched
-        # self.posts_already_finished
-
         unhandled_posts = self.candidates_backup.difference(handled_posts)
+        unhandled_posts = unhandled_posts.difference(
+            self.posts_already_finished)
 
         for each in unhandled_posts:
             self.unhandled_posts.add(
