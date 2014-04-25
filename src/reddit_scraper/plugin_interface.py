@@ -1,5 +1,6 @@
 import os
 import re
+import unicodedata
 
 from reddit_scraper.data_types import CandidatesList
 from reddit_scraper.plugins import loaded_plugins
@@ -80,8 +81,9 @@ class PluginInterface():
             if len(plug_inst.handled_posts):
                 for post in plug_inst.handled_posts:
                     # print post.title.encode('ascii', 'xmlcharrefreplace')
-                    print '%s (%s)' % (post.title.encode('ascii', 'replace'),
-                                       post.url)
+                    print '%s (%s)' % \
+                          (unicodedata.normalize(post.title, 'NFD').encode(
+                              'ascii', 'xmlcharrefreplace'), post.url)
 
                     print '\n\t...which provided the following image urls:\n'
                     for link in plug_inst.handled_posts[post]:
@@ -106,9 +108,8 @@ class PluginInterface():
         for each in unhandled_posts:
             self.unhandled_posts.add(
                 (extract_domain(each.url), '%s (%s)' %
-                                           (each.title.encode(
-                                               'ascii', 'replace'),
-                                            each.url)))
+                    (unicodedata.normalize(each.title, 'NFD').encode(
+                        'ascii', 'xmlcharrefreplace'), each.url)))
 
     def acquire(self):
         """
