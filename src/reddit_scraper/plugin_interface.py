@@ -7,7 +7,7 @@ from reddit_scraper.plugins import loaded_plugins
 
 
 def ensure_ascii(text):
-    unicodedata.normalize(text.decode(), 'NFD').encode('ascii',
+    unicodedata.normalize(unicode(text), 'NFD').encode('ascii',
                                                        'xmlcharrefreplace')
 
 
