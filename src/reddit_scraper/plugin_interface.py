@@ -6,6 +6,11 @@ from reddit_scraper.data_types import CandidatesList
 from reddit_scraper.plugins import loaded_plugins
 
 
+def ensure_ascii(text):
+    unicodedata.normalize(text.decode(), 'NFD').encode('ascii',
+                                                       'xmlcharrefreplace')
+
+
 def extract_domain(url):
     dom_pat = re.compile(r'^.*://(?:[wW]{3}\.)?([^:/]*).*$')
     domain = re.findall(dom_pat, url)[0]
@@ -82,8 +87,7 @@ class PluginInterface():
                 for post in plug_inst.handled_posts:
                     # print post.title.encode('ascii', 'xmlcharrefreplace')
                     print '%s (%s)' % \
-                          (unicodedata.normalize(post.title, 'NFD').encode(
-                              'ascii', 'xmlcharrefreplace'), post.url)
+                          (ensure_ascii(pos.title), post.url)
 
                     print '\n\t...which provided the following image urls:\n'
                     for link in plug_inst.handled_posts[post]:
@@ -107,8 +111,7 @@ class PluginInterface():
         for each in unhandled_posts:
             self.unhandled_posts.add(
                 (extract_domain(each.url), '%s (%s)' %
-                    (unicodedata.normalize(each.title, 'NFD').encode(
-                        'ascii', 'xmlcharrefreplace'), each.url)))
+                    (ensure_ascii(each.title), each.url)))
 
     def acquire(self):
         """
