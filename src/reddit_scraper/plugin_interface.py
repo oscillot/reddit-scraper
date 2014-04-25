@@ -1,6 +1,7 @@
 import os
 import re
 
+from reddit_scraper.data_types import CandidatesList
 from reddit_scraper.plugins import loaded_plugins
 
 
