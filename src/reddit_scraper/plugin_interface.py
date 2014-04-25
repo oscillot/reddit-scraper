@@ -87,7 +87,7 @@ class PluginInterface():
                 for post in plug_inst.handled_posts:
                     # print post.title.encode('ascii', 'xmlcharrefreplace')
                     print '%s (%s)' % \
-                          (ensure_ascii(pos.title), post.url)
+                          (ensure_ascii(post.title), post.url)
 
                     print '\n\t...which provided the following image urls:\n'
                     for link in plug_inst.handled_posts[post]:
