@@ -152,10 +152,10 @@ class BasePlugin(object):
         """
         #prevent hash collision in the table
         uniques = set()
-        for k in self.handled_posts.keys():
-            for h in self.handled_posts[k]:
-                if h.url not in self.posts_already_finished:
-                    uniques.add(h.url)
+        for post in self.handled_posts.keys():
+            # for h in self.handled_posts[k]:
+            if post not in self.posts_already_finished:
+                uniques.add()
 
         for u in uniques:
             conn = self.engine.connect()
@@ -246,6 +246,9 @@ class BasePlugin(object):
             except Exception, e:
                 print traceback.print_exc()
                 self.unhandled_posts.add(self.candidate)
+            #     continue
+            # #EXPERIMENTAL:
+            # self.add_to_previous_aquisitions()
 
     def execute(self):
         """
