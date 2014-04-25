@@ -13,14 +13,14 @@ class Imgur(BasePlugin):
         operate to handle links.
         """
         if self.url_matches(self.candidate.url):
-            if self.album_url():
+            if self.album_url(self.candidate.url):
                 album_imgs = self.get_imgur_album()
                 for album_img in album_imgs:
                     self.current = Download(self.candidate.title,
                                             self.candidate.subreddit,
                                             album_img,
                                             self.candidate.nsfw)
-            elif self.api_url():
+            elif self.api_url(self.candidate.url):
                 img_url = self.get_url_from_api()
                 if img_url is not None:
                     self.current = Download(self.candidate.title,
@@ -29,7 +29,7 @@ class Imgur(BasePlugin):
                                             self.candidate.nsfw)
             #if you add more, try to keep this guy down at the bottom...
             # he tends to grab everything!
-            elif self.image_url():
+            elif self.image_url(self.candidate.url):
                 img_url = self.get_imgur_single()
                 if img_url is not None:
                     self.current = Download(self.candidate.title,
@@ -50,14 +50,15 @@ class Imgur(BasePlugin):
         else:
             return False
 
-    def album_url(self):
+    @staticmethod
+    def album_url(url):
         """
         This matches only imgur albums
         """
 
         imgur_alb_pat = re.compile(r'^http[s]?://.*imgur\.com/a/.*$',
                                    flags=re.IGNORECASE)
-        if imgur_alb_pat.match(self.candidate.url):
+        if imgur_alb_pat.match(url):
             return True
         else:
             return False
@@ -100,7 +101,8 @@ class Imgur(BasePlugin):
 
 #http://api.imgur.com/oembed.json?url=http://imgur.com/gallery/QLBhjdq
 
-    def api_url(self):
+    @staticmethod
+    def api_url(url):
         """
         This matches single imgur api calls that return JSON
         """
@@ -109,7 +111,7 @@ class Imgur(BasePlugin):
             r'^http[s]?://api\.imgur\.com/oembed\.json\?.*$',
             flags=re.IGNORECASE)
         #strip the url args since we are looking to match against file types
-        if imgur_single_page_pat.match(self.candidate.url):
+        if imgur_single_page_pat.match(url):
             return True
         else:
             return False
@@ -130,8 +132,8 @@ class Imgur(BasePlugin):
 
 #Handles getting a single imgur image that isn't a direct link but rather a
 # link to its imgur page
-
-    def image_url(self):
+    @staticmethod
+    def image_url(url):
         """
         This matches single image pages on imgur that are not direct links to
         the image. Yeah, look at that sexy regex. Nested non-captureing groups
@@ -159,7 +161,7 @@ class Imgur(BasePlugin):
             r').)*$',
             flags=re.IGNORECASE)
         #strip the url args since we are looking to match against file types
-        if imgur_single_page_pat.match(self.candidate.url.split('#')[0]):
+        if imgur_single_page_pat.match(url.split('#')[0]):
             return True
         else:
             return False
