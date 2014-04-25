@@ -46,7 +46,7 @@ class PluginInterface():
             nsfw_flag = 'enabled'
         else:
             nsfw_flag = 'disabled'
-        print 'Fetching NSFW Images is %s.' % nsfw_flag
+        print '\nFetching NSFW Images is %s.\n' % nsfw_flag
         #set up some class variables
         self.handled_posts = {}
         self.unhandled_posts = set()
