@@ -80,7 +80,8 @@ class PluginInterface():
             if len(plug_inst.handled_posts):
                 for post in plug_inst.handled_posts:
                     # print post.title.encode('ascii', 'xmlcharrefreplace')
-                    print post.title.encode('ascii', 'replace')
+                    print '%s (%s)' % (post.title.encode('ascii', 'replace'),
+                                       post.url)
 
                     print '\n\t...which provided the following image urls:\n'
                     for link in plug_inst.handled_posts[post]:
@@ -103,7 +104,11 @@ class PluginInterface():
         unhandled_posts = self.candidates_backup.difference(handled_posts)
 
         for each in unhandled_posts:
-            self.unhandled_posts.add((extract_domain(each.url), each.url))
+            self.unhandled_posts.add(
+                (extract_domain(each.url), '%s (%s)' %
+                                           (each.title.encode(
+                                               'ascii', 'replace'),
+                                            each.url)))
 
     def acquire(self):
         """
