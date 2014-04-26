@@ -34,7 +34,6 @@ class PluginInterface():
         #set up some class variables
         self.handled_posts = {}
         self.unhandled_posts = set()
-        self.posts_already_finished = None
         self.image_urls_already_fetched = None
         self.candidates_backup = CandidatesList(set())
 
@@ -80,10 +79,7 @@ class PluginInterface():
         development/maintenance
         """
         handled_posts = self.handled_posts.keys()
-
         unhandled_posts = self.candidates_backup.difference(handled_posts)
-        unhandled_posts = unhandled_posts.difference(
-            self.posts_already_finished)
 
         for each in unhandled_posts:
             self.unhandled_posts.add(
