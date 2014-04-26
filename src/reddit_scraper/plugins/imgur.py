@@ -61,5 +61,3 @@ class Imgur(BasePlugin):
             urls.append(meta.attrs['content'])
 
         return urls
-
-print Imgur.get_imgur_images('http://imgur.com/wtD08iT')
