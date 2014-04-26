@@ -65,5 +65,3 @@ class Tumblr(BasePlugin):
                 imgs.append(img.attrs.get('src'))
 
         return imgs
-
-print Tumblr.get_tumblr_imgs('http://finalcontext.tumblr.com/post/83525179578/data-entry')
