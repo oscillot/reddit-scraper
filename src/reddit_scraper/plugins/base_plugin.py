@@ -9,7 +9,7 @@ from sqlalchemy import *
 import sqlalchemy.sql as sql
 
 from reddit_scraper.data_types import CandidatesList, DownloadList, Download
-
+from util import ensure_ascii
 
 IMAGE_HEADERS = ['image/bmp',
                  'image/png',
@@ -124,11 +124,13 @@ class BasePlugin(object):
                     # self.add_to_previous_aquisitions()
                     print '%s: Success! %s saved.\n' % \
                           (self.__class__.__name__, '%s: %s' % (
-                              self.current.title, self.current.filename))
+                              ensure_ascii(self.current.title),
+                              self.current.filename))
                 else:
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
                           (self.__class__.__name__, '%s: %s' % (
-                              self.current.title, self.current.filename))
+                              ensure_ascii(self.current.title),
+                              self.current.filename))
                 #remove successes so the whole run goes faster
                 self.revised.remove(self.candidate)
 
