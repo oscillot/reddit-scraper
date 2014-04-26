@@ -33,14 +33,15 @@ class Tumblr(BasePlugin):
         else:
             return False
 
-    def get_tumblr_imgs(self, url):
+    @staticmethod
+    def get_tumblr_imgs(url):
         try:
             resp = requests.get(url)
         except requests.HTTPError, e:
             print 'Error contacting tumblr (%s):' % url
             print e
             return []
-        root = BeautifulSoup(resp.text)
+        root = BeautifulSoup(resp.content)
         imgs = []
 
         for iframe in root.find_all('iframe', {'class': 'photoset'}):
@@ -52,8 +53,17 @@ class Tumblr(BasePlugin):
                 print 'Error contacting tumblr (%s):' % url
                 print e
                 return []
-            root = BeautifulSoup(resp.text)
+            inner_root = BeautifulSoup(resp.text)
 
-            for img in root.find_all({'class': 'photoset_photo'}):
+            for img in inner_root.find_all({'class': 'photoset_photo'}):
                 imgs.append(img.attrs.get('href'))
+
+        divs = root.find_all('div', {'class': 'photo-wrap'})
+        if divs:
+            for div in divs:
+                img = div.find('img')
+                imgs.append(img.attrs.get('src'))
+
         return imgs
+
+print Tumblr.get_tumblr_imgs('http://finalcontext.tumblr.com/post/83525179578/data-entry')
