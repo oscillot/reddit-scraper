@@ -23,6 +23,7 @@ class PluginInterface():
         """
         self.database = database
         self.candidates = candidates
+        self.announce_candidates()
         self.output = output
         self.categorize = categorize
         self.nsfw = nsfw
@@ -36,6 +37,18 @@ class PluginInterface():
         self.unhandled_posts = set()
         self.image_urls_already_fetched = None
         self.candidates_backup = CandidatesList(set())
+
+    def announce_candidates(self):
+        print '\n'
+        for c in self.candidates:
+            found_str = 'Found Candidate: %s %s (%s)' % (
+                        c['data']['subreddit'],
+                        c['data']['title'],
+                        c['data']['url'])
+            if c['data']['over_18']:
+                found_str += ' [NSFW]'
+            found_str += '\n'
+            print ensure_ascii(found_str)
 
     def hand_off_to_plugins(self):
         """Calls each plugin module and hand the CandidateList off to it.

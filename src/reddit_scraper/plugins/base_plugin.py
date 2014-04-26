@@ -171,21 +171,11 @@ class BasePlugin(object):
             return
         else:
             new_cands = set()
-            print '\n'
             for c in self.candidates:
                 new_cands.add(Download(c['data']['title'],
                                        c['data']['subreddit'],
                                        c['data']['url'],
                                        c['data']['over_18']))
-
-                found_str = 'Found Candidate: %s %s (%s)' % (
-                    c['data']['subreddit'],
-                    c['data']['title'],
-                    c['data']['url'])
-                if c['data']['over_18']:
-                    found_str += ' [NSFW]'
-                found_str += '\n'
-                print ensure_ascii(found_str)
             self.candidates = CandidatesList(new_cands)
             self.candidates_backup = self.candidates
             self.revised = self.candidates
