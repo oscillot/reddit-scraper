@@ -139,7 +139,7 @@ class BasePlugin(object):
         Inserts the full handled link info into the wallpapers table of the db
         """
         conn = self.engine.connect()
-        wall_data = (self.current.subreddit, self.current.title,
+        wall_data = (self.date, self.current.subreddit, self.current.title,
                      self.current.url, self.current.filename, self.current.md5)
         wall_ins = self.wallpapers.insert(wall_data)
         conn.execute(wall_ins)
@@ -171,14 +171,13 @@ class BasePlugin(object):
             return
         else:
             new_cands = set()
+            print '\n'
             for c in self.candidates:
-                if c.__class__.__name__ == 'Download':
-                    new_cands.add(c)
-                else:
-                    new_cands.add(Download(c['data']['title'],
-                                           c['data']['subreddit'],
-                                           c['data']['url'],
-                                           c['data']['over_18']))
+                new_cands.add(Download(c['data']['title'],
+                                       c['data']['subreddit'],
+                                       c['data']['url'],
+                                       c['data']['over_18']))
+                print 'Found Candidate: '
             self.candidates = CandidatesList(new_cands)
             self.candidates_backup = self.candidates
             self.revised = self.candidates
