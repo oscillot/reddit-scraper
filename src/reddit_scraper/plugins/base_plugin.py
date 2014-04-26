@@ -48,12 +48,12 @@ class BasePlugin(object):
         self.engine = create_engine('sqlite:///%s' % self.db)
         metadata = MetaData(self.engine)
         self.wallpapers = Table('wallpapers', metadata,
+                                Column('date', String),
                                 Column('subreddit', String),
                                 Column('title', String),
                                 Column('url', String),
                                 Column('filename', String),
-                                Column('md5', String, primary_key=True),
-                                Column('date', String))
+                                Column('md5', String, primary_key=True))
         #Create the DB tables if not there
         metadata.create_all()
         self.unique_img_hashes = self.get_previous_md5s()

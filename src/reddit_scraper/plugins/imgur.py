@@ -186,5 +186,3 @@ class Imgur(BasePlugin):
             href = a.img.attrs.get('src')
 
             return fixed_href(href)
-
-print Imgur.get_imgur_album('http://imgur.com/a/kfkmK')
