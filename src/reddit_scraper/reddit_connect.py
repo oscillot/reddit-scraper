@@ -5,6 +5,8 @@ import string
 
 import requests
 
+from reddit_scraper.util import ensure_ascii, substract
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(HERE, '..', '..', 'VERSION')) as f:
     VERSION = f.read()
@@ -92,10 +94,12 @@ class RedditConnect():
         :returns str: The response if successful.
         """
         the_page = self.basic_request('http://www.reddit.com/reddits/mine.json')
-        if the_page is None:
+        if not the_page:
             print 'Nothing returned trying to request your subs (mine.json)!\n'
             raise ValueError
-        return the_page
+        return map(substract,
+                   [s['data']['url']
+                    for s in json.loads(the_page)['data']['children']])
 
     def get_about_me(self):
         """
@@ -173,17 +177,28 @@ class RedditConnect():
         :returns list: A list of dictionaries where each key 'url' is a
         direct link to an image
         """
+        if [] == subs or '*' == subs:
+            subs = [child['data']['subreddit'].lower() for child in upvotes_data]
         print 'Getting candidates...\n'
         #make the list of subreddits lowercase for easier comparisons
         subs = map(string.lower, subs)
 
         matches = 0
         candidates = []
+        print '\nCandidates found so far:\n'
         for child in upvotes_data:
             if child['data']['subreddit'].lower() in subs:
                 candidates.append(child)
                 matches += 1
-                print 'Candidates found so far: %d' % matches
+                so_far = '%d: [%s] %s (%s)' % (
+                    matches,
+                    child['data']['subreddit'],
+                    child['data']['title'],
+                    child['data']['url'])
+                if child['data']['over_18']:
+                    so_far += ' [NSFW]'
+                so_far += '\n'
+                print ensure_ascii(so_far)
         return candidates
 
     def wait(self):

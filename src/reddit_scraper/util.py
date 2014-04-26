@@ -1,8 +1,6 @@
 import re
 import unicodedata
 
-__author__ = 'Oscillot'
-
 
 def ensure_ascii(text):
     return unicodedata.normalize('NFD', unicode(text)).encode('ascii',
@@ -23,3 +21,12 @@ def extract_domain(url):
                 #alternate ruleset for e.g. .co.uk
                 domain = '.'.join(domain.split('.')[1:])
     return domain
+
+
+def substract(string):
+    substractor = re.compile(r'^/r/(.*)/$')
+    match = substractor.search(string)
+    if match:
+        return match.group(1)
+    else:
+        return string

@@ -1,6 +1,6 @@
 import unittest
 
-from reddit_scraper.util import extract_domain
+from reddit_scraper.util import extract_domain, substract
 
 
 class TestExtractDomain(unittest.TestCase):
@@ -39,3 +39,11 @@ class TestExtractDomain(unittest.TestCase):
               '.png?token=3418327129&other_param="some_other_stuff_to_ignore'
         extracted = extract_domain(url)
         self.assertEqual(extracted, 'deviantart.com')
+
+    def test_substract_returns_sub(self):
+        url = '/r/spaceclop/'
+        self.assertEqual('spaceclop', substract(url))
+
+    def test_substract_returns_original(self):
+        url = '/r/spaceclop'
+        self.assertEqual('/r/spaceclop', substract(url))
