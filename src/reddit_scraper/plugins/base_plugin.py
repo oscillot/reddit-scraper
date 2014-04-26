@@ -1,4 +1,5 @@
 import os
+import time
 import hashlib
 import traceback
 
@@ -33,6 +34,7 @@ class BasePlugin(object):
         :param bool categorize: whether to create subfolders of the subreddit
         names where images came from. Defaults to False.
         """
+        self.date = str(int(time.time()))
         self.candidates = candidates
         self.candidates_backup = None
         self.revised = None
@@ -50,10 +52,8 @@ class BasePlugin(object):
                                 Column('title', String),
                                 Column('url', String),
                                 Column('filename', String),
-                                Column('md5', String, primary_key=True))
-        self.retrieved = Table('retrieved', metadata,
-                               Column('image_url', String,
-                                      primary_key=True))
+                                Column('md5', String, primary_key=True),
+                                Column('date', String))
         #Create the DB tables if not there
         metadata.create_all()
         self.unique_img_hashes = self.get_previous_md5s()
@@ -123,16 +123,19 @@ class BasePlugin(object):
                 if self.candidate not in self.handled_posts.keys():
                     self.handled_posts[self.candidate] = set()
                 self.handled_posts[self.candidate].add(self.current)
-                # self.handled_links.add(self.current)
+
                 if self.current.md5 not in self.unique_img_hashes:
                     self.save_img(new_img)
                     self.unique_img_hashes.add(self.current.md5)
                     self.add_to_main_db_table()
+                    # self.add_to_previous_aquisitions()
                     print '%s: Success! %s saved.\n' % \
-                          (self.__class__.__name__, self.current.filename)
+                          (self.__class__.__name__, '%s: %s' % (
+                              self.current.title, self.current.filename))
                 else:
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
-                          (self.__class__.__name__, self.current.filename)
+                          (self.__class__.__name__, '%s: %s' % (
+                              self.current.title, self.current.filename))
                 #remove successes so the whole run goes faster
                 self.revised.remove(self.candidate)
 
@@ -146,23 +149,6 @@ class BasePlugin(object):
         wall_ins = self.wallpapers.insert(wall_data)
         conn.execute(wall_ins)
 
-    def add_to_previous_aquisitions(self):
-        """
-        Adds to the list of previously handled links
-        """
-        #prevent hash collision in the table
-        uniques = set()
-        for post in self.handled_posts.keys():
-            # for h in self.handled_posts[k]:
-            if post not in self.posts_already_finished:
-                uniques.add()
-
-        for u in uniques:
-            conn = self.engine.connect()
-            retrieved_ins = sql.insert(table=self.retrieved,
-                                       values=[u])
-            conn.execute(retrieved_ins)
-
     def check_db_for_finished_image_urls(self):
         """
         Returns a `class` DownloadList of urls that has successfully been
@@ -175,17 +161,6 @@ class BasePlugin(object):
         self.image_urls_already_fetched = DownloadList(
             set(a[2] for a in conn.execute(
                 finished_urls_select).fetchall()))
-
-    def check_db_for_finished_post_urls(self):
-        """
-        Returns a `class` DownloadList of previous posts that successfully
-        went allthe way through the scraper, this is needed for gallery posts
-        that may fail partway through a job to not get skipped on retry
-        """
-        conn = self.engine.connect()
-        finished_posts_select = sql.select([self.retrieved])
-        self.posts_already_finished = DownloadList(set(a[0] for a in
-            conn.execute(finished_posts_select).fetchall()))
 
     def convert_candidates(self):
         """
@@ -224,8 +199,6 @@ class BasePlugin(object):
         # connect class to something specific with only the necessary
         # attributes needed for downloading images
         self.convert_candidates()
-        #create self.already_handled
-        self.check_db_for_finished_post_urls()
         #create self.already_dled
         self.check_db_for_finished_image_urls()
         #remove the above, if found, from the returned list before doing
@@ -288,8 +261,6 @@ class BasePlugin(object):
         """
         self.candidates.difference(
                 self.image_urls_already_fetched.downloads)
-
-        self.candidates.difference(self.posts_already_finished.downloads)
 
     def save_img(self, data):
         """

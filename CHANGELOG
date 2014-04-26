@@ -1,3 +1,8 @@
+2.30
+----
+Nuked a lot of dead code
+Fixed up imgur album getter which seems to have been dead a while
+
 2.22
 ----
 Finally fixed the unhandled list bug!

@@ -9,7 +9,7 @@ setup(
     name='reddit_scraper',
     version=VERSION,
     package_dir={'': 'src'},
-    packages=find_packages(where='src'),
+    packages=find_packages(where='src', exclude=['test']),
     install_requires=['pillow>=1.7.8',
                       'lxml>=3.0.2',
                       'sqlalchemy>=0.8.0b2',
@@ -23,6 +23,6 @@ setup(
     test_suite='tests',
     description='Automatically download upvoted wallpapers using cron or '
                 'jenkins easily extended with plugins you can write yourself. '
-                'Requires SQLite be already installed. See the README to get '
-                'started with plugins or just dive into the code.'
+                'See the README to get started with plugins or just dive into '
+                'the code.'
 )

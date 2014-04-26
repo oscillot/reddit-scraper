@@ -7,6 +7,14 @@ from bs4 import BeautifulSoup
 from reddit_scraper.plugins.base_plugin import *
 
 
+def fixed_href(url):
+    #Fix The single indirect links that look like this:
+    #<link rel="image_src" href="//i.imgur.com/IZZayKa.png" />
+    if not url.startswith('http://'):
+        if url.startswith('//'):
+            url = 'http:' + url
+    return  url
+
 class Imgur(BasePlugin):
     def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
@@ -14,7 +22,7 @@ class Imgur(BasePlugin):
         """
         if self.url_matches(self.candidate.url):
             if self.album_url(self.candidate.url):
-                album_imgs = self.get_imgur_album()
+                album_imgs = self.get_imgur_album(self.candidate.url)
                 for album_img in album_imgs:
                     self.current = Download(self.candidate.title,
                                             self.candidate.subreddit,
@@ -30,7 +38,7 @@ class Imgur(BasePlugin):
             #if you add more, try to keep this guy down at the bottom...
             # he tends to grab everything!
             elif self.image_url(self.candidate.url):
-                img_url = self.get_imgur_single()
+                img_url = self.get_imgur_single(self.candidate.url)
                 if img_url is not None:
                     self.current = Download(self.candidate.title,
                                             self.candidate.subreddit,
@@ -63,40 +71,34 @@ class Imgur(BasePlugin):
         else:
             return False
 
-    def get_imgur_album(self):
+    @staticmethod
+    def get_imgur_album(url):
         """Helper for the imgur album execute function
 
         :rtype list: a list of urls that is are direct links to images
         """
         try:
-            resp = requests.get(self.candidate.url)
+            resp = requests.get(url)
         except requests.HTTPError, e:
-            print 'Error contacting imgur (%s):' % self.candidate.url
+            print 'Error contacting imgur (%s):' % url
             print e
             return []
-        root = BeautifulSoup(resp.text)
+        soup = BeautifulSoup(resp.text)
+
         urls = []
-        for script in root.find('body').find_all('script'):
-            if script.attrs.get('text') is not None:
-                if script.text.replace('\n', '').lstrip().rstrip()\
-                        .startswith('var album'):
-                    album = eval('[{%s}]' % script.text.split('[{')[1].split(
-                        '}]')[0])
-                    #this check in case the album has one image,
-                    # which returns dict instead of list
-                    if type(album) == list or type(album) == tuple:
-                        for image in album:
-                            url = 'http://i.imgur.com/%s%s' % (image['hash'],
-                                                               image['ext'])
-                            urls.append(url)
-                    elif type(album) == dict:
-                        url = 'http://i.imgur.com/%s%s' % (album['hash'],
-                                                           album['ext'])
-                        urls.append(url)
-                    else:
-                        print type(album), album
-                        print 'Unhandled album type!'
-                        raise ValueError
+        images = soup.find_all('div', attrs={'class': 'wrapper'})
+        for image in images:
+            found_url = image.find('a').attrs['href']
+            urls.append(fixed_href(found_url))
+
+        if not urls:
+            #try to get an early warning next time this plugin stops working
+            # for albums
+            try:
+                raise ValueError('No images found from album: %s' % url)
+            except ValueError:
+                pass
+
         return urls
 
 #http://api.imgur.com/oembed.json?url=http://imgur.com/gallery/QLBhjdq
@@ -166,24 +168,23 @@ class Imgur(BasePlugin):
         else:
             return False
 
-    def get_imgur_single(self):
+    @staticmethod
+    def get_imgur_single(url):
         """Helper for the imgur single image page function
 
         :rtype str: a url that is a direct link to an image
         """
         try:
-            resp = requests.get(self.candidate.url)
+            resp = requests.get(url)
         except requests.HTTPError, e:
-            print 'Error contacting imgur (%s):' % self.candidate.url
+            print 'Error contacting imgur (%s):' % url
             print e
             return []
-        root = BeautifulSoup(resp.text)
+        root = BeautifulSoup(resp.content)
         al = root.find_all(attrs={'class': 'image textbox '})
         for a in al:
             href = a.img.attrs.get('src')
-            #Fix The single indirect links that look like this:
-            #<link rel="image_src" href="//i.imgur.com/IZZayKa.png" />
-            if not href.startswith('http://'):
-                if href.startswith('//'):
-                    href = 'http:' + href
-            return href
+
+            return fixed_href(href)
+
+print Imgur.get_imgur_album('http://imgur.com/a/kfkmK')
