@@ -9,7 +9,7 @@ from sqlalchemy import *
 import sqlalchemy.sql as sql
 
 from reddit_scraper.data_types import CandidatesList, DownloadList, Download
-from util import ensure_ascii
+from reddit_scraper.util import ensure_ascii
 
 IMAGE_HEADERS = ['image/bmp',
                  'image/png',

@@ -2,7 +2,7 @@ import os
 
 from reddit_scraper.data_types import CandidatesList
 from reddit_scraper.plugins import loaded_plugins
-from util import ensure_ascii, extract_domain
+from reddit_scraper.util import ensure_ascii, extract_domain
 
 
 class PluginInterface():
