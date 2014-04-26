@@ -77,8 +77,7 @@ class PluginInterface():
             #trim down the candidates from what got parsed
             self.candidates = plug_inst.revised
 
-            #these two shouldn't(?) change so assigning them each time is fine
-            self.posts_already_finished = plug_inst.posts_already_finished
+            #this shouldn't(?) change so assigning them each time is fine
             self.image_urls_already_fetched = \
                 plug_inst.image_urls_already_fetched
 
