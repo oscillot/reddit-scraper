@@ -12,10 +12,18 @@ class GfyCat(BasePlugin):
         """
         if self.url_matches(self.candidate.url):
             url = GfyCat.get_gfycat_img(self.candidate.url)
-            self.current = Download(self.candidate.title,
-                                    self.candidate.subreddit,
-                                    url,
-                                    self.candidate.nsfw)
+            if url:
+                self.current = Download(self.candidate.title,
+                                        self.candidate.subreddit,
+                                        url,
+                                        self.candidate.nsfw)
+            else:
+                #try to get an early warning next time this plugin stops working
+                try:
+                    raise ValueError('No image found from url: %s' %
+                                     self.candidate.url)
+                except ValueError, e:
+                    print '%s: %s' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):
@@ -34,10 +42,4 @@ class GfyCat(BasePlugin):
         resp = requests.get(url)
         soup = BeautifulSoup(resp.content)
         gif_link = soup.find(id='gifShareLink')
-        if not gif_link:
-                #try to get an early warning next time this plugin stops working
-            try:
-                raise ValueError('No image found from url: %s' % url)
-            except ValueError:
-                pass
         return gif_link.text

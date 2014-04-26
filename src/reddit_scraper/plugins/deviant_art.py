@@ -13,7 +13,7 @@ class DeviantArt(BasePlugin):
         if self.url_matches(self.candidate.url):
             deviant_art_img_url, deviant_art_cookie = self\
                 .get_deviant_art_image(self.candidate.url)
-            if deviant_art_img_url is not None:
+            if deviant_art_img_url:
                 if deviant_art_img_url == 'deviantART: 404 Not Found':
                     return
                 self.current = Download(self.candidate.title,
@@ -21,6 +21,13 @@ class DeviantArt(BasePlugin):
                                         deviant_art_img_url,
                                         self.candidate.nsfw,
                                         deviant_art_cookie)
+            else:
+                #try to get an early warning next time this plugin stops working
+                try:
+                    raise ValueError('No image found from url: %s' %
+                                     self.candidate.url)
+                except ValueError, e:
+                    print '%s: %s' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):

@@ -15,11 +15,18 @@ class FlickrSingle(BasePlugin):
             if '/sizes/' in self.candidate.url:
                 self.candidate.url = self.candidate.url.split('/sizes/')[0]
             flickr_img_url = self.get_best_quality(self.candidate.url)
-            if flickr_img_url is not None:
+            if flickr_img_url:
                 self.current = Download(self.candidate.title,
                                         self.candidate.subreddit,
                                         flickr_img_url,
                                         self.candidate.nsfw)
+            else:
+                #try to get an early warning next time this plugin stops working
+                try:
+                    raise ValueError('No image found from url: %s' %
+                                     self.candidate.url)
+                except ValueError, e:
+                    print '%s: %s' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):

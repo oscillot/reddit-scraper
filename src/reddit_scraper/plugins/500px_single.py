@@ -12,10 +12,18 @@ class Get500pxSingle(BasePlugin):
         """
         if self.url_matches(self.candidate.url):
             img_url = self.get_500px_img(self.candidate.url)
-            self.current = Download(self.candidate.title,
-                                    self.candidate.subreddit,
-                                    img_url,
-                                    self.candidate.nsfw)
+            if img_url:
+                self.current = Download(self.candidate.title,
+                                        self.candidate.subreddit,
+                                        img_url,
+                                        self.candidate.nsfw)
+            else:
+                #try to get an early warning next time this plugin stops working
+                try:
+                    raise ValueError('No image found from url: %s' %
+                                     self.candidate.url)
+                except ValueError, e:
+                    print '%s: %s' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):

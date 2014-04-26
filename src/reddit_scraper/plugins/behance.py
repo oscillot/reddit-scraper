@@ -12,11 +12,19 @@ class Behance(BasePlugin):
         """
         if self.url_matches(self.candidate.url):
             urls = Behance.get_behance_imgs(self.candidate.url)
-            for url in urls:
-                self.current = Download(self.candidate.title,
-                                        self.candidate.subreddit,
-                                        url,
-                                        self.candidate.nsfw)
+            if urls:
+                for url in urls:
+                    self.current = Download(self.candidate.title,
+                                            self.candidate.subreddit,
+                                            url,
+                                            self.candidate.nsfw)
+            else:
+                #try to get an early warning next time this plugin stops working
+                try:
+                    raise ValueError('No images found from gallery: %s' %
+                                     self.candidate.url)
+                except ValueError, e:
+                    print '%s: %s' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):
@@ -42,12 +50,5 @@ class Behance(BasePlugin):
         for li in lis:
             img = li.find('img')
             imgs.append(img.attrs['data-hd-src'])
-
-        if not imgs:
-            #try to get an early warning next time this plugin stops working
-            try:
-                raise ValueError('No image found from url: %s' % url)
-            except ValueError:
-                pass
 
         return imgs
