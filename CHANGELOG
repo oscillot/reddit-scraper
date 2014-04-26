@@ -1,7 +1,10 @@
 2.30
 ----
 Nuked a lot of dead code
-Fixed up imgur album getter which seems to have been dead a while
+Fixed up imgur album getter which seems to have been dead a while, and shored
+up the single inderect portion
+Added a GfyCat plugin which grabs gifs
+Added a Behance gallery plugin
 
 2.22
 ----
