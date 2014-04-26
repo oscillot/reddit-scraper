@@ -20,5 +20,12 @@ class TestMatcher(unittest.TestCase):
         self.assertFalse(Imgur.api_url(url))
         self.assertFalse(Imgur.image_url(url))
 
+    def test_url_matches_single_indirect(self):
+        url = 'http://imgur.com/wtD08iT'
+        self.assertTrue(Imgur.url_matches(url))
+        self.assertFalse(Imgur.album_url(url))
+        self.assertFalse(Imgur.api_url(url))
+        self.assertTrue(Imgur.image_url(url))
+
     def tearDown(self):
         pass

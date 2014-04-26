@@ -177,7 +177,14 @@ class BasePlugin(object):
                                        c['data']['subreddit'],
                                        c['data']['url'],
                                        c['data']['over_18']))
-                print 'Found Candidate: '
+
+                found_str = 'Found Candidate: %s %s (%s)' % (
+                    c['data']['subreddit'], c['data']['title'],
+                    c['data']['url'])
+                if c['data']['over_18']:
+                    found_str += ' [NSFW]'
+                found_str += '\n'
+                print found_str
             self.candidates = CandidatesList(new_cands)
             self.candidates_backup = self.candidates
             self.revised = self.candidates

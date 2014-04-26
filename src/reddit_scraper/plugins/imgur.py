@@ -182,7 +182,14 @@ class Imgur(BasePlugin):
             return []
         root = BeautifulSoup(resp.content)
         al = root.find_all(attrs={'class': 'image textbox '})
+        if not al:
+            al = root.find_all(attrs={'class': 'image textbox'})
         for a in al:
             href = a.img.attrs.get('src')
 
             return fixed_href(href)
+        #try to get an early warning next time this plugin stops working
+        try:
+            raise ValueError('No image found from url: %s' % url)
+        except ValueError:
+            pass
