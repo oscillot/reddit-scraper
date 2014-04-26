@@ -74,13 +74,6 @@ class BasePlugin(object):
             self.unhandled_posts.add(self.candidate)
 
     def acquisition_tasks(self):
-        if self.current.url in self.posts_already_finished:
-            #skip any posts that already have been done
-            print '%s: Skipping post: %s - previously acquired' % \
-                  (self.__class__.__name__, self.current.url)
-        else:
-            self.posts_already_finished.add(self.current.url)
-
         if self.current.url in self.image_urls_already_fetched:
             #skip any exact url matches from the db
             print '%s: Skipping url %s: already downloaded\n' % \
