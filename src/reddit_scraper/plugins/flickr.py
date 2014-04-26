@@ -4,7 +4,7 @@ import requests
 from reddit_scraper.plugins.base_plugin import *
 
 
-class FlickrSingle(BasePlugin):
+class Flickr(BasePlugin):
     def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
@@ -34,7 +34,14 @@ class FlickrSingle(BasePlugin):
         This matches flickr photo pages
         """
 
-        flickr_pat = re.compile(r'^http[s]?://.*www\.flickr\.com/photos/.*$',
+        flickr_pat = re.compile(r'^http[s]?://.*www\.flickr\.com/photos/'
+                                r'(?:(?![.]{1}(?:' #that doesn't end with the extension
+                                r'jpg|' #jpeg
+                                r'jpeg|' #jpeg
+                                r'gif|' #gif
+                                r'bmp|' #bitmap
+                                r'png)' #png
+                                r').)*$',
                                 flags=re.IGNORECASE)
         if flickr_pat.match(url):
             return True

@@ -10,5 +10,9 @@ class TestMatcher(unittest.TestCase):
         url = 'http://gfycat.com/SilentFirmDuckling'
         self.assertTrue(GfyCat.url_matches(url))
 
+    def test_url_not_matches(self):
+        url = 'http://gfycat.com/SilentFirmDuckling.gif'
+        self.assertFalse(GfyCat.url_matches(url))
+
     def tearDown(self):
         pass

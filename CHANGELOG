@@ -1,3 +1,8 @@
+2.31
+----
+Made all the plugins reject direct links except for directlinks
+Fixed many more stale plugins
+
 2.30
 ----
 Nuked a lot of dead code

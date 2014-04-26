@@ -34,7 +34,14 @@ class Tumblr(BasePlugin):
         This matches all tumblr urls
         """
 
-        tumplr_pat = re.compile(r'^http[s]?://.*tumblr\.com.*$',
+        tumplr_pat = re.compile(r'^http[s]?://.*tumblr\.com'
+                                r'(?:(?![.]{1}(?:' #that doesn't end with the extension
+                                r'jpg|' #jpeg
+                                r'jpeg|' #jpeg
+                                r'gif|' #gif
+                                r'bmp|' #bitmap
+                                r'png)' #png
+                                r').)*$',
                                 flags=re.IGNORECASE)
         if tumplr_pat.match(url):
             return True
@@ -63,8 +70,8 @@ class Tumblr(BasePlugin):
                 return []
             inner_root = BeautifulSoup(resp.text)
 
-            for img in inner_root.find_all({'class': 'photoset_photo'}):
-                imgs.append(img.attrs.get('href'))
+            for a in inner_root.find_all('a', {'class': 'photoset_photo'}):
+                imgs.append(a.attrs['href'])
 
         divs = root.find_all('div', {'class': 'photo-wrap'})
         if divs:
@@ -73,3 +80,5 @@ class Tumblr(BasePlugin):
                 imgs.append(img.attrs.get('src'))
 
         return imgs
+
+# print Tumblr.get_tumblr_imgs('http://n6jlv.tumblr.com/post/83763121262/thanks-alan-you-are-an-amazing-photographer')

@@ -7,19 +7,41 @@ from bs4 import BeautifulSoup
 from reddit_scraper.plugins.base_plugin import *
 
 
-class WallbaseCollection(BasePlugin):
+class Wallbase(BasePlugin):
     def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
         if self.url_matches(self.candidate.url):
-            collection_imgs = self.get_wallbase_collection(self.candidate.url)
-            if collection_imgs:
-                for img_url in collection_imgs:
+            if self.is_coll(self.candidate.url):
+                collection_imgs = self.get_wallbase_collection(self.candidate.url)
+                if collection_imgs:
+                    for img_url in collection_imgs:
+                        self.current = Download(self.candidate.title,
+                                                self.candidate.subreddit,
+                                                img_url,
+                                                self.candidate.nsfw)
+                else:
+                    #try to get an early warning next time this plugin stops working
+                    try:
+                        raise ValueError('No image found from url: %s' %
+                                         self.candidate.url)
+                    except ValueError, e:
+                        print '%s: %s' % (e.__class__.__name__, e)
+            elif self.is_wall(self.candidate.url):
+                img = self.get_wallbase_single(self.candidate.url)
+                if img:
                     self.current = Download(self.candidate.title,
                                             self.candidate.subreddit,
-                                            img_url,
+                                            img,
                                             self.candidate.nsfw)
+                else:
+                    #try to get an early warning next time this plugin stops working
+                    try:
+                        raise ValueError('No image found from url: %s' %
+                                         self.candidate.url)
+                    except ValueError, e:
+                        print '%s: %s' % (e.__class__.__name__, e)
             else:
                 #try to get an early warning next time this plugin stops working
                 try:
@@ -34,6 +56,26 @@ class WallbaseCollection(BasePlugin):
         This matches only wallbase user collections.
         """
 
+        wallbase_coll_pat = re.compile(r'^http[s]?://.*wallbase.cc'
+                                       r'(?:(?![.]{1}(?:' #that doesn't end with the extension
+                                       r'jpg|' #jpeg
+                                       r'jpeg|' #jpeg
+                                       r'gif|' #gif
+                                       r'bmp|' #bitmap
+                                       r'png)' #png
+                                       r').)*$',
+                                       flags=re.IGNORECASE)
+        if wallbase_coll_pat.match(url):
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def is_coll(url):
+        """
+        This matches only wallbase user collections.
+        """
+
         wallbase_coll_pat = re.compile(r'^http[s]?://.*wallbase.cc/user/collection/.*$',
                                        flags=re.IGNORECASE)
         if wallbase_coll_pat.match(url):
@@ -41,7 +83,21 @@ class WallbaseCollection(BasePlugin):
         else:
             return False
 
-    def get_wallbase_collection(self, url):
+    @staticmethod
+    def is_wall(url):
+        """
+        This matches only wallbase user collections.
+        """
+
+        wallbase_coll_pat = re.compile(r'^http[s]?://.*wallbase.cc/wallpaper/[0-9]+$',
+                                       flags=re.IGNORECASE)
+        if wallbase_coll_pat.match(url):
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def get_wallbase_collection(url):
         """Helper for the wallbase collection function. This will try to
         retirieve all of the pages of a collection and then stitch together a
         listing of all the different images from that collection.
@@ -55,7 +111,7 @@ class WallbaseCollection(BasePlugin):
             print 'Error contacting wallbase (%s):' % url
             print e
             return []
-        root = BeautifulSoup(resp.text)
+        root = BeautifulSoup(resp.content)
         max_images = int(root.find({'id': 'delwrap'})
                              .find_all('div', recursive=False)[1]
                              .find_all('div', recursive=False)[3]
@@ -92,3 +148,15 @@ class WallbaseCollection(BasePlugin):
                 if img_url not in urls:
                     urls.append(img_url)
         return urls
+
+    @staticmethod
+    def get_wallbase_single(url):
+        try:
+            resp = requests.get(url)
+        except requests.HTTPError, e:
+            print 'Error contacting wallbase (%s):' % url
+            print e
+            return []
+        root = BeautifulSoup(resp.content)
+        img = root.find('img', attrs={'class': 'wall'})
+        return img

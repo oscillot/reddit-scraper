@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from reddit_scraper.plugins.base_plugin import *
 
 
-class Get500pxSingle(BasePlugin):
+class PX500(BasePlugin):
     def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
@@ -30,15 +30,34 @@ class Get500pxSingle(BasePlugin):
         """
         This matches 500px photo pages
         """
-
-        px500_pat = re.compile(r'^http[s]?://.*500px\.com/photo/.*$',
-                                 flags=re.IGNORECASE)
+        px500_pat = re.compile(r'^http[s]?://.*500px\.com.*'
+                               r'(?:(?![.]{1}(?:' #that doesn't end with the extension
+                               r'jpg|' #jpeg
+                               r'jpeg|' #jpeg
+                               r'gif|' #gif
+                               r'bmp|' #bitmap
+                               r'png)' #png
+                               r').)*$',
+                               flags=re.IGNORECASE)
         if px500_pat.match(url):
             return True
         else:
             return False
 
-    def get_500px_img(self, url):
+    @staticmethod
+    def is_image(url):
+        """
+        This matches 500px photo pages
+        """
+        px500_pat = re.compile(r'^http[s]?://.*500px\.com/photo/.*$',
+                               flags=re.IGNORECASE)
+        if px500_pat.match(url):
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def get_500px_img(url):
         """Helper for the 500px execute function
 
         :param str url: a url to retrieve and execute the xpath on
@@ -51,5 +70,7 @@ class Get500pxSingle(BasePlugin):
             print e
             return []
         root = BeautifulSoup(resp.text)
-        a = root.find(id='thephoto').find('a')
-        return a.attrs.get('href')
+        img = root.find('div', attrs={'data-bind': 'photo_wrap'}).find('img')
+        return img.attrs['src']
+
+# print PX500.get_500px_img('http://500px.com/photo/13746291/shining-through-by-paul-rojas?utm_campaign=apr26_2PM_landscape_shiningthrough13746291&utm_medium=google&utm_source=500px')

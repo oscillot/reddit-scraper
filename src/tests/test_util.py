@@ -1,6 +1,6 @@
 import unittest
 
-from util import extract_domain
+from reddit_scraper.util import extract_domain
 
 
 class TestExtractDomain(unittest.TestCase):
