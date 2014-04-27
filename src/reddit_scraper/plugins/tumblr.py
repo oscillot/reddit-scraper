@@ -61,27 +61,33 @@ class Tumblr(BasePlugin):
         root = BeautifulSoup(resp.content)
         imgs = []
 
-        for iframe in root.find_all('iframe', {'class': 'photoset'}):
-            src = iframe.attrs.get('src')
+        metas = root.find_all('meta', {'property': 'og:image'})
+        if metas:
+            imgs.extend([m.attrs.get('content') for m in metas])
+            return imgs
+        else:
+            for iframe in root.find_all('iframe', {'class': 'photoset'}):
+                src = iframe.attrs.get('src')
 
-            try:
-                resp = requests.get(src)
-                resp.raise_for_status()
-            except HTTPError, e:
-                print 'Error contacting Tumblr (%s):' % url
-                print '%s: %s\n' % (e.__class__.__name__, e)
-                return []
-            inner_root = BeautifulSoup(resp.text)
+                try:
+                    resp = requests.get(src)
+                    resp.raise_for_status()
+                except HTTPError, e:
+                    print 'Error contacting Tumblr (%s):' % url
+                    print '%s: %s\n' % (e.__class__.__name__, e)
+                    return []
+                inner_root = BeautifulSoup(resp.text)
 
-            for a in inner_root.find_all('a', {'class': 'photoset_photo'}):
-                imgs.append(a.attrs['href'])
+                for a in inner_root.find_all('a', {'class': 'photoset_photo'}):
+                    imgs.append(a.attrs['href'])
 
-        divs = root.find_all('div', {'class': 'photo-wrap'})
-        if divs:
-            for div in divs:
-                img = div.find('img')
-                imgs.append(img.attrs.get('src'))
+            divs = root.find_all('div', {'class': 'photo-wrap'})
+            if divs:
+                for div in divs:
+                    img = div.find('img')
+                    imgs.append(img.attrs.get('src'))
 
         return imgs
 
 # print Tumblr.get_tumblr_imgs('http://n6jlv.tumblr.com/post/83763121262/thanks-alan-you-are-an-amazing-photographer')
+# print Tumblr.get_tumblr_imgs('http://afewvowels.tumblr.com/post/83723061060/ever-have-one-of-these-days')
