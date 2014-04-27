@@ -136,7 +136,7 @@ class PluginInterface():
         def filter_new(handled):
             duped = set()
             for h in handled:
-                if not h.duplicate:
+                if h.duplicate:
                     duped.add(h)
             return duped
 
