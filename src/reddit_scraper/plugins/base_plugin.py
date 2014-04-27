@@ -116,10 +116,10 @@ class BasePlugin(object):
                 #finally! we have image!
                 new_img = self.resp.content
                 self.current.md5 = hashlib.md5(new_img).hexdigest()
+                if self.candidate not in self.handled_posts.keys():
+                    self.handled_posts[self.candidate] = set()
 
                 if self.current.md5 not in self.unique_img_hashes:
-                    if self.candidate not in self.handled_posts.keys():
-                        self.handled_posts[self.candidate] = set()
                     self.handled_posts[self.candidate].add(self.current)
                     self.save_img(new_img)
                     self.unique_img_hashes.add(self.current.md5)
@@ -130,6 +130,8 @@ class BasePlugin(object):
                               ensure_ascii(self.current.title),
                               self.current.filename))
                 else:
+                    self.current.duplicate = True
+                    self.handled_posts[self.candidate].add(self.current)
                     print '%s: MD5 duplicate. Discarding: %s.\n' % \
                           (self.__class__.__name__, '%s: %s' % (
                               ensure_ascii(self.current.title),

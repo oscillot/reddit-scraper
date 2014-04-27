@@ -125,7 +125,8 @@ class PluginInterface():
             print 'None\n'
 
         print '\nComplete. %d new images were acquired this run.' \
-              % sum([len(self.handled_posts[p]) for p in self.handled_posts])
+              % sum([len(self.handled_posts[p]) for p in self.handled_posts
+                     if not p.duplicate])
 
     def remove_unneeded_plugins(self):
         plugins_count = {}
