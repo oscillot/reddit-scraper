@@ -152,7 +152,7 @@ class PluginInterface():
               '\n%d urls were attempted.' \
               '\n%d new images were acquired this run.' \
               '\n%d were duplicate images.' \
-              '\n%d were not handled or invalid.' \
+              '\n%d were not handled or invalid.\n' \
               % (len_posts, len_urls, len_new, len_dupes, len_bad)
 
     def remove_unneeded_plugins(self):
