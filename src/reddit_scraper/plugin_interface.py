@@ -141,7 +141,7 @@ class PluginInterface():
             return duped
 
         len_posts = len(self.handled_posts)
-        len_urls = sum([len(p) for p in self.handled_posts])
+        len_urls = sum([self.handled_posts[p] for p in self.handled_posts])
         len_new = sum([len(filter_dupes(self.handled_posts[p]))
                       for p in self.handled_posts])
         len_dupes = sum([len(filter_new(self.handled_posts[p]))
