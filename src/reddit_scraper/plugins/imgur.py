@@ -62,7 +62,6 @@ class Imgur(BasePlugin):
             print 'Error contacting Imgur (%s):' % url
             print '%s: %s\n' % (e.__class__.__name__, e)
             return []
-        print resp.status_code
         root = BeautifulSoup(resp.content)
         metas = root.find_all('meta', property='og:image')
 
