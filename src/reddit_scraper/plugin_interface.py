@@ -126,9 +126,34 @@ class PluginInterface():
         else:
             print 'None\n'
 
-        print '\nComplete. %d new images were acquired this run.' \
-              % sum([len(self.handled_posts[p]) for p in self.handled_posts
-                     if not p.duplicate])
+        def filter_dupes(handled):
+            unduped = set()
+            for h in handled:
+                if not h.duplicate:
+                    unduped.add(h)
+            return unduped
+
+        def filter_new(handled):
+            duped = set()
+            for h in handled:
+                if not h.duplicate:
+                    duped.add(h)
+            return duped
+
+        len_posts = len(self.handled_posts)
+        len_urls = sum([len(p) for p in self.handled_posts])
+        len_new = sum([len(filter_dupes(self.handled_posts[p]))
+                      for p in self.handled_posts])
+        len_dupes = sum([len(filter_new(self.handled_posts[p]))
+                        for p in self.handled_posts])
+        len_bad = len_urls - len_new - len_dupes
+        print '\nComplete.' \
+              '\n%d posts were processed.' \
+              '\n%d urls were attempted.' \
+              '\n%d new images were acquired this run.' \
+              '\n%d were duplicate images.' \
+              '\n%d were not handled or invalid.' \
+              % (len_posts, len_urls, len_new, len_dupes, len_bad)
 
     def remove_unneeded_plugins(self):
         plugins_count = {}
