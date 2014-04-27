@@ -1,8 +1,10 @@
 import re
+
 import requests
+from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
-from reddit_scraper.plugins.base_plugin import *
+from reddit_scraper.plugins.base_plugin import Download, BasePlugin
 
 
 class Behance(BasePlugin):
@@ -24,7 +26,7 @@ class Behance(BasePlugin):
                     raise ValueError('No images found from gallery: %s' %
                                      self.candidate.url)
                 except ValueError, e:
-                    print '%s: %s' % (e.__class__.__name__, e)
+                    print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):
@@ -40,7 +42,13 @@ class Behance(BasePlugin):
 
     @staticmethod
     def get_behance_imgs(url):
-        resp = requests.get(url)
+        try:
+            resp = requests.get(url)
+            resp.raise_for_status()
+        except HTTPError, e:
+            print 'Error contacting Behance (%s):' % url
+            print '%s: %s\n' % (e.__class__.__name__, e)
+            return
         soup = BeautifulSoup(resp.content)
 
         ul = soup.find(id='project-modules')

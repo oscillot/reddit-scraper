@@ -1,6 +1,7 @@
 import re
-import requests
 
+import requests
+from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
 from reddit_scraper.plugins.base_plugin import BasePlugin
@@ -26,7 +27,7 @@ class Tumblr(BasePlugin):
                     raise ValueError('No images found from url: %s' %
                                      self.candidate.url)
                 except ValueError, e:
-                    print '%s: %s' % (e.__class__.__name__, e)
+                    print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):
@@ -52,7 +53,8 @@ class Tumblr(BasePlugin):
     def get_tumblr_imgs(url):
         try:
             resp = requests.get(url)
-        except requests.HTTPError, e:
+            resp.raise_for_status()
+        except HTTPError, e:
             print 'Error contacting tumblr (%s):' % url
             print e
             return []
@@ -64,9 +66,10 @@ class Tumblr(BasePlugin):
 
             try:
                 resp = requests.get(src)
-            except requests.HTTPError, e:
-                print 'Error contacting tumblr (%s):' % url
-                print e
+                resp.raise_for_status()
+            except HTTPError, e:
+                print 'Error contacting Tumblr (%s):' % url
+                print '%s: %s\n' % (e.__class__.__name__, e)
                 return []
             inner_root = BeautifulSoup(resp.text)
 

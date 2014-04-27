@@ -5,11 +5,13 @@ import traceback
 
 from PIL import Image
 import requests
+from requests.exceptions import HTTPError
 from sqlalchemy import *
 import sqlalchemy.sql as sql
 
 from reddit_scraper.data_types import CandidatesList, DownloadList, Download
 from reddit_scraper.util import ensure_ascii
+
 
 IMAGE_HEADERS = ['image/bmp',
                  'image/png',
@@ -19,7 +21,8 @@ IMAGE_HEADERS = ['image/bmp',
 
 
 class BasePlugin(object):
-    def __init__(self, database, candidates, output, categorize=False, nsfw=False):
+    def __init__(self, database, candidates, output, categorize=False,
+                 nsfw=False):
         """The BasePlugin class actually does all of the work under the hood.
         It creates the database, performs the database calls. Retrieves images
         from content servers, does any error handling that plugins neglect to
@@ -93,7 +96,7 @@ class BasePlugin(object):
                                              cookies=self.current.cookies)
                 else:
                     self.resp = requests.get(self.current.url)
-            except requests.HTTPError, e:
+            except HTTPError, e:
                 #or abject failure, you know, whichever...
                 print '%s: Failure: %s \n' % \
                       (self.__class__.__name__, e.message)
@@ -251,8 +254,7 @@ class BasePlugin(object):
         the database from the beginning, try to be as econmoical as possible
         and avoid getting ip or other form of blacklisted at all costs
         """
-        self.candidates.difference(
-                self.image_urls_already_fetched.downloads)
+        self.candidates.difference(self.image_urls_already_fetched.downloads)
 
     def save_img(self, data):
         """
@@ -277,7 +279,8 @@ class BasePlugin(object):
         #handle incrementing the image name with a number if we pass the MD5
         # but the filename was taken
         #the original image path is the INTENDED image path, the img_path is
-        # what it ends up being if there is a namespace collision on the filesystem
+        # what it ends up being if there is a namespace collision on the
+        # filesystem
         img_path = orig_img_path
 
         orig_path, orig_ext = orig_img_path.rsplit('.', 1)

@@ -1,8 +1,11 @@
 import re
 
+import requests
+from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
-from reddit_scraper.plugins.base_plugin import *
+from reddit_scraper.plugins.base_plugin import BasePlugin
+from reddit_scraper.data_types import Download
 
 
 class DeviantArt(BasePlugin):
@@ -27,7 +30,7 @@ class DeviantArt(BasePlugin):
                     raise ValueError('No image found from url: %s' %
                                      self.candidate.url)
                 except ValueError, e:
-                    print '%s: %s' % (e.__class__.__name__, e)
+                    print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):
@@ -49,7 +52,8 @@ class DeviantArt(BasePlugin):
         else:
             return False
 
-    def get_deviant_art_image(self, url):
+    @staticmethod
+    def get_deviant_art_image(url):
         """Helper for the deviant art execute function
 
         :param str url: a url to retrieve and execute the xpath on
@@ -58,9 +62,10 @@ class DeviantArt(BasePlugin):
 
         try:
             resp = requests.get(url)
-        except requests.HTTPError, e:
-            print 'Error reaching deviantart (%s):' % url
-            print e
+            resp.raise_for_status()
+        except HTTPError, e:
+            print 'Error contacting Deviantart (%s):' % url
+            print '%s: %s\n' % (e.__class__.__name__, e)
             return
         root = BeautifulSoup(resp.text)
 

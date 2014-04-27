@@ -15,7 +15,7 @@ setup(
                       'sqlalchemy>=0.8.0b2',
                       'requests>=2.0.0',
                       'BeautifulSoup4'
-    ],
+                      ],
     url='https://github.com/oscillot/reddit-scraper',
     license='GPL2',
     author='Oscillot',

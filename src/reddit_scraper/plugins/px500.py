@@ -1,8 +1,11 @@
 import re
 
+import requests
+from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
-from reddit_scraper.plugins.base_plugin import *
+from reddit_scraper.plugins.base_plugin import BasePlugin
+from reddit_scraper.data_types import Download
 
 
 class PX500(BasePlugin):
@@ -23,7 +26,7 @@ class PX500(BasePlugin):
                     raise ValueError('No image found from url: %s' %
                                      self.candidate.url)
                 except ValueError, e:
-                    print '%s: %s' % (e.__class__.__name__, e)
+                    print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):
@@ -65,9 +68,10 @@ class PX500(BasePlugin):
         """
         try:
             resp = requests.get(url)
-        except requests.HTTPError, e:
-            print 'Error contacting imgur (%s):' % url
-            print e
+            resp.raise_for_status()
+        except HTTPError, e:
+            print 'Error contacting 500Px (%s):' % url
+            print '%s: %s\n' % (e.__class__.__name__, e)
             return []
         root = BeautifulSoup(resp.text)
         img = root.find('div', attrs={'data-bind': 'photo_wrap'}).find('img')

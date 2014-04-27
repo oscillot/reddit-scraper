@@ -24,14 +24,13 @@ sys.path.insert(0, plugins_folder)
 def valid_plugin(cls):
     #Make sure all plugins subclass the base plugin!
     if not issubclass(cls, BasePlugin):
-        # print 'Plugin Import Failed!\t %s does not subclass the BasePlugin' % cls.__name__ ##Wow too loud!
         return False
     if cls.__name__ == 'BasePlugin':
         return False
     if not hasattr(cls, 'url_matches') and \
             type(cls.url_matches != 'instancemethod'):
-        print 'Plugin Import Failed!\t %s does not have a static method called ' \
-              '`url_matches` to match URLs!'
+        print 'Plugin Import Failed!\t %s does not have a static method ' \
+              'called `url_matches` to match URLs!'
         return False
     return True
 
@@ -50,8 +49,9 @@ for plugin in plugin_list:
                 pass
     except ImportError, e:
         print '%s failed to load: %s\n' % (plugin, e)
-        failed_plugins.append(cls)
+        failed_plugins.append(plugin)
 
 sys.path.remove(plugins_folder)
 
-print 'Loaded the following plugins successfully: %s\n' % ', '.join(good_plugins)
+print 'Loaded the following plugins successfully: %s\n' % \
+      ', '.join(good_plugins)

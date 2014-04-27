@@ -1,8 +1,11 @@
 import re
+
 import requests
+from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
-from reddit_scraper.plugins.base_plugin import *
+from reddit_scraper.plugins.base_plugin import BasePlugin
+from reddit_scraper.data_types import Download
 
 
 class GfyCat(BasePlugin):
@@ -23,7 +26,7 @@ class GfyCat(BasePlugin):
                     raise ValueError('No image found from url: %s' %
                                      self.candidate.url)
                 except ValueError, e:
-                    print '%s: %s' % (e.__class__.__name__, e)
+                    print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):
@@ -46,7 +49,13 @@ class GfyCat(BasePlugin):
 
     @staticmethod
     def get_gfycat_img(url):
-        resp = requests.get(url)
+        try:
+            resp = requests.get(url)
+            resp.raise_for_status()
+        except HTTPError, e:
+            print 'Error contacting GfyCat (%s):' % url
+            print '%s: %s\n' % (e.__class__.__name__, e)
+            return
         soup = BeautifulSoup(resp.content)
         gif_link = soup.find(id='gifShareLink')
         return gif_link.text

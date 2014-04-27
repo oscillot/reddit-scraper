@@ -2,9 +2,12 @@
 import re
 import base64
 
+import requests
+from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
-from reddit_scraper.plugins.base_plugin import *
+from reddit_scraper.plugins.base_plugin import BasePlugin
+from reddit_scraper.data_types import Download
 
 
 class Wallbase(BasePlugin):
@@ -27,7 +30,7 @@ class Wallbase(BasePlugin):
                         raise ValueError('No image found from url: %s' %
                                          self.candidate.url)
                     except ValueError, e:
-                        print '%s: %s' % (e.__class__.__name__, e)
+                        print '%s: %s\n' % (e.__class__.__name__, e)
             elif self.is_wall(self.candidate.url):
                 img = self.get_wallbase_single(self.candidate.url)
                 if img:
@@ -41,14 +44,14 @@ class Wallbase(BasePlugin):
                         raise ValueError('No image found from url: %s' %
                                          self.candidate.url)
                     except ValueError, e:
-                        print '%s: %s' % (e.__class__.__name__, e)
+                        print '%s: %s\n' % (e.__class__.__name__, e)
             else:
                 #try to get an early warning next time this plugin stops working
                 try:
                     raise ValueError('No image found from url: %s' %
                                      self.candidate.url)
                 except ValueError, e:
-                    print '%s: %s' % (e.__class__.__name__, e)
+                    print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):
@@ -107,7 +110,7 @@ class Wallbase(BasePlugin):
         """
         try:
             resp = requests.get(url)
-        except requests.HTTPError, e:
+        except HTTPError, e:
             print 'Error contacting wallbase (%s):' % url
             print e
             return []
@@ -135,7 +138,7 @@ class Wallbase(BasePlugin):
             for link in thumb_links:
                 try:
                     resp = requests.get(link)
-                except requests.HTTPError, e:
+                except HTTPError, e:
                     print 'Error contacting wallbase (%s):' % url
                     print e
                     continue
@@ -153,9 +156,10 @@ class Wallbase(BasePlugin):
     def get_wallbase_single(url):
         try:
             resp = requests.get(url)
-        except requests.HTTPError, e:
-            print 'Error contacting wallbase (%s):' % url
-            print e
+            resp.raise_for_status()
+        except HTTPError, e:
+            print 'Error contacting Wallbase (%s):' % url
+            print '%s: %s\n' % (e.__class__.__name__, e)
             return []
         root = BeautifulSoup(resp.content)
         img = root.find('img', attrs={'class': 'wall'})

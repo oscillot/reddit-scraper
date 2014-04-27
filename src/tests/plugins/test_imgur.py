@@ -1,4 +1,5 @@
 import unittest
+from requests.exceptions import HTTPError
 from reddit_scraper.plugins.imgur import Imgur
 
 
@@ -21,6 +22,11 @@ class TestMatcher(unittest.TestCase):
     def test_url_not_matches_single_direct(self):
         url = 'http://imgur.com/wtD08iT.jpg'
         self.assertFalse(Imgur.url_matches(url))
+
+    def test_imgur_404(self):
+        url = 'http://imgur.com/gallery/jsCHztU'
+        self.assertTrue(Imgur.url_matches(url))
+        self.assertRaises(HTTPError, Imgur.get_imgur_images, url)
 
     def tearDown(self):
         pass

@@ -4,8 +4,10 @@ import json
 import string
 
 import requests
+from requests.exceptions import HTTPError
 
 from reddit_scraper.util import ensure_ascii, substract
+
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(HERE, '..', '..', 'VERSION')) as f:
@@ -45,7 +47,7 @@ class RedditConnect():
         try:
             resp = requests.post('https://ssl.reddit.com/api/login/%s?' %
                                  self.username, data, headers=self.headers)
-        except requests.HTTPError, e:
+        except HTTPError, e:
             print 'Error contacting reddit:'
             raise e
         json_str = resp.text
@@ -67,7 +69,7 @@ class RedditConnect():
         try:
             resp = requests.get(url, headers=self.headers,
                                 cookies=self.cookie)
-        except requests.HTTPError, e:
+        except HTTPError, e:
             print 'Error in basic request (%s): %s\n' % (url, e)
             return
         return resp.text
@@ -160,7 +162,8 @@ class RedditConnect():
         print 'Upvotes retrieved!\n'
         return total_upvoted_data
 
-    def get_upvoted_wallpapers(self, subs, upvotes_data):
+    @staticmethod
+    def get_upvoted_wallpapers(subs, upvotes_data):
         """
         Get the urls for upvotes in a specific subset of subreddits. This is
         the list of candidate upvotes from which we try to extract an
@@ -201,7 +204,8 @@ class RedditConnect():
                 print ensure_ascii(so_far)
         return candidates
 
-    def wait(self):
+    @staticmethod
+    def wait():
         """
         Waits two seconds whenever the API agreement decrees that you must
         wait. This prevents the bot from getting blocked and having requests

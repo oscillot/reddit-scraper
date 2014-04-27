@@ -1,10 +1,12 @@
 #Handles getting all of the images from an album linked to on imgur
-import json
 import re
 
+import requests
+from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
-from reddit_scraper.plugins.base_plugin import *
+from reddit_scraper.plugins.base_plugin import BasePlugin
+from reddit_scraper.data_types import Download
 
 
 class Imgur(BasePlugin):
@@ -26,14 +28,13 @@ class Imgur(BasePlugin):
                     raise ValueError('No image found from url: %s' %
                                      self.candidate.url)
                 except ValueError, e:
-                    print '%s: %s' % (e.__class__.__name__, e)
+                    print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod
     def url_matches(url):
         """
         This matches all of imgur
         """
-
         imgur_alb_pat = re.compile(r'^http[s]?://.*imgur\.com'
                                    r'(?:(?![.]{1}(?:' #that doesn't end with the extension
                                    r'jpg|' #jpeg
@@ -56,10 +57,12 @@ class Imgur(BasePlugin):
         """
         try:
             resp = requests.get(url)
-        except requests.HTTPError, e:
-            print 'Error contacting imgur (%s):' % url
-            print e
+            resp.raise_for_status()
+        except HTTPError, e:
+            print 'Error contacting Imgur (%s):' % url
+            print '%s: %s\n' % (e.__class__.__name__, e)
             return []
+        print resp.status_code
         root = BeautifulSoup(resp.content)
         metas = root.find_all('meta', property='og:image')
 
