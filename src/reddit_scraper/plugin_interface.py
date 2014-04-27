@@ -61,7 +61,6 @@ class PluginInterface():
             print '%s handled the following posts:\n' % plugin.__name__
             if len(plug_inst.handled_posts):
                 for post in plug_inst.handled_posts:
-                    # print post.title.encode('ascii', 'xmlcharrefreplace')
                     print '%s (%s)' % \
                           (ensure_ascii(post.title), post.url)
 
