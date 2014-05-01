@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 
 from reddit_scraper.plugins.base_plugin import BasePlugin
 from reddit_scraper.data_types import Download
+from reddit_scraper.exceptions import PluginNeedsUpdated
 
 
 class GfyCat(BasePlugin):
@@ -23,9 +24,9 @@ class GfyCat(BasePlugin):
             else:
                 #try to get an early warning next time this plugin stops working
                 try:
-                    raise ValueError('No image found from url: %s' %
-                                     self.candidate.url)
-                except ValueError, e:
+                    raise PluginNeedsUpdated(
+                        'No image found from url: %s' % self.candidate.url)
+                except PluginNeedsUpdated, e:
                     print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod

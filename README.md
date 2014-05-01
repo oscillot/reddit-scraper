@@ -42,29 +42,13 @@ along with an optional sixth attribute, which you set if needed:
                 and let the BasePlugin handle it for you.
 
 The approach that I take for writing plugins is typically to have the execute
-function call a helper function that returns an img_url (and when needed a
-cookie), typically I just drill down the tree with find or find_all using
-BeautifulSoup, nothing too fancy, though there are some exceptions.
+function call a helper function that returns a list of img_urls (and when
+needed a cookie), typically I just drill down the tree with find or find_all
+using BeautifulSoup, nothing too fancy, though there are some exceptions.
 
-This important part is to create the self.current object and set it to a
+The important part is to create the self.current object and set it to a
 Download object with a valid url and whatever else it may need so that the
 BasePlugin can do its work.
-
-For example, for non direct imgur links, it looks like this (abridged):
-
-    class ImgurSingleIndirect(BasePlugin):
-        def execute(self, candidate):
-            if (candidate.url.lower().startswith('http://imgur.com/'):
-                img_url = self.get_imgur_single(candidate.url)
-                for album_img in album_imgs:
-                    ...
-                    self.current = Download(candidate.title,
-                                            candidate.subreddit,
-                                            img_url)
-
-        def get_imgur_single(self, url):
-            ...
-            return urls
 
 If you have a gallery, it isn't any more complicated. Just return an iterable
 and iterate through the list, setting the self.current object each time
@@ -73,20 +57,70 @@ set to None, the acquisition logic is triggered so you can set the object as
 few or as many times as you want from within execute and the logic to acquire
 the image will still fire off each time you set the object.
 
-    class ImgurAlbum(BasePlugin):
-        def execute(self, candidate):
-            if candidate.url.lower().startswith('http://imgur.com/a/'):
-                album_imgs = self.get_imgur_album(candidate.url)
-                for album_img in album_imgs:
-                    ...
-                    self.current = Download(candidate.title,
-                                            candidate.subreddit,
-                                            album_img_url)
+In addition to the above requirements every plugin must have a staticmethod
+called url_matches that carefully tailors that plugin's matches so that there
+ is no overlap between other plugins and their matches. The most difficult
+ one to work around is also the most useful, the DirectLinks plugin. An
+ example url_matches looks like this:
 
-        def get_imgur_album(self, url):
-            ...
-            return urls
+    @staticmethod
+    def url_matches(url):
+        """
+        This matches all of imgur
+        """
+        imgur_alb_pat = re.compile(r'^http[s]?://.*imgur\.com' #any imgur page from any subdomain (or none)
+                                   r'(?:(?![.]{1}(?:' #that doesn't end with the extension
+                                   r'jpg|' #jpeg
+                                   r'jpeg|' #jpeg
+                                   r'gif|' #gif
+                                   r'bmp|' #bitmap
+                                   r'png)' #png
+                                   r').)*$',
+                                   flags=re.IGNORECASE)
+        if imgur_alb_pat.match(url):
+            return True
+        else:
+            return False
 
-NOTES: It is recommended to set PYTHONUNBUFFERED=1 when running in Jenkins so
- that the console updates in something closer to real-time,
- otherwise trying to watch the console pretty much sucks.
+The above is a pretty ugly regex, but lines[1:] are basically a non-capturing
+ group with a negative lookahead assertion that the string can end with
+ anything except a dot and those file extensions. In most cases you can copy
+ this method wholecloth and change only the contents of the first line to get
+  the matches you need. See this flickr example or any other included plugin
+  for more guidance (and note that only the first line of the regex is
+  modified):
+
+    @staticmethod
+    def url_matches(url):
+        """
+        This matches flickr photo pages
+        """
+
+        flickr_pat = re.compile(r'^http[s]?://.*www\.flickr\.com/photos/'
+                                r'(?:(?![.]{1}(?:' #that doesn't end with the extension
+                                r'jpg|' #jpeg
+                                r'jpeg|' #jpeg
+                                r'gif|' #gif
+                                r'bmp|' #bitmap
+                                r'png)' #png
+                                r').)*$',
+                                flags=re.IGNORECASE)
+        if flickr_pat.match(url):
+            return True
+        else:
+            return False
+
+
+To aid in keeping the plugins up to date there is a custom exception in
+reddit_scraper.exceptions `PluginNeedsUpdated` that should be raised. I
+always raise in a try/except and then output something printable. Using the
+`PluginNeedsUpdated` exception is important however since under the hood
+there is a Singleton class (I know, I know...) that gets called and
+increments a counter. The value of this counter becomes the exit code of the
+scraper so as soon as you have a non-zero exit code from a completed run,
+grep the log for "PluginNeedsUpdated" and you should have some useful output
+to help you target plugin maintenance tasks.
+
+It is recommended to set PYTHONUNBUFFERED=1 when running in Jenkins so
+that the console updates in something closer to real-time, otherwise trying to
+watch the console live pretty much sucks.

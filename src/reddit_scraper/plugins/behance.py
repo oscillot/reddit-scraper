@@ -5,6 +5,7 @@ from requests.exceptions import HTTPError
 from bs4 import BeautifulSoup
 
 from reddit_scraper.plugins.base_plugin import Download, BasePlugin
+from reddit_scraper.exceptions import PluginNeedsUpdated
 
 
 class Behance(BasePlugin):
@@ -23,9 +24,10 @@ class Behance(BasePlugin):
             else:
                 #try to get an early warning next time this plugin stops working
                 try:
-                    raise ValueError('No images found from gallery: %s' %
-                                     self.candidate.url)
-                except ValueError, e:
+                    raise PluginNeedsUpdated(
+                        'No images found from gallery: %s' %
+                        self.candidate.url)
+                except PluginNeedsUpdated, e:
                     print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod

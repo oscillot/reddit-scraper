@@ -1,47 +1,29 @@
-# Singleton code is from:
-# http://stackoverflow.com/questions/42558/python-and-the-singleton-pattern
+from reddit_scraper.singleton import Singleton
 
 
-class Singleton:
-    """
-    A non-thread-safe helper class to ease implementing singletons.
-    This should be used as a decorator -- not a metaclass -- to the
-    class that should be a singleton.
+class PluginNeedsUpdated(Exception):
+    def __init__(self, message):
+        self.message = message
+        super(PluginNeedsUpdated, self).__init__(message)
 
-    The decorated class can define one `__init__` function that
-    takes only the `self` argument. Other than that, there are
-    no restrictions that apply to the decorated class.
+    @property
+    def message(self):
+        return self._message
 
-    To get the singleton instance, use the `Instance` method. Trying
-    to use `__call__` will result in a `TypeError` being raised.
-
-    Limitations: The decorated class cannot be inherited from.
-
-    """
-
-    def __init__(self, decorated):
-        self._decorated = decorated
-
-    def Instance(self):
-        """
-        Returns the singleton instance. Upon its first call, it creates a
-        new instance of the decorated class and calls its `__init__` method.
-        On all subsequent calls, the already created instance is returned.
-
-        """
-        try:
-            return self._instance
-        except AttributeError:
-            self._instance = self._decorated()
-            return self._instance
-
-    def __call__(self):
-        raise TypeError('Singletons must be accessed through `Instance()`.')
+    @message.setter
+    def message(self, value):
+        self._message = value
+        c = PluginExceptionCounter.Instance()
+        c.increment()
 
 
 @Singleton
-class PluginNeedsUpdated(Exception):
-    def __init__(self, message, ):
-            pass
-        # make print message a property to inc the counter and make a static
-        # method that gets the count val for the exit code?
+class PluginExceptionCounter(object):
+    def __init__(self):
+        self._counter = 0
+
+    def increment(self):
+        self._counter += 1
+
+    def get_count(self):
+        return self._counter

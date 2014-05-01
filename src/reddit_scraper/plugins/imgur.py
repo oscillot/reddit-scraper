@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 
 from reddit_scraper.plugins.base_plugin import BasePlugin
 from reddit_scraper.data_types import Download
+from reddit_scraper.exceptions import PluginNeedsUpdated
 
 
 class Imgur(BasePlugin):
@@ -25,9 +26,9 @@ class Imgur(BasePlugin):
             else:
                 #try to get an early warning next time this plugin stops working
                 try:
-                    raise ValueError('No image found from url: %s' %
-                                     self.candidate.url)
-                except ValueError, e:
+                    raise PluginNeedsUpdated(
+                        'No image found from url: %s' % self.candidate.url)
+                except PluginNeedsUpdated, e:
                     print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod
@@ -35,7 +36,7 @@ class Imgur(BasePlugin):
         """
         This matches all of imgur
         """
-        imgur_alb_pat = re.compile(r'^http[s]?://.*imgur\.com'
+        imgur_alb_pat = re.compile(r'^http[s]?://.*imgur\.com' #any imgur page from any subdomain (or none)
                                    r'(?:(?![.]{1}(?:' #that doesn't end with the extension
                                    r'jpg|' #jpeg
                                    r'jpeg|' #jpeg

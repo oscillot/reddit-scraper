@@ -1,3 +1,9 @@
+2.40
+----
+Updated README (overdue)
+Added a custom PluginNeedsUpdated class that counts exceptions raised by
+stale plugins and uses this number as the exit code for the scraper.
+
 2.31
 ----
 Made all the plugins reject direct links except for directlinks

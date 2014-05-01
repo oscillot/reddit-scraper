@@ -5,6 +5,7 @@ from requests.exceptions import HTTPError
 
 from reddit_scraper.plugins.base_plugin import BasePlugin
 from reddit_scraper.data_types import Download
+from reddit_scraper.exceptions import PluginNeedsUpdated
 
 
 class Flickr(BasePlugin):
@@ -26,9 +27,9 @@ class Flickr(BasePlugin):
             else:
                 #try to get an early warning next time this plugin stops working
                 try:
-                    raise ValueError('No image found from url: %s' %
-                                     self.candidate.url)
-                except ValueError, e:
+                    raise PluginNeedsUpdated(
+                        'No image found from url: %s' % self.candidate.url)
+                except PluginNeedsUpdated, e:
                     print '%s: %s\n' % (e.__class__.__name__, e)
 
     @staticmethod
@@ -67,8 +68,9 @@ class Flickr(BasePlugin):
         qualities = eval(match.group(1).replace(
             'true', 'True').replace('false', 'False').replace('null', 'None'))
         if type(qualities) != dict:
-            raise ValueError('Did not resolve to a dict. That\'s really '
-                             '*really* bad! You got a: %s' % type(qualities))
+            raise PluginNeedsUpdated(
+                'Did not resolve to a dict. That\'s really *really* bad! '
+                'You got a: %s' % type(qualities))
         sizes = qualities['sizes']
         sizemore = {}
         areas = []

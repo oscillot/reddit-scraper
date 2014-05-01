@@ -3,6 +3,7 @@ import os
 from reddit_scraper.data_types import CandidatesList
 from reddit_scraper.plugins import loaded_plugins
 from reddit_scraper.util import ensure_ascii, extract_domain
+from reddit_scraper.exceptions import PluginExceptionCounter
 
 
 class PluginInterface():
@@ -154,6 +155,9 @@ class PluginInterface():
               '\n%d were duplicate images.' \
               '\n%d were not handled or invalid.\n' \
               % (len_posts, len_urls, len_new, len_dupes, len_bad)
+        #emit the exit code based on whether everything went well or not
+        c = PluginExceptionCounter.Instance()
+        exit(c.get_count())
 
     def remove_unneeded_plugins(self):
         plugins_count = {}
