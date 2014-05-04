@@ -2,6 +2,8 @@
 ----
 Added filter_types to help keep animated gifs and wallpapers seperate even when
 the same subreddits are used as sources for both.
+Using content type from response header to rewrite file extensions when they
+are incorrect (.jpgs that are actually .gifs, I'm looking at you!)
 
 2.40
 ----
