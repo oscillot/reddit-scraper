@@ -311,6 +311,8 @@ class BasePlugin(object):
         # reason
         if not self.resp.headers.get('content-type').endswith(orig_ext):
             new_ext = self.resp.headers.get('content-type').split('/')[1]
+            print 'Rewriting file extension based on content-type header: ' \
+                  '%s->%s\n' % (orig_ext, new_ext)
             orig_ext = new_ext
 
         #prevent stupidly named files like image.jpg from being overwritten
@@ -334,7 +336,7 @@ class BasePlugin(object):
         lot especially with sites that try not to let you scrape them for
         their high quality images, so it's an important check.
         """
-        for header in self.config.image_headers:
+        for header in self.config.get('image_headers'):
             #this handles headers that look like this:
             #image/jpeg; charset=UTF-8
             if header in self.resp.headers.get('content-type'):

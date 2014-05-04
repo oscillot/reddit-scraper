@@ -39,9 +39,6 @@ class Config(object):
         if force_string:
             self.data = self.convert(self.data)
 
-    def __getattribute__(self, item):
-        return self.data[item]
-
     def __getitem__(self, item):
         return self.data[item]
 
