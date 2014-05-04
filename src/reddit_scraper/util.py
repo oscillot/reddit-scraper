@@ -38,8 +38,6 @@ def gif_is_animated(data):
     try:
         im.seek(1)
     except EOFError:
-        im.close()
         return False
     else:
-        im.close()
         return True
