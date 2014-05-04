@@ -8,7 +8,7 @@ def get_config():
     return Config(os.path.join(HERE, 'config.json'))
 
 
-class Config():
+class Config(object):
     """
     The config class is the entry point to the Configurable Object class.
 
@@ -38,6 +38,9 @@ class Config():
         self.force_string = force_string
         if force_string:
             self.data = self.convert(self.data)
+
+    def __getattribute__(self, item):
+        return self.data[item]
 
     def __getitem__(self, item):
         return self.data[item]
