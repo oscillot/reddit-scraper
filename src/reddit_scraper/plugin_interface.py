@@ -4,11 +4,12 @@ from reddit_scraper.data_types import CandidatesList
 from reddit_scraper.plugins import loaded_plugins
 from reddit_scraper.util import ensure_ascii, extract_domain
 from reddit_scraper.exceptions import PluginExceptionCounter
+from reddit_scraper.config import get_config
 
 
 class PluginInterface():
-    def __init__(self, database, candidates, output, categorize=False,
-                 nsfw=False):
+    def __init__(self, database, candidates, output, filter_type='all',
+                 categorize=False, nsfw=False):
         """
         The PluginInterface takes care of reading the plugins, determining
         which ones are valid, and iterating through them. It is a wrapper
@@ -25,6 +26,7 @@ class PluginInterface():
         self.database = database
         self.candidates = candidates
         self.output = output
+        self.type = filter_type
         self.categorize = categorize
         self.nsfw = nsfw
         if self.nsfw:
@@ -32,6 +34,7 @@ class PluginInterface():
         else:
             nsfw_flag = 'disabled'
         print '\nFetching NSFW Images is %s.\n' % nsfw_flag
+        self.config = get_config()
         #set up some class variables
         self.handled_posts = {}
         self.unhandled_posts = set()
@@ -44,7 +47,8 @@ class PluginInterface():
         for plugin in loaded_plugins:
             print 'Loading plugin: %s.\n' % plugin.__name__
             plug_inst = plugin(self.database, self.candidates, self.output,
-                               self.categorize, self.nsfw)
+                               self.type, self.config, self.categorize,
+                               self.nsfw)
             self.handled_posts.update(plug_inst.handled_posts)
 
             #lazy instantiation so we only get it on the first loop

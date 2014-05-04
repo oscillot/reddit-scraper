@@ -1,0 +1,11 @@
+[
+    {
+        "image_headers": [
+            "image/jpeg",
+            "image/jpg",
+            "image/gif",
+            "image/bmp",
+            "image/png"
+        ]
+    }
+]

@@ -1,6 +1,7 @@
 import re
 import unicodedata
-
+from StringIO import StringIO
+from PIL import Image
 
 def ensure_ascii(text):
     return unicodedata.normalize('NFD', unicode(text)).encode('ascii',
@@ -30,3 +31,15 @@ def substract(string):
         return match.group(1)
     else:
         return string
+
+
+def gif_is_animated(data):
+    im = Image.open(StringIO(data))
+    try:
+        im.seek(1)
+    except EOFError:
+        im.close()
+        return False
+    else:
+        im.close()
+        return True

@@ -10,19 +10,12 @@ from sqlalchemy import *
 import sqlalchemy.sql as sql
 
 from reddit_scraper.data_types import CandidatesList, DownloadList, Download
-from reddit_scraper.util import ensure_ascii
-
-
-IMAGE_HEADERS = ['image/bmp',
-                 'image/png',
-                 'image/jpg',
-                 'image/jpeg',
-                 'image/gif']
+from reddit_scraper.util import ensure_ascii, gif_is_animated
 
 
 class BasePlugin(object):
-    def __init__(self, database, candidates, output, categorize=False,
-                 nsfw=False):
+    def __init__(self, database, candidates, output, filter_type, config,
+                 categorize, nsfw):
         """The BasePlugin class actually does all of the work under the hood.
         It creates the database, performs the database calls. Retrieves images
         from content servers, does any error handling that plugins neglect to
@@ -42,6 +35,8 @@ class BasePlugin(object):
         self.candidates_backup = None
         self.revised = None
         self.output_dir = output
+        self.type = filter_type
+        self.config = config
         self.categorize = categorize
         self.nsfw = nsfw
         self.to_acquire = []
@@ -75,6 +70,24 @@ class BasePlugin(object):
 
         else:
             self.unhandled_posts.add(self.candidate)
+
+    def filtered(self):
+        if self.type == 'all':
+            return False #nothing is filtered
+        elif self.type == 'gifs-animated':
+            if self.resp.headers.get('content-type') == 'image/gif' and \
+                    gif_is_animated(self.resp.content):
+                return False
+            else:
+                return True
+        elif self.type == 'wallpapers':
+            if self.resp.headers.get('content-type') == 'image/gif' and \
+                    gif_is_animated(self.resp.content):
+                return True
+            else:
+                return False
+        else:
+            raise ValueError('Unsupported Filter Type. Sorry. ;(')
 
     def acquisition_tasks(self):
         if self.current.url in self.image_urls_already_fetched:
@@ -121,14 +134,20 @@ class BasePlugin(object):
 
                 if self.current.md5 not in self.unique_img_hashes:
                     self.handled_posts[self.candidate].add(self.current)
-                    self.save_img(new_img)
-                    self.unique_img_hashes.add(self.current.md5)
-                    self.add_to_main_db_table()
-                    # self.add_to_previous_aquisitions()
-                    print '%s: Success! %s saved.\n' % \
-                          (self.__class__.__name__, '%s: %s' % (
-                              ensure_ascii(self.current.title),
-                              self.current.filename))
+                    if self.filtered():
+                        print '%s: Skipped! %s filtered. Filter type %s ' \
+                              'excludes this image type.\n' % \
+                              (self.__class__.__name__, '%s: %s' % (
+                                  ensure_ascii(self.current.title),
+                                  self.current.filename), self.type)
+                    else:
+                        self.save_img(new_img)
+                        self.unique_img_hashes.add(self.current.md5)
+                        self.add_to_main_db_table()
+                        print '%s: Success! %s saved.\n' % \
+                              (self.__class__.__name__, '%s: %s' % (
+                                  ensure_ascii(self.current.title),
+                                  self.current.filename))
                 else:
                     self.current.duplicate = True
                     self.handled_posts[self.candidate].add(self.current)
@@ -286,9 +305,17 @@ class BasePlugin(object):
         img_path = orig_img_path
 
         orig_path, orig_ext = orig_img_path.rsplit('.', 1)
-        inc = 1
+
+        #check the extension here against the header that got sent down
+        #this deals with those weird asshats who save gifs as jpegs for some
+        # reason
+        if not self.resp.headers.get('content-type').endswith(orig_ext):
+            new_ext = self.resp.headers.get('content-type').split('/')[1]
+            orig_ext = new_ext
+
         #prevent stupidly named files like image.jpg from being overwritten
         # all the time
+        inc = 1
         while os.path.exists(img_path):
             img_path = '%s_%d.%s' % (orig_path, inc, orig_ext)
             inc += 1
@@ -307,7 +334,7 @@ class BasePlugin(object):
         lot especially with sites that try not to let you scrape them for
         their high quality images, so it's an important check.
         """
-        for header in IMAGE_HEADERS:
+        for header in self.config.image_headers:
             #this handles headers that look like this:
             #image/jpeg; charset=UTF-8
             if header in self.resp.headers.get('content-type'):

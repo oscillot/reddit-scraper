@@ -1,3 +1,8 @@
+2.50
+----
+Added filter_types to help keep animated gifs and wallpapers seperate even when
+the same subreddits are used as sources for both.
+
 2.40
 ----
 Updated README (overdue)
