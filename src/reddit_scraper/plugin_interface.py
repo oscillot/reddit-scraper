@@ -73,6 +73,8 @@ class PluginInterface():
                     for link in plug_inst.handled_posts[post]:
                         if link.duplicate:
                             print '\t%s (Duplicate)\n' % link.url
+                        elif link.skipped:
+                            print '\t%s (Skipped)\n' % link.url
                         else:
                             print '\t%s\n' % link.url
             else:

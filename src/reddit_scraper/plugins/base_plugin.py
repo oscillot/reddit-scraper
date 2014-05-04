@@ -133,14 +133,16 @@ class BasePlugin(object):
                     self.handled_posts[self.candidate] = set()
 
                 if self.current.md5 not in self.unique_img_hashes:
-                    self.handled_posts[self.candidate].add(self.current)
                     if self.filtered():
+                        self.current.skipped = True
+                        self.handled_posts[self.candidate].add(self.current)
                         print '%s: Skipped! %s filtered. Filter type \"%s\" ' \
                               'excludes this image type.\n' % \
                               (self.__class__.__name__, '%s: %s' % (
                                   ensure_ascii(self.current.title),
                                   self.current.filename), self.type)
                     else:
+                        self.handled_posts[self.candidate].add(self.current)
                         self.save_img(new_img)
                         self.unique_img_hashes.add(self.current.md5)
                         self.add_to_main_db_table()

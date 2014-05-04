@@ -92,6 +92,7 @@ class Download(object):
         self.md5 = None
         self.cookies = cookies
         self.duplicate = False #no need to ever pass this in
+        self.skipped = False #no need to ever pass this in
 
     def name_from_url(self):
         return self.url.split('/')[-1].replace(' ', '_')
