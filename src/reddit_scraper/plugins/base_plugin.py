@@ -135,7 +135,7 @@ class BasePlugin(object):
                 if self.current.md5 not in self.unique_img_hashes:
                     self.handled_posts[self.candidate].add(self.current)
                     if self.filtered():
-                        print '%s: Skipped! %s filtered. Filter type %s ' \
+                        print '%s: Skipped! %s filtered. Filter type \"%s\" ' \
                               'excludes this image type.\n' % \
                               (self.__class__.__name__, '%s: %s' % (
                                   ensure_ascii(self.current.title),
