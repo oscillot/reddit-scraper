@@ -30,7 +30,8 @@ class DirectLinks(BasePlugin):
         """
         This is just a link that looks like it's a direct link to an image
         """
-        direct_pat = re.compile(r'^http[s]?://.*(?:.jpg|.jpeg|.gif|.bmp|.png).*$',
+        #direct_pat = re.compile(r'^http[s]?://.*(?:.jpg|.jpeg|.gif|.bmp|.png).*$',
+        direct_pat = re.compile(r'^https?://.*(?:(?:.jpg|.jpeg|.gif|.bmp|.png)(?:[?#0-9a-zA-Z\-_]{0,}))$',
                                 flags=re.IGNORECASE)
         if direct_pat.match(url):
             return True
