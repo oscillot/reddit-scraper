@@ -1,0 +1,16 @@
+Handle the following imgur error scenario:
+
+Post says:
+
+http://imgur.com/gallery/jsCHztU
+
+Image should resolve to
+
+http://i.imgur.com/jsCHztU.[jpg|png|bmp|gif]
+
+But redirects to:
+
+http://i.imgur.com/removed.png
+
+Scraper gets a 404 on the gallerypage, which I guess is fine, actually,
+but think about it for a bit and see what you can do.

@@ -3,6 +3,7 @@ import unicodedata
 from StringIO import StringIO
 from PIL import Image
 
+
 def ensure_ascii(text):
     return unicodedata.normalize('NFD', unicode(text)).encode('ascii',
                                                        'xmlcharrefreplace')

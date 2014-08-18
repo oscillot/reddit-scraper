@@ -128,7 +128,7 @@ class PluginInterface():
             #so you should be able to see which domains you want or need to
             # target
             for uh in sorted(self.unhandled_posts):
-                print uh[0], '\t', uh[1]
+                print uh[0], '\t', ensure_ascii(uh[1])
             print '\n'
         else:
             print 'None\n'
