@@ -153,8 +153,8 @@ class BasePlugin(object):
                 else:
                     self.current.duplicate = True
                     self.handled_posts[self.candidate].add(self.current)
-                    print '%s: MD5 duplicate. Discarding: %s.\n' % \
-                          (self.__class__.__name__, '%s: %s' % (
+                    print '%s: Discarding: %s.\n' % \
+                          (self.__class__.__name__, '%s: %s (Duplicate)' % (
                               ensure_ascii(self.current.title),
                               self.current.filename))
                 #remove successes so the whole run goes faster
