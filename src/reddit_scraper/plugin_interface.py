@@ -72,11 +72,11 @@ class PluginInterface():
                     print '\n\t...which provided the following image urls:\n'
                     for link in plug_inst.handled_posts[post]:
                         if link.duplicate:
-                            print '\t%s (Duplicate)\n' % link.url
+                            print '\t%s (Duplicate)\n' % ensure_ascii(link.url)
                         elif link.skipped:
-                            print '\t%s (Skipped)\n' % link.url
+                            print '\t%s (Skipped)\n' % ensure_ascii(link.url)
                         else:
-                            print '\t%s\n' % link.url
+                            print '\t%s\n' % ensure_ascii(link.url)
             else:
                 print 'None.'
             print '\n'
