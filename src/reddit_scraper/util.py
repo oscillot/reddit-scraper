@@ -4,9 +4,12 @@ from StringIO import StringIO
 from PIL import Image
 
 
-def ensure_ascii(text):
-    return unicodedata.normalize('NFD', unicode(text)).encode('ascii',
-                                                       'xmlcharrefreplace')
+def ensure_ascii(*args):
+    def asciify(text):
+        return unicodedata.normalize('NFD',
+                                     unicode(text)).encode('ascii',
+                                                           'xmlcharrefreplace')
+    return map(asciify, args)
 
 
 def extract_domain(url):

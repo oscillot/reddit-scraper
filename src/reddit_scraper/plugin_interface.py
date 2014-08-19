@@ -67,7 +67,7 @@ class PluginInterface():
             if len(plug_inst.handled_posts):
                 for post in plug_inst.handled_posts:
                     print '%s (%s)' % \
-                          (ensure_ascii(post.title), post.url)
+                          (ensure_ascii(post.title, post.url))
 
                     print '\n\t...which provided the following image urls:\n'
                     for link in plug_inst.handled_posts[post]:
@@ -93,7 +93,7 @@ class PluginInterface():
         for each in unhandled_posts:
             self.unhandled_posts.add(
                 (extract_domain(each.url), '%s (%s)' %
-                    (ensure_ascii(each.title), each.url)))
+                    (ensure_ascii(each.title, each.url))))
 
     def acquire(self):
         """
