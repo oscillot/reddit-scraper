@@ -9,7 +9,7 @@ def ensure_ascii(*args):
         return unicodedata.normalize('NFD',
                                      unicode(text)).encode('ascii',
                                                            'xmlcharrefreplace')
-    return map(asciify, args)
+    return tuple(map(asciify, args))
 
 
 def extract_domain(url):
