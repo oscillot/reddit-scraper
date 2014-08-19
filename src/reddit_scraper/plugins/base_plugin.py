@@ -97,7 +97,7 @@ class BasePlugin(object):
         else:
             #print data about the current acquisition
             print '%s: Requesting: %s \n' % \
-                  (self.__class__.__name__, self.current.url)
+                  (self.__class__.__name__, ensure_ascii(self.current.url))
 
             #snag the image! woot! that's what it all leads up to
             # in the end!
