@@ -34,7 +34,7 @@ class GfyCat(BasePlugin):
         """
         This matches a gfycat link
         """
-        direct_pat = re.compile(r'^http[s]?://gfycat\.com/'
+        direct_pat = re.compile(r'^http[s]?://(?:www.)?gfycat\.com/'
                                 r'(?:(?![.]{1}(?:' #that doesn't end with the extension
                                 r'jpg|' #jpeg
                                 r'jpeg|' #jpeg
