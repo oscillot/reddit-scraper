@@ -153,7 +153,8 @@ class PluginInterface():
                       for p in self.handled_posts])
         len_dupes = sum([len(filter_new(self.handled_posts[p]))
                         for p in self.handled_posts])
-        len_bad = len_urls - len_new - len_dupes
+        c = PluginExceptionCounter.Instance()
+        len_bad = c.get_count()
         print '\nComplete.' \
               '\n%d posts were processed.' \
               '\n%d urls were attempted.' \
@@ -162,8 +163,7 @@ class PluginInterface():
               '\n%d were not handled or invalid.\n' \
               % (len_posts, len_urls, len_new, len_dupes, len_bad)
         #emit the exit code based on whether everything went well or not
-        c = PluginExceptionCounter.Instance()
-        exit(c.get_count())
+        exit(len_bad)
 
     def remove_unneeded_plugins(self):
         plugins_count = {}
