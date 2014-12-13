@@ -25,7 +25,11 @@ class TestMatcher(unittest.TestCase):
     def test_imgur_404(self):
         url = 'http://imgur.com/gallery/jsCHztU'
         self.assertTrue(Imgur.url_matches(url))
-	self.assertEqual([], Imgur.get_imgur_images(url))
+        self.assertEqual([], Imgur.get_imgur_images(url))
+
+    def test_imgur_gifv(self):
+        url = 'http://i.imgur.com/bw4IhL2.gifv'
+        self.assertTrue(Imgur.url_matches(url))
 
     def tearDown(self):
         pass

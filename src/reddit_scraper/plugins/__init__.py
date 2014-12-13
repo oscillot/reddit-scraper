@@ -16,7 +16,7 @@ plugins_folder = os.path.abspath(os.path.dirname(__file__))
 for r, d, f in os.walk(plugins_folder):
     for p in f:
         if p.endswith('.py'):
-            plugin_list.append(p.rstrip('.py'))
+            plugin_list.append(p[:-3])
 
 sys.path.insert(0, plugins_folder)
 

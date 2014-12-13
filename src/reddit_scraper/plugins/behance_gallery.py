@@ -8,13 +8,13 @@ from reddit_scraper.plugins.base_plugin import Download, BasePlugin
 from reddit_scraper.exceptions import PluginNeedsUpdated
 
 
-class Behance(BasePlugin):
+class BehanceGallery(BasePlugin):
     def execute(self):
         """Executor for this plugin. The entry function by which any plugin must
         operate to handle links.
         """
         if self.url_matches(self.candidate.url):
-            urls = Behance.get_behance_imgs(self.candidate.url)
+            urls = BehanceGallery.get_behance_imgs(self.candidate.url)
             if urls:
                 for url in urls:
                     self.current = Download(self.candidate.title,
@@ -35,9 +35,10 @@ class Behance(BasePlugin):
         """
         This matches a gfycat link
         """
-        direct_pat = re.compile(r'^http[s]?://www\.behance\.net/gallery/.*$',
-                                flags=re.IGNORECASE)
-        if direct_pat.match(url):
+        behance_gallery_pat = re.compile(
+            r'^http[s]?://www\.behance\.net/gallery/.*$',
+            flags=re.IGNORECASE)
+        if behance_gallery_pat.match(url):
             return True
         else:
             return False

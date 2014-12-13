@@ -59,17 +59,7 @@ class Wallbase(BasePlugin):
         """
         This matches only wallbase user collections.
         """
-
-        wallbase_coll_pat = re.compile(r'^http[s]?://.*wallbase.cc'
-                                       r'(?:(?![.]{1}(?:' #that doesn't end with the extension
-                                       r'jpg|' #jpeg
-                                       r'jpeg|' #jpeg
-                                       r'gif|' #gif
-                                       r'bmp|' #bitmap
-                                       r'png)' #png
-                                       r').)*$',
-                                       flags=re.IGNORECASE)
-        if wallbase_coll_pat.match(url):
+        if BasePlugin.get_basic_matcher('wallbase.cc').match(url):
             return True
         else:
             return False

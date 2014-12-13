@@ -37,16 +37,8 @@ class Flickr(BasePlugin):
         """
         This matches flickr photo pages
         """
-
-        flickr_pat = re.compile(r'^http[s]?://.*www\.flickr\.com/photos/'
-                                r'(?:(?![.]{1}(?:' #that doesn't end with the extension
-                                r'jpg|' #jpeg
-                                r'jpeg|' #jpeg
-                                r'gif|' #gif
-                                r'bmp|' #bitmap
-                                r'png)' #png
-                                r').)*$',
-                                flags=re.IGNORECASE)
+        #QUESTION: is /photos needed here?
+        flickr_pat = BasePlugin.get_basic_matcher('flickr.com/photos')
         if flickr_pat.match(url):
             return True
         else:

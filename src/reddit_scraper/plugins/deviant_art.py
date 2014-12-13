@@ -38,17 +38,7 @@ class DeviantArt(BasePlugin):
         """
         This is matches all deviant art pages
         """
-
-        deviant_pat = re.compile(r'^http[s]?://.*deviantart\.com'
-                                 r'(?:(?![.]{1}(?:' #that doesn't end with the extension
-                                 r'jpg|' #jpeg
-                                 r'jpeg|' #jpeg
-                                 r'gif|' #gif
-                                 r'bmp|' #bitmap
-                                 r'png)' #png
-                                 r').)*$',
-                                 flags=re.IGNORECASE)
-        if deviant_pat.match(url):
+        if BasePlugin.get_basic_matcher('deviantart.com').match(url):
             return True
         else:
             return False

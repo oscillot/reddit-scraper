@@ -1,3 +1,10 @@
+2.51
+----
+Add some unittests for the base_plugin
+Made a generic regex factory suitable for most plugins
+added gifv support in the imgur plugin (will download the underlying gif)
+renamed behance to behance gallery to reflect the actual functionality
+
 2.50
 ----
 Added filter_types to help keep animated gifs and wallpapers seperate even when

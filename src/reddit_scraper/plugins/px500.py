@@ -34,16 +34,7 @@ class PX500(BasePlugin):
         """
         This matches 500px photo pages
         """
-        px500_pat = re.compile(r'^http[s]?://.*500px\.com.*'
-                               r'(?:(?![.]{1}(?:' #that doesn't end with the extension
-                               r'jpg|' #jpeg
-                               r'jpeg|' #jpeg
-                               r'gif|' #gif
-                               r'bmp|' #bitmap
-                               r'png)' #png
-                               r').)*$',
-                               flags=re.IGNORECASE)
-        if px500_pat.match(url):
+        if BasePlugin.get_basic_matcher('500px.com').match(url):
             return True
         else:
             return False

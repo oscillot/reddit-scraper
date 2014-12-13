@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import hashlib
 import traceback
@@ -345,3 +346,19 @@ class BasePlugin(object):
                 return True
         #if we get here no header matched
         return False
+
+    @staticmethod
+    def get_basic_matcher(domain, flags=re.IGNORECASE):
+        domain = domain.replace(r'.', r'\.')
+        return re.compile(r'^http[s]?://[a-z0-9.\-]*' #any or no subdomain
+                                   r'(?<=[/.])' #assert prev char is . or / (prevents matching a domain that ends with the next line)
+                                   r'%s' #on this domain
+                                   r'(?!.*\.(' #that doesn't end with the extension
+                                   r'jpg|' #jpeg
+                                   r'jpeg|' #jpeg
+                                   r'gif|' #gif
+                                   r'bmp|' #bitmap
+                                   r'png)' #png
+                                   r'$)' #end of string
+                                   r'.*$' % domain, #but anything else until end of string is fine
+                                   flags=flags)

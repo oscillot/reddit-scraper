@@ -35,17 +35,7 @@ class Tumblr(BasePlugin):
         """
         This matches all tumblr urls
         """
-
-        tumplr_pat = re.compile(r'^http[s]?://.*tumblr\.com'
-                                r'(?:(?![.]{1}(?:' #that doesn't end with the extension
-                                r'jpg|' #jpeg
-                                r'jpeg|' #jpeg
-                                r'gif|' #gif
-                                r'bmp|' #bitmap
-                                r'png)' #png
-                                r').)*$',
-                                flags=re.IGNORECASE)
-        if tumplr_pat.match(url):
+        if BasePlugin.get_basic_matcher('tumblr.com').match(url):
             return True
         else:
             return False
